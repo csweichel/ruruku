@@ -1,0 +1,10 @@
+ports:
+- port: 8080
+tasks:
+- command: >
+    cd src/github.com/32leaves/ruruku;
+    cd protocol && yarn install && yarn build; cd -;
+    cd client && yarn install && yarn build; cd -;
+    go get -v ./... && go run main.go start example-suite.yaml
+checkoutLocation: src/github.com/32leaves/ruruku
+workspaceLocation: .
