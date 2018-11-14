@@ -1,0 +1,13 @@
+{
+  "name": "protocol",
+  "version": "1.0.0",
+  "description": "The protocol spoken over the websocket connection",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "quicktype": "^15.0.152"
+  },
+  "scripts": {
+      "build": "quicktype -l go --package protocol protocol.ts > protocol.go"
+  }
+}

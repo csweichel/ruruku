@@ -1,0 +1,13 @@
+name: Demo Suite
+cases:
+- name: Start server
+  group: basics
+  description: Tests the basic server start
+  steps: |
+    \# Preparation
+    - Have everything compiled and ready to run.
+    - Have this test suite handy
+    \# Execution
+    run `ruruku start example-suite.yaml`
+  mustPass: false
+  minTesterCount: 1
