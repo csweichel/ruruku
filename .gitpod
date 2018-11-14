@@ -1,0 +1,6 @@
+ports:
+- port: 8080
+  protocol: http
+tasks:
+- command: yarn build && yarn start
+checkoutLocation: src/github.com/32leaves/ruruku
