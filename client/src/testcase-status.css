@@ -1,0 +1,16 @@
+
+.case-status-view .unassigned {
+    background-color: white;
+}
+.case-status-view .assigned {
+    background-color: #c8c8c8;
+}
+.case-status-view .passed {
+    background-color: #32cb56;
+}
+.case-status-view .failed {
+    background-color: #f62f38;
+}
+.case-status-view .undecided {
+    background-color: #fda406;
+}

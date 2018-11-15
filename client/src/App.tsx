@@ -1,5 +1,6 @@
 import * as React from 'react';
 import './App.css';
+import 'semantic-ui-css/semantic.min.css';
 
 import logo from './logo.svg';
 import { LoginForm } from './login-form';
@@ -59,7 +60,6 @@ class App extends React.Component<{}, AppState> {
         ws.onopen = () => this.setState({ socket: ws, connecting: false });
         ws.onerror = (err) => {
             console.log(err);
-            alert(err);
             this.setState({ socket: ws, connecting: false });
         };
     }

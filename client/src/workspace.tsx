@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { WelcomeRequest, TestSuite, TestRun } from '../../protocol/protocol'
+import { WelcomeRequest, TestSuite, TestRun, TestParticipant } from '../../protocol/protocol'
 import logo from './logo.svg';
 import { TestplanView } from './testplan-view';
+import { Button } from 'semantic-ui-react';
 
 export interface WorkspaceProps {
     ws: WebSocket
@@ -11,6 +12,7 @@ export interface WorkspaceProps {
 interface WorkspaceState {
     suite: TestSuite
     run: TestRun
+    participant: TestParticipant
     view: "none" | "plan"
 }
 
@@ -31,7 +33,7 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
     public render() {
         let main = <div />;
         if(this.state.view === "plan") {
-            main = <TestplanView suite={this.state.suite} run={this.state.run} />;
+            main = <TestplanView suite={this.state.suite} run={this.state.run} participant={this.state.participant} />;
         }
 
         return (
@@ -40,6 +42,7 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
                     <img src={logo} className="app-logo" alt="logo" />
                 </div>
                 <div className="sidebar">
+                    <Button label="Test Plan" />
                     <ul>
                         <li><header><a>Plan</a></header></li>
                         <li>
@@ -67,7 +70,8 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
             this.setState({
                 view: "plan",
                 suite: msg.suite,
-                run: msg.run
+                run: msg.run,
+                participant: msg.participant
             });
         }
     }

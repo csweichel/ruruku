@@ -11,3 +11,11 @@ cases:
     run `ruruku start example-suite.yaml`
   mustPass: false
   minTesterCount: 1
+- name: Stop server
+  group: basics
+  description: Checks if the server saves the session log before it exits
+  steps: |
+    \# Preparation
+    - Have a ruruku session running
+    \# Execution
+    use `Ctrl+C` on a running ruruku process
