@@ -28,7 +28,7 @@ class App extends React.Component<{}, AppState> {
     public render() {
         let loginOrWorkspace;
         if (this.state.socket) {
-            loginOrWorkspace = <Workspace name={this.state.name} ws={this.state.socket} />;
+            return <div className="app app-connected"><Workspace name={this.state.name} ws={this.state.socket} /></div>;
         } else if (this.state.connecting) {
             loginOrWorkspace = <div>Connecting ...</div>
         } else {
@@ -36,9 +36,9 @@ class App extends React.Component<{}, AppState> {
         }
 
         return (
-            <div className="app">
+            <div className={ this.state.socket ? "app app-connected" : "app app-login" }>
                 <header>
-                    <img src={logo} className="app-logo" alt="logo" /><h1 className="title">RURUKU</h1>
+                    <img src={logo} className="app-logo" alt="logo" />
                 </header>
                 <div className="body">
                     { loginOrWorkspace }
@@ -55,7 +55,7 @@ class App extends React.Component<{}, AppState> {
             protocol = 'wss';
         }
         const ws = new WebSocket(`${protocol}://${window.location.host}/ws`);
-        ws.onclose = (ev: CloseEvent) => this.setState({ socket: undefined, connecting: false });
+        ws.onclose = (ev: CloseEvent) => this.connect(name);
         ws.onopen = () => this.setState({ socket: ws, connecting: false });
         ws.onerror = (err) => {
             console.log(err);

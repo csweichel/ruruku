@@ -1,28 +1,84 @@
-.app {
-  text-align: center;
+.app.app-login {
+    text-align: center;
+}
+.app.app-connected {
+    padding: 1em;
 }
 
-.app-logo {
-  animation: app-logo-spin infinite 20s linear;
-  height: 80px;
+.app-login .app-logo {
+  height: 100px;
+  padding-top: 100px;
+  padding-bottom: 100px;
 }
 
-.app-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
+.app-connected .app-logo {
+    height: 50px;
 }
 
-.app-title {
-  font-size: 1.5em;
+input[type="text"] {
+    background-color: #38EFC1;
+    color: #211A30;
+    padding: 0.5em;
+    border: 0px;
+    border-radius: 5px;
 }
 
-.app-intro {
-  font-size: large;
+input[type="submit"] {
+    border: 0px;
+    padding: 0.5em;
+    background-color: #FDA406;
+}
+input[type="submit"]:disabled {
+    background-color: #211A30;
+    color: #211A30;
 }
 
-@keyframes app-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.app-connected .header {
+    position: absolute;
+    top: 0;
+    bottom: calc(100vh - 80px);
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    padding-left: 1em;
+}
+.app-connected .sidebar {
+    position: absolute;
+    top: 80px;
+    width: calc(20vw - 1em);
+    background-color: rgb(30,33,56);
+    bottom: 0;
+    left: 0;
+    padding-left: 1em;
+    padding-top: 1em;
+}
+.app-connected .sidebar > ul {
+    list-style-type: none;
+    padding: 0 1em 0 0;
+    margin: 0;
+}
+.sidebar .button {
+    color: white;
+    text-decoration: none;
+    padding: 0.5em;
+    border: 1px solid white;
+    border-radius: 4px;
+}
+.app-connected .sidebar header {
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 90%;
+    padding-bottom: 0.2em;
+}
+.app-connected .main {
+    position: absolute;
+    top: 80px;
+    left: 20vw;
+    right: 0;
+    bottom: 0;
+    background-color: rgb(250,250,250);
+    color: black;
+    padding: 1em;
 }
