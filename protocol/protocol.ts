@@ -8,6 +8,7 @@ export interface WelcomeResponse {
     type: "welcome"
     suite: TestSuite
     run: TestRun
+    participant: TestParticipant
 }
 
 export interface TestSuite {
@@ -29,8 +30,13 @@ export interface TestCase {
 export interface TestRun {
     suiteName: string
     start: Date
-    participants: string[]
+    participants: TestParticipant[]
     cases: TestCaseRun[]
+}
+
+export interface TestParticipant {
+    name: string
+    claimedCases: string[]
 }
 
 type TestCaseResult = "pass" | "fall" | "undecided"
