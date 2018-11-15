@@ -10,7 +10,6 @@ export interface WelcomeResponse {
     run: TestRun
 }
 
-
 export interface TestSuite {
     name: string
     tags: { [id: string]: string }

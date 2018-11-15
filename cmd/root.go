@@ -5,9 +5,9 @@ import (
 	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-    log "github.com/sirupsen/logrus"
 
 	"github.com/32leaves/ruruku/pkg/rurukulib/server"
 )
@@ -56,7 +56,7 @@ func initConfig() {
 
 		// Search config in home directory with name ".ruruku" (without extension).
 		viper.AddConfigPath(home)
-        viper.AddConfigPath(".")
+		viper.AddConfigPath(".")
 		viper.SetConfigName(".ruruku")
 	}
 

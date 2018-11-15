@@ -29,7 +29,7 @@ var startCmd = &cobra.Command{
 			log.Fatalf("Error while loading test suite: %s", err)
 		}
 
-        srvcfg := cfg.Server
+		srvcfg := cfg.Server
 		if err := server.Start(&srvcfg, suite, sessionName); err != nil {
 			log.Fatalf("Error while starting the ruruku server", err)
 		}
