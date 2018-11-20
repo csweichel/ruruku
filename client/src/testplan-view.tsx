@@ -1,12 +1,14 @@
 import * as React from 'react';
-import { TestSuite, TestRun, TestParticipant } from '../../protocol/protocol';
-import { Table, Checkbox } from 'semantic-ui-react';
-import { TestCaseStatusView } from './testcase-status';
+import { TestSuite, TestRun, TestParticipant, TestCase, TestCaseRun } from '../../protocol/protocol';
+import { Table, Button } from 'semantic-ui-react';
+import { TestCaseStatusView, TestCaseParticipant } from './testcase-status';
 
 export interface TestplanViewProps {
     suite: TestSuite
     run: TestRun
     participant: TestParticipant
+
+    claimTestCase(testCase: TestCase, claim: boolean): void
 }
 
 export class TestplanView extends React.Component<TestplanViewProps, {}> {
@@ -29,23 +31,61 @@ export class TestplanView extends React.Component<TestplanViewProps, {}> {
     }
 
     protected buildRows() {
+        if (!this.props.suite) {
+            return [];
+        }
+
         const matchedCases = this.props.suite.cases.map(cse => {
-            const runs = (this.props.run.cases || []).filter(cser => cser.caseName === cse.name && cser.caseGroup === cse.group);
+            const runs = (this.props.run.cases || []).filter(cser => cser.case === cse.id && cser.caseGroup === cse.group);
             return { case: cse, runs };
         });
 
-        return matchedCases.map((mc, idx) => {
-            return <Table.Row key={idx}>
-                <Table.Cell><Checkbox checked={this.isClaimed(mc.case.name)} /></Table.Cell>
+        return matchedCases.map(mc => {
+            return <Table.Row key={mc.case.id}>
+                <Table.Cell>
+                    {this.getActions(mc.case)}
+                </Table.Cell>
                 <Table.Cell>{mc.case.group}</Table.Cell>
                 <Table.Cell>{mc.case.name}</Table.Cell>
-                <Table.Cell><TestCaseStatusView case={mc.case} runs={mc.runs} /></Table.Cell>
+                <Table.Cell><TestCaseStatusView case={mc.case} runs={this.getRunsAndClaims(mc.case, mc.runs)} /></Table.Cell>
             </Table.Row>
         });
     }
 
-    protected isClaimed(testCase: string): boolean {
-        return this.props.participant.claimedCases.indexOf(testCase) > -1;
+    protected getActions(tc: TestCase) {
+        if (this.isClaimed(tc)) {
+            return [
+                <Button label="Complete" icon="write square" key="complete" />,
+                <Button label="Unclaim" basic={true} icon="minus circle" onClick={this.claim.bind(this, tc, false)} key="unclaim" />
+            ]
+        } else {
+            return [
+                <Button label="Claim" icon="plus circle" onClick={this.claim.bind(this, tc, true)} key="claim" />
+            ]
+        }
+    }
+
+    protected getRunsAndClaims(cse: TestCase, runs: TestCaseRun[]): TestCaseParticipant[] {
+        const participants = this.props.run.participants.filter(p => Object.keys(p.claimedCases).indexOf(`${cse.group}/${cse.id}`) > -1);
+
+        return participants.map(p => {
+            return {
+                participant: p
+            } as TestCaseParticipant
+        }).concat(runs.map(r => {
+            return {
+                run: r
+            } as TestCaseParticipant
+        }));
+    }
+
+    protected isClaimed(cse: TestCase): boolean {
+        return this.props.participant.claimedCases[`${cse.group}/${cse.id}`];
+    }
+
+    protected claim(cse: TestCase, claim: boolean, evt: React.SyntheticEvent): void {
+        evt.preventDefault();
+        this.props.claimTestCase(cse, claim);
     }
 
 }

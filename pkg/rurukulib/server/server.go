@@ -9,8 +9,6 @@ import (
 	"net/http"
 )
 
-var session *sessionStore
-
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -22,37 +20,39 @@ func staticFiles(w http.ResponseWriter, r *http.Request) {
 }
 
 // this is also the handler for joining to the chat
-func wsHandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Printf("Error upgrading to websocket: %s", err)
-		return
-	}
+func wsHandler(session *sessionStore) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+        conn, err := upgrader.Upgrade(w, r, nil)
+        if err != nil {
+            log.Printf("Error upgrading to websocket: %s", err)
+            return
+        }
 
-	go func() {
-		log.Info("New websocket connection")
+        go func() {
+            log.Info("New websocket connection")
 
-		if err := session.Join(conn); err != nil {
-			log.WithError(err).Error("Unable to join session")
-			return
-		}
+            if err := session.Join(conn); err != nil {
+                log.WithError(err).Error("Unable to join session")
+                return
+            }
 
-		// then watch for incoming messages
-		for {
-			_, message, err := conn.ReadMessage()
-			if err != nil { // if error then assuming that the connection is closed
-				log.WithError(err).Error("Error while reading message from WS")
-				session.Exit(conn)
-				return
-			}
+            // then watch for incoming messages
+            for {
+                _, message, err := conn.ReadMessage()
+                if err != nil { // if error then assuming that the connection is closed
+                    log.WithError(err).Error("Error while reading message from WS")
+                    session.Exit(conn)
+                    return
+                }
 
-			if err := session.HandleMessage(conn, message); err != nil {
-				log.WithError(err).Error("Error while handling message")
-				return
-			}
-		}
+                if err := session.HandleMessage(conn, message); err != nil {
+                    log.WithError(err).Error("Error while handling message")
+                    return
+                }
+            }
 
-	}()
+        }()
+    }
 }
 
 func Start(cfg *Config, suite *protocol.TestSuite, sessionName string) error {
@@ -60,9 +60,13 @@ func Start(cfg *Config, suite *protocol.TestSuite, sessionName string) error {
 		cfg.Token = uuid.Must(uuid.NewV4()).String()
 	}
 
-	session = NewSession(sessionName, suite)
+	var err error
+	session, err := LoadSessionOrNew(sessionName, suite)
+	if err != nil {
+		log.WithError(err).Fatal("Error during startup")
+	}
 
-	http.HandleFunc("/ws", wsHandler)
+	http.HandleFunc("/ws", wsHandler(session))
 	http.HandleFunc("/", staticFiles)
 
 	// fmt.Println("\nSuccess! Please navigate your browser to http://localhost:8000")

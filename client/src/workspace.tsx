@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { WelcomeRequest, TestSuite, TestRun, TestParticipant } from '../../protocol/protocol'
+import { WelcomeRequest, TestSuite, TestRun, TestParticipant, TestCase, ClaimRequest } from '../../protocol/protocol'
 import logo from './logo.svg';
 import { TestplanView } from './testplan-view';
-import { Button } from 'semantic-ui-react';
 
 export interface WorkspaceProps {
     ws: WebSocket
@@ -17,12 +16,17 @@ interface WorkspaceState {
 }
 
 export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
+    protected keepAliveDisposable?: () => void;
 
     constructor(props: WorkspaceProps) {
         super(props);
+
+        // ES6 classes do not autobind to this
         props.ws.onmessage = this.onMessage.bind(this);
+        this.claimTestCase = this.claimTestCase.bind(this);
 
         this.sendWelcome();
+        this.keepAliveDisposable = this.keepConnectionAlive();
     }
 
     public componentWillMount() {
@@ -30,31 +34,26 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
         this.sendWelcome();
     }
 
-    public render() {
-        let main = <div />;
-        if(this.state.view === "plan") {
-            main = <TestplanView suite={this.state.suite} run={this.state.run} participant={this.state.participant} />;
+    public componentWillUnmount() {
+        if (this.keepAliveDisposable) {
+            this.keepAliveDisposable();
         }
+    }
 
+    public render() {
         return (
             <div className="workspace">
                 <div className="header">
                     <img src={logo} className="app-logo" alt="logo" />
+                    <div className="username">{this.props.name}</div>
                 </div>
-                <div className="sidebar">
-                    <Button label="Test Plan" />
-                    <ul>
-                        <li><header><a>Plan</a></header></li>
-                        <li>
-                            <header>Your tests</header>
-                            <ul>
-                                <li><a>Item 1</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
+
                 <div className="main">
-                    {main}
+                    <TestplanView
+                        suite={this.state.suite}
+                        run={this.state.run}
+                        participant={this.state.participant}
+                        claimTestCase={this.claimTestCase} />
                 </div>
             </div>
         )
@@ -73,6 +72,11 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
                 run: msg.run,
                 participant: msg.participant
             });
+        } else if (msg.type === "update") {
+            this.setState({
+                run: msg.run,
+                participant: msg.participant
+            });
         }
     }
 
@@ -82,6 +86,26 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
             name: this.props.name
         };
         this.props.ws.send(JSON.stringify(welcome));
+    }
+
+    protected claimTestCase(testCase: TestCase, claim: boolean) {
+        const msg: ClaimRequest = {
+            type: "claim",
+            caseId: `${testCase.group}/${testCase.id}`,
+            claim
+        };
+        this.props.ws.send(JSON.stringify(msg));
+    }
+
+    protected keepConnectionAlive(): () => void {
+        const timeout = setInterval(() => {
+            try {
+                this.props.ws.send(JSON.stringify({ type: "keep-alive" }));
+            } catch(err) {
+                // ignore for now until we have better connection management
+            }
+        }, 10000);
+        return () => clearTimeout(timeout);
     }
 
 }
