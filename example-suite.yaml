@@ -1,6 +1,7 @@
 name: Demo Suite
 cases:
-- name: Start server
+- id: basics_start_server
+  name: Start server
   group: basics
   description: Tests the basic server start
   steps: |
@@ -10,8 +11,9 @@ cases:
     \# Execution
     run `ruruku start example-suite.yaml`
   mustPass: false
-  minTesterCount: 1
-- name: Stop server
+  minTesterCount: 5
+- id: basics_stop_server
+  name: Stop server
   group: basics
   description: Checks if the server saves the session log before it exits
   steps: |

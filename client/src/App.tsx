@@ -56,7 +56,10 @@ class App extends React.Component<{}, AppState> {
             protocol = 'wss';
         }
         const ws = new WebSocket(`${protocol}://${window.location.host}/ws`);
-        ws.onclose = (ev: CloseEvent) => this.connect(name);
+        ws.onclose = (ev: CloseEvent) => {
+            this.setState({ socket: undefined, connecting: false });
+            this.connect(name);
+        };
         ws.onopen = () => this.setState({ socket: ws, connecting: false });
         ws.onerror = (err) => {
             console.log(err);

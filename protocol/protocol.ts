@@ -11,6 +11,27 @@ export interface WelcomeResponse {
     participant: TestParticipant
 }
 
+export interface KeepAliveRequest {
+    type: "keep-alive"
+}
+
+export interface ClaimRequest {
+    type: "claim"
+    caseId: string
+    claim: boolean
+}
+
+export interface ClaimResponse {
+    type: "claim"
+}
+
+export interface UpdateMessage {
+    type: "update"
+    run: TestRun
+    participant: TestParticipant
+}
+
+
 export interface TestSuite {
     name: string
     tags: { [id: string]: string }
@@ -18,6 +39,7 @@ export interface TestSuite {
 }
 
 export interface TestCase {
+    id: string
     name: string
     group: string
     description: string
@@ -36,13 +58,13 @@ export interface TestRun {
 
 export interface TestParticipant {
     name: string
-    claimedCases: string[]
+    claimedCases: { [id: string]: boolean }
 }
 
 type TestCaseResult = "pass" | "fall" | "undecided"
 
 export interface TestCaseRun {
-    caseName: string
+    case: string
     caseGroup: string
     start: Date
     tester: string
