@@ -2,6 +2,7 @@ import * as React from 'react';
 import { WelcomeRequest, TestSuite, TestRun, TestParticipant, TestCase, ClaimRequest } from '../../protocol/protocol'
 import logo from './logo.svg';
 import { TestplanView } from './testplan-view';
+import { Sidebar, Segment } from 'semantic-ui-react';
 
 export interface WorkspaceProps {
     ws: WebSocket
@@ -13,6 +14,7 @@ interface WorkspaceState {
     run: TestRun
     participant: TestParticipant
     view: "none" | "plan"
+    sidebar: any | undefined
 }
 
 export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
@@ -24,6 +26,7 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
         // ES6 classes do not autobind to this
         props.ws.onmessage = this.onMessage.bind(this);
         this.claimTestCase = this.claimTestCase.bind(this);
+        this.showSidebar = this.showSidebar.bind(this);
 
         this.sendWelcome();
         this.keepAliveDisposable = this.keepConnectionAlive();
@@ -43,17 +46,27 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
     public render() {
         return (
             <div className="workspace">
-                <div className="header">
+                <div id="header">
                     <img src={logo} className="app-logo" alt="logo" />
                     <div className="username">{this.props.name}</div>
                 </div>
 
                 <div className="main">
-                    <TestplanView
-                        suite={this.state.suite}
-                        run={this.state.run}
-                        participant={this.state.participant}
-                        claimTestCase={this.claimTestCase} />
+                    <Sidebar.Pushable as={Segment} attached="bottom" className="no-border">
+                        <Sidebar animation="overlay" visible={!!this.state.sidebar} icon="labeled" vertical={true} inline={true} inverted={false} direction="right">
+                            {this.state.sidebar}
+                        </Sidebar>
+                        <Sidebar.Pusher>
+                            <Segment basic={true} className="no-padding">
+                                <TestplanView
+                                    suite={this.state.suite}
+                                    run={this.state.run}
+                                    participant={this.state.participant}
+                                    claimTestCase={this.claimTestCase}
+                                    showDetails={this.showSidebar} />
+                            </Segment>
+                        </Sidebar.Pusher>
+                    </Sidebar.Pushable>
                 </div>
             </div>
         )
@@ -95,6 +108,10 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
             claim
         };
         this.props.ws.send(JSON.stringify(msg));
+    }
+
+    protected showSidebar(sidebar: any | undefined) {
+        this.setState({ sidebar });
     }
 
     protected keepConnectionAlive(): () => void {

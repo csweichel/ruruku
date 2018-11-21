@@ -33,7 +33,7 @@ input[type="submit"]:disabled {
     color: #211A30;
 }
 
-.app-connected .header {
+.app-connected #header {
     position: absolute;
     top: 0;
     bottom: calc(100vh - 50px);
@@ -45,7 +45,7 @@ input[type="submit"]:disabled {
     padding-left: 1em;
     padding-right: 1em;
 }
-.app-connected .header .username {
+.app-connected #header .username {
     justify-content: flex-end;
 }
 .app-connected .main {
@@ -57,4 +57,15 @@ input[type="submit"]:disabled {
     background-color: rgb(250,250,250);
     color: black;
     padding: 1em;
+}
+
+.app-connected .main > .ui {
+    border: 0px solid white;
+}
+
+.no-border {
+    border: 0px !important;
+}
+.no-padding {
+    padding: 0px !important;
 }

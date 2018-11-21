@@ -38,7 +38,7 @@ class App extends React.Component<{}, AppState> {
 
         return (
             <div className={ this.state.socket ? "app app-connected" : "app app-login" }>
-                <header>
+                <header id="header">
                     <img src={logo} className="app-logo" alt="logo" />
                 </header>
                 <div className="body">
