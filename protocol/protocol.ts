@@ -25,6 +25,19 @@ export interface ClaimResponse {
     type: "claim"
 }
 
+export interface NewTestCaseRunRequest {
+    type: "newTestCaseRun"
+    case: string
+    caseGroup: string
+    start: Date
+    result: TestCaseResult
+    comment: string
+}
+
+export interface NewTestCaseRunResponse {
+    type: "newTestCaseRun"
+}
+
 export interface UpdateMessage {
     type: "update"
     run: TestRun
@@ -61,7 +74,7 @@ export interface TestParticipant {
     claimedCases: { [id: string]: boolean }
 }
 
-type TestCaseResult = "pass" | "fall" | "undecided"
+export type TestCaseResult = "passed" | "failed" | "undecided"
 
 export interface TestCaseRun {
     case: string

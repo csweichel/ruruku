@@ -38,9 +38,9 @@ export class TestcaseDetailView extends React.Component<TestcaseDetailViewProps,
 
         const allRuns = this.props.runs.map((r, idx) => {
             let icon = <Icon name="circle outline" />;
-            if (r.result === 'pass') {
+            if (r.result === 'passed') {
                 icon = <Icon name="check" />;
-            } else if (r.result === 'fall') {
+            } else if (r.result === 'failed') {
                 icon = <Icon name="times" />;
             } else {
                 icon = <Icon name="question" />;
@@ -50,7 +50,7 @@ export class TestcaseDetailView extends React.Component<TestcaseDetailViewProps,
                 <Feed.Label>{icon}</Feed.Label>
                 <Feed.Content>
                     <Feed.Date>{r.tester}</Feed.Date>
-                    <Feed.Summary>{r.comment}</Feed.Summary>
+                    <div dangerouslySetInnerHTML={{__html: markdown.makeHtml(r.comment)}} />
                 </Feed.Content>
             </Feed.Event>
         });

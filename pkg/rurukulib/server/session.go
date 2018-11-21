@@ -78,6 +78,12 @@ func (session *sessionStore) HandleMessage(conn *websocket.Conn, msg []byte) err
 			return err
 		}
 		return session.handleClaim(conn, claim)
+    } else if tpe == "newTestCaseRun" {
+        newRun, err := protocol.UnmarshalNewTestCaseRunRequest(msg)
+        if err != nil {
+            return err
+        }
+        return session.handleNewTestcaseRun(conn, newRun)
 	} else if tpe == "keep-alive" {
 		return nil
 	} else {
@@ -144,6 +150,41 @@ func (session *sessionStore) handleClaim(conn *websocket.Conn, msg protocol.Clai
 
 	resp := protocol.ClaimResponse{
 		Type: "claim",
+	}
+	return conn.WriteJSON(resp)
+
+	return nil
+}
+
+func (session *sessionStore) handleNewTestcaseRun(conn *websocket.Conn, msg protocol.NewTestCaseRunRequest) error {
+	name, ok := session.conn[conn]
+	if !ok {
+		return fmt.Errorf("No user associated with this connection. Did you say welcome?")
+	}
+
+	participant, ok := session.participants[name]
+	if !ok {
+		return fmt.Errorf("User %s seems not to participate in the testing. Looks like a bug.", name)
+	}
+
+    tcr := protocol.TestCaseRun{
+        Case: msg.Case,
+        CaseGroup: msg.CaseGroup,
+        Comment: msg.Comment,
+        Result: msg.Result,
+        Start: msg.Start,
+        Tester: participant.Name,
+    }
+    log.WithField("participant", participant.Name).WithField("case", msg.Case).WithField("result", msg.Result).Info("Participant submitted testcase run")
+
+    session.run.Cases = append(session.run.Cases, tcr)
+
+	if err := session.Save(); err != nil {
+		return err
+	}
+
+	resp := protocol.NewTestCaseRunResponse{
+		Type: "newTestCaseRun",
 	}
 	return conn.WriteJSON(resp)
 

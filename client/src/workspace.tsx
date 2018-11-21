@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { WelcomeRequest, TestSuite, TestRun, TestParticipant, TestCase, ClaimRequest } from '../../protocol/protocol'
+import { WelcomeRequest, TestSuite, TestRun, TestParticipant, TestCase, ClaimRequest, TestCaseResult, NewTestCaseRunRequest } from '../../protocol/protocol'
 import logo from './logo.svg';
 import { TestplanView } from './testplan-view';
 import { Sidebar, Segment } from 'semantic-ui-react';
@@ -26,6 +26,7 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
         // ES6 classes do not autobind to this
         props.ws.onmessage = this.onMessage.bind(this);
         this.claimTestCase = this.claimTestCase.bind(this);
+        this.submitTestcaseRun = this.submitTestcaseRun.bind(this);
         this.showSidebar = this.showSidebar.bind(this);
 
         this.sendWelcome();
@@ -63,6 +64,7 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
                                     run={this.state.run}
                                     participant={this.state.participant}
                                     claimTestCase={this.claimTestCase}
+                                    submitTestCaseRun={this.submitTestcaseRun}
                                     showDetails={this.showSidebar} />
                             </Segment>
                         </Sidebar.Pusher>
@@ -106,6 +108,18 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
             type: "claim",
             caseId: `${testCase.group}/${testCase.id}`,
             claim
+        };
+        this.props.ws.send(JSON.stringify(msg));
+    }
+
+    protected submitTestcaseRun(testcase: TestCase, result: TestCaseResult, comment: string) {
+        const msg: NewTestCaseRunRequest = {
+            type: "newTestCaseRun",
+            case: testcase.id,
+            caseGroup: testcase.group,
+            comment,
+            result,
+            start: new Date(),
         };
         this.props.ws.send(JSON.stringify(msg));
     }

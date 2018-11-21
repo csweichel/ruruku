@@ -20,12 +20,12 @@ export class TestCaseStatusView extends React.Component<TestCaseStatusViewProps,
         const content = [];
         for(const r of this.props.runs) {
             if (r.run) {
-                if (r.run.result === "pass") {
-                    content.push(<Icon name="check" className={r.run.result} key={content.length}  about="Passed" />);
-                } else if (r.run.result === "fall") {
-                    content.push(<Icon name="times" className={r.run.result} key={content.length} about="Failed" />);
+                if (r.run.result === "passed") {
+                    content.push(<Icon name="check" className="passed" key={content.length}  about="Passed" />);
+                } else if (r.run.result === "failed") {
+                    content.push(<Icon name="times" className="failed" key={content.length} about="Failed" />);
                 } else {
-                    content.push(<Icon name="circle outline" className={r.run.result} key={content.length} about="Undecided" />);
+                    content.push(<Icon name="circle outline" className="undecided" key={content.length} about="Undecided" />);
                 }
             } else {
                 content.push(<Icon name="user" key={content.length} about={r.participant!.name} />);
