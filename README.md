@@ -10,6 +10,7 @@ During the test run the server persists a test-report YAML file which can be use
 
 ## Development
 [![Open in Gitpod](http://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io#https://github.com/32leaves/ruruku)
+[![Build Status](https://travis-ci.org/32leaves/ruruku.svg?branch=master)](https://travis-ci.org/32leaves/ruruku)
 
 ## FAQ
 

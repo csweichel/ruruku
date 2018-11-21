@@ -1,0 +1,11 @@
+language: go
+
+go:
+  - "1.11"
+
+before_install:
+  - cd protocol && yarn install && yarn build; cd -
+
+script:
+  - cd client && yarn install && yarn build; cd -
+  - go build
