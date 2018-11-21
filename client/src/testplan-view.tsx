@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { TestSuite, TestRun, TestParticipant, TestCase, TestCaseRun } from '../../protocol/protocol';
+import { TestSuite, TestRun, TestParticipant, TestCase, TestCaseRun, TestCaseResult } from '../../protocol/protocol';
 import { Table, Button } from 'semantic-ui-react';
 import { TestCaseStatusView, TestCaseParticipant } from './testcase-status';
 import { TestcaseDetailView } from './testcase-detail-view';
+import { NewTestcaseRunView } from './new-testcase-run-view';
 
 export interface TestplanViewProps {
     suite: TestSuite
@@ -10,6 +11,7 @@ export interface TestplanViewProps {
     participant: TestParticipant
 
     claimTestCase(testCase: TestCase, claim: boolean): void
+    submitTestCaseRun(testCase: TestCase, result: TestCaseResult, comment: string): void
     showDetails(content?: any): void
 }
 
@@ -57,7 +59,7 @@ export class TestplanView extends React.Component<TestplanViewProps, {}> {
     protected getActions(tc: TestCase) {
         if (this.isClaimed(tc)) {
             return [
-                <Button label="Complete" icon="write square" key="complete" />,
+                <Button label="Complete" icon="write square" key="complete" onClick={this.showNewRunForm.bind(this, tc)} />,
                 <Button label="Unclaim" basic={true} icon="minus circle" onClick={this.claim.bind(this, tc, false)} key="unclaim" />
             ]
         } else {
@@ -70,6 +72,10 @@ export class TestplanView extends React.Component<TestplanViewProps, {}> {
     protected showDetails(cse: TestCase, runs: TestCaseRun[], evt: React.SyntheticEvent) {
         evt.preventDefault();
         this.props.showDetails(<TestcaseDetailView testcase={cse} runs={runs} onClose={this.props.showDetails} />);
+    }
+
+    protected showNewRunForm(cse: TestCase) {
+        this.props.showDetails(<NewTestcaseRunView testcase={cse} onSubmit={this.props.submitTestCaseRun} onCancel={this.props.showDetails} />)
     }
 
     protected getRunsAndClaims(cse: TestCase, runs: TestCaseRun[]): TestCaseParticipant[] {
