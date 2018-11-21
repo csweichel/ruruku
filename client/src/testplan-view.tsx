@@ -2,6 +2,7 @@ import * as React from 'react';
 import { TestSuite, TestRun, TestParticipant, TestCase, TestCaseRun } from '../../protocol/protocol';
 import { Table, Button } from 'semantic-ui-react';
 import { TestCaseStatusView, TestCaseParticipant } from './testcase-status';
+import { TestcaseDetailView } from './testcase-detail-view';
 
 export interface TestplanViewProps {
     suite: TestSuite
@@ -9,6 +10,7 @@ export interface TestplanViewProps {
     participant: TestParticipant
 
     claimTestCase(testCase: TestCase, claim: boolean): void
+    showDetails(content?: any): void
 }
 
 export class TestplanView extends React.Component<TestplanViewProps, {}> {
@@ -46,7 +48,7 @@ export class TestplanView extends React.Component<TestplanViewProps, {}> {
                     {this.getActions(mc.case)}
                 </Table.Cell>
                 <Table.Cell>{mc.case.group}</Table.Cell>
-                <Table.Cell>{mc.case.name}</Table.Cell>
+                <Table.Cell><a href="#" onClick={this.showDetails.bind(this, mc.case, mc.runs)}>{mc.case.name}</a></Table.Cell>
                 <Table.Cell><TestCaseStatusView case={mc.case} runs={this.getRunsAndClaims(mc.case, mc.runs)} /></Table.Cell>
             </Table.Row>
         });
@@ -63,6 +65,11 @@ export class TestplanView extends React.Component<TestplanViewProps, {}> {
                 <Button label="Claim" icon="plus circle" onClick={this.claim.bind(this, tc, true)} key="claim" />
             ]
         }
+    }
+
+    protected showDetails(cse: TestCase, runs: TestCaseRun[], evt: React.SyntheticEvent) {
+        evt.preventDefault();
+        this.props.showDetails(<TestcaseDetailView testcase={cse} runs={runs} onClose={this.props.showDetails} />);
     }
 
     protected getRunsAndClaims(cse: TestCase, runs: TestCaseRun[]): TestCaseParticipant[] {

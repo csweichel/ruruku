@@ -4,11 +4,12 @@ cases:
   name: Start server
   group: basics
   description: Tests the basic server start
-  steps: |
-    \# Preparation
+  steps: |-
+    # Preparation
     - Have everything compiled and ready to run.
     - Have this test suite handy
-    \# Execution
+
+    # Execution
     run `ruruku start example-suite.yaml`
   mustPass: false
   minTesterCount: 5
@@ -16,8 +17,9 @@ cases:
   name: Stop server
   group: basics
   description: Checks if the server saves the session log before it exits
-  steps: |
-    \# Preparation
+  steps: |-
+    # Preparation
     - Have a ruruku session running
-    \# Execution
+
+    # Execution
     use `Ctrl+C` on a running ruruku process
