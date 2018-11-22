@@ -26,7 +26,7 @@ func wsHandler(session *sessionStore) func(w http.ResponseWriter, r *http.Reques
 	return func(w http.ResponseWriter, r *http.Request) {
         conn, err := upgrader.Upgrade(w, r, nil)
         if err != nil {
-            log.Printf("Error upgrading to websocket: %s", err)
+            log.WithError(err).Error("Error upgrading to websocket")
             return
         }
 
@@ -68,7 +68,7 @@ func Start(cfg *Config, suite *protocol.TestSuite, sessionName string) error {
 		log.WithError(err).Fatal("Error during startup")
 	}
 
-	http.HandleFunc("/ws", wsHandler(session))
+	http.HandleFunc(fmt.Sprintf("/ws/%s", cfg.Token), wsHandler(session))
 	http.HandleFunc("/", staticFiles)
 
 	// fmt.Println("\nSuccess! Please navigate your browser to http://localhost:8000")
@@ -87,5 +87,5 @@ func serverUrl(port int32, token string) string {
             protocol = parsedWsURL.Scheme
         }
     }
-    return fmt.Sprintf("%s://%s/?token=%s", protocol, host, token)
+    return fmt.Sprintf("%s://%s/%s", protocol, host, token)
 }

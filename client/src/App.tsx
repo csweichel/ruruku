@@ -6,9 +6,11 @@ import logo from './logo.svg';
 import { LoginForm } from './login-form';
 import { Workspace } from './workspace';
 
+type ConnectionState = "not-connected" | "connecting" | "connected";
+
 interface AppState {
     name: string
-    connecting: boolean
+    connection: ConnectionState
     socket?: WebSocket
 }
 
@@ -28,9 +30,9 @@ class App extends React.Component<{}, AppState> {
 
     public render() {
         let loginOrWorkspace;
-        if (this.state.socket) {
+        if (this.state.socket && this.state.connection === 'connected') {
             return <div className="app app-connected"><Workspace name={this.state.name} ws={this.state.socket} /></div>;
-        } else if (this.state.connecting) {
+        } else if (this.state.connection === 'connecting') {
             loginOrWorkspace = <div>Connecting ...</div>
         } else {
             loginOrWorkspace = <LoginForm handleSubmit={this.connect} />
@@ -49,21 +51,38 @@ class App extends React.Component<{}, AppState> {
     }
 
     protected connect(name: string) {
-        this.setState({ name, connecting: true });
+        const token = window.location.pathname.substring(1);
+        if (!token) {
+            throw new Error("No authentication token available. Cannot connect");
+        }
+
+        this.setState({ name, connection: 'connecting' });
 
         let protocol = 'ws';
         if (window.location.protocol === 'https:') {
             protocol = 'wss';
         }
-        const ws = new WebSocket(`${protocol}://${window.location.host}/ws`);
+
+        const ws = new WebSocket(`${protocol}://${window.location.host}/ws/${token}`);
         ws.onclose = (ev: CloseEvent) => {
-            this.setState({ socket: undefined, connecting: false });
-            this.connect(name);
+            this.setState({ socket: undefined });
+            if (this.state.connection === 'connected') {
+                this.connect(name);
+            } else {
+                this.setState({ connection: 'not-connected' });
+            }
         };
-        ws.onopen = () => this.setState({ socket: ws, connecting: false });
+        ws.onopen = () => this.setState({ socket: ws, connection: 'connected' });
         ws.onerror = (err) => {
             console.log(err);
-            this.setState({ socket: ws, connecting: false });
+
+            this.setState({ socket: undefined });
+            if (this.state.connection === 'connected') {
+                this.connect(name);
+            } else {
+                alert("Cannot connect - make sure your link is correct");
+                this.setState({ connection: 'not-connected' });
+            }
         };
     }
 
