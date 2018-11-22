@@ -87,5 +87,5 @@ func serverUrl(port int32, token string) string {
             protocol = parsedWsURL.Scheme
         }
     }
-    return fmt.Sprintf("%s://%s/%s", protocol, host, token)
+    return fmt.Sprintf("%s://%s/?%s", protocol, host, token)
 }

@@ -12,6 +12,7 @@ interface AppState {
     name: string
     connection: ConnectionState
     socket?: WebSocket
+    token: string
 }
 
 class App extends React.Component<{}, AppState> {
@@ -24,7 +25,8 @@ class App extends React.Component<{}, AppState> {
 
     public componentWillMount() {
         this.setState({
-            name: "none"
+            name: "none",
+            token: window.location.search.substring(1)
         });
     }
 
@@ -34,8 +36,10 @@ class App extends React.Component<{}, AppState> {
             return <div className="app app-connected"><Workspace name={this.state.name} ws={this.state.socket} /></div>;
         } else if (this.state.connection === 'connecting') {
             loginOrWorkspace = <div>Connecting ...</div>
-        } else {
+        } else if(this.state.token) {
             loginOrWorkspace = <LoginForm handleSubmit={this.connect} />
+        } else {
+            loginOrWorkspace = <b>No token present. Are you sure you have the right link?</b>
         }
 
         return (
@@ -51,7 +55,7 @@ class App extends React.Component<{}, AppState> {
     }
 
     protected connect(name: string) {
-        const token = window.location.pathname.substring(1);
+        const token = this.state.token;
         if (!token) {
             throw new Error("No authentication token available. Cannot connect");
         }
