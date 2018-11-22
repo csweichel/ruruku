@@ -45,13 +45,11 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
                     <Form.Field>
                         <Label>Result</Label>
                         <Dropdown
-                            defaultValue="undecided"
                             options={[
-                                { value: "passed", content: "Passed", icon: "check" },
-                                { value: "undecided", content: "Undecided", icon: "question" },
-                                { value: "failed", content: "Failed", icon: "times" }
+                                { value: "passed", text: "Passed", icon: "check" },
+                                { value: "undecided", text: "Undecided", icon: "question" },
+                                { value: "failed", text: "Failed", icon: "times" }
                             ]}
-                            search={true}
                             onChange={this.onResultChange}
                             value={this.state.result} />
                     </Form.Field>
