@@ -64,7 +64,7 @@ export class TestplanView extends React.Component<TestplanViewProps, {}> {
                 return [<Button label="Edit" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, tc, previousRun)} />];
             } else {
                 return [
-                    <Button label="Contribute" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, tc)} />
+                    <Button label="Contribute" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, tc, undefined)} />
                 ];
             }
         } else {

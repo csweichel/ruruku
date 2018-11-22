@@ -39,11 +39,10 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
 
         let unclaim: any | undefined;
         if (!this.props.previousRun) {
-            unclaim = (
-                <Card.Content extra={true}>
-                    <Button basic={true} onClick={this.onUnclaim} fluid={true}>Unclaim</Button>
-                </Card.Content>
-            );
+            unclaim = [
+                <Button onClick={this.onUnclaim} color="red" key={0}>Unclaim</Button>,
+                <ButtonOr key={1} />
+            ];
         }
 
         return <Card>
@@ -72,12 +71,12 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
             </Card.Content>
             <Card.Content extra={true}>
                 <ButtonGroup>
-                    <Button positive={true} onClick={this.onSubmit}>Submit</Button>
+                    <Button positive={true} onClick={this.onSubmit} fluid={true}>Submit</Button>
                     <ButtonOr />
+                    {unclaim}
                     <Button onClick={this.onCancel}>Cancel</Button>
                 </ButtonGroup>
             </Card.Content>
-            {unclaim}
         </Card>;
     }
 
