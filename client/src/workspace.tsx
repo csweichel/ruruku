@@ -115,8 +115,7 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
     protected submitTestcaseRun(testcase: TestCase, result: TestCaseResult, comment: string) {
         const msg: NewTestCaseRunRequest = {
             type: "newTestCaseRun",
-            case: testcase.id,
-            caseGroup: testcase.group,
+            caseId: `${testcase.group}/${testcase.id}`,
             comment,
             result,
             start: new Date(),

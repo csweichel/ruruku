@@ -27,8 +27,7 @@ export interface ClaimResponse {
 
 export interface NewTestCaseRunRequest {
     type: "newTestCaseRun"
-    case: string
-    caseGroup: string
+    caseId: string
     start: Date
     result: TestCaseResult
     comment: string
@@ -77,8 +76,7 @@ export interface TestParticipant {
 export type TestCaseResult = "passed" | "failed" | "undecided"
 
 export interface TestCaseRun {
-    case: string
-    caseGroup: string
+    caseId: string
     start: Date
     tester: string
     result: TestCaseResult

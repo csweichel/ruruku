@@ -1,11 +1,12 @@
 import { TestCaseResult, TestCase } from '../../protocol/protocol';
 import * as React from 'react';
-import { Card, Button, ButtonOr, Form, Label, Dropdown, TextArea, DropdownProps, TextAreaProps } from 'semantic-ui-react';
+import { Card, Button, ButtonOr, Form, Label, Dropdown, TextArea, DropdownProps, TextAreaProps, ButtonGroup } from 'semantic-ui-react';
 
 export interface NewTestcaseRunViewProps {
     testcase: TestCase;
     onSubmit: (testcase: TestCase, result: TestCaseResult, comment: string) => void;
-    onCancel: () => void;
+    onClose: () => void;
+    claimTestCase: (testcase: TestCase, claim: boolean) => void;
 }
 
 interface NewTestcaseRunViewState {
@@ -19,6 +20,7 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
         super(props);
         this.onCancel = this.onCancel.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
+        this.onUnclaim = this.onUnclaim.bind(this);
         this.onResultChange = this.onResultChange.bind(this);
         this.updateComment = this.updateComment.bind(this);
     }
@@ -60,20 +62,30 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
                 </Form>
             </Card.Content>
             <Card.Content extra={true}>
-                <ButtonOr>
-                    <Button primary={true} color="green" onClick={this.onSubmit}>Submit</Button>
-                    <Button basic={true} color="red" onClick={this.onCancel}>Cancel</Button>
-                </ButtonOr>
+                <ButtonGroup>
+                    <Button positive={true} onClick={this.onSubmit}>Submit</Button>
+                    <ButtonOr />
+                    <Button onClick={this.onCancel}>Cancel</Button>
+                </ButtonGroup>
+            </Card.Content>
+            <Card.Content extra={true}>
+                <Button basic={true} onClick={this.onUnclaim} fluid={true}>Unclaim</Button>
             </Card.Content>
         </Card>;
     }
 
     protected onSubmit() {
         this.props.onSubmit(this.props.testcase, this.state.result, this.state.comment);
+        this.props.onClose();
     }
 
     protected onCancel() {
-        this.props.onCancel();
+        this.props.onClose();
+    }
+
+    protected onUnclaim() {
+        this.props.claimTestCase(this.props.testcase, false);
+        this.props.onClose();
     }
 
     protected onResultChange(evt: React.SyntheticEvent, props: DropdownProps) {

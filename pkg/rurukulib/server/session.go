@@ -168,14 +168,13 @@ func (session *sessionStore) handleNewTestcaseRun(conn *websocket.Conn, msg prot
 	}
 
     tcr := protocol.TestCaseRun{
-        Case: msg.Case,
-        CaseGroup: msg.CaseGroup,
+        CaseID: msg.CaseID,
         Comment: msg.Comment,
         Result: msg.Result,
         Start: msg.Start,
         Tester: participant.Name,
     }
-    log.WithField("participant", participant.Name).WithField("case", msg.Case).WithField("result", msg.Result).Info("Participant submitted testcase run")
+    log.WithField("participant", participant.Name).WithField("case", msg.CaseID).WithField("result", msg.Result).Info("Participant submitted testcase run")
 
     session.run.Cases = append(session.run.Cases, tcr)
 

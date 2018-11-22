@@ -40,7 +40,7 @@ export class TestplanView extends React.Component<TestplanViewProps, {}> {
         }
 
         const matchedCases = this.props.suite.cases.map(cse => {
-            const runs = (this.props.run.cases || []).filter(cser => cser.case === cse.id && cser.caseGroup === cse.group);
+            const runs = (this.props.run.cases || []).filter(cser => cser.caseId === `${cse.group}/${cse.id}`);
             return { case: cse, runs };
         });
 
@@ -58,14 +58,18 @@ export class TestplanView extends React.Component<TestplanViewProps, {}> {
 
     protected getActions(tc: TestCase) {
         if (this.isClaimed(tc)) {
-            return [
-                <Button label="Complete" icon="write square" key="complete" onClick={this.showNewRunForm.bind(this, tc)} />,
-                <Button label="Unclaim" basic={true} icon="minus circle" onClick={this.claim.bind(this, tc, false)} key="unclaim" />
-            ]
+            if (this.isCompleted(tc)) {
+                // TODO: add edit button - see #4
+                return [];
+            } else {
+                return [
+                    <Button label="Complete" icon="write square" key="complete" onClick={this.showNewRunForm.bind(this, tc)} />
+                ];
+            }
         } else {
             return [
                 <Button label="Claim" icon="plus circle" onClick={this.claim.bind(this, tc, true)} key="claim" />
-            ]
+            ];
         }
     }
 
@@ -75,11 +79,14 @@ export class TestplanView extends React.Component<TestplanViewProps, {}> {
     }
 
     protected showNewRunForm(cse: TestCase) {
-        this.props.showDetails(<NewTestcaseRunView testcase={cse} onSubmit={this.props.submitTestCaseRun} onCancel={this.props.showDetails} />)
+        this.props.showDetails(<NewTestcaseRunView testcase={cse} onSubmit={this.props.submitTestCaseRun} claimTestCase={this.props.claimTestCase} onClose={this.props.showDetails} />)
     }
 
     protected getRunsAndClaims(cse: TestCase, runs: TestCaseRun[]): TestCaseParticipant[] {
-        const participants = this.props.run.participants.filter(p => Object.keys(p.claimedCases).indexOf(`${cse.group}/${cse.id}`) > -1);
+        const participants = this.props.run.participants.filter(p =>
+            Object.keys(p.claimedCases).indexOf(`${cse.group}/${cse.id}`) > -1 &&
+            !runs.find(r => r.tester === p.name)
+        );
 
         return participants.map(p => {
             return {
@@ -94,6 +101,10 @@ export class TestplanView extends React.Component<TestplanViewProps, {}> {
 
     protected isClaimed(cse: TestCase): boolean {
         return this.props.participant.claimedCases[`${cse.group}/${cse.id}`];
+    }
+
+    protected isCompleted(cse: TestCase): boolean {
+        return !!(this.props.run.cases || []).find(r => r.caseId === `${cse.group}/${cse.id}` && r.tester === this.props.participant.name);
     }
 
     protected claim(cse: TestCase, claim: boolean, evt: React.SyntheticEvent): void {
