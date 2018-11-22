@@ -63,7 +63,7 @@ export class TestplanView extends React.Component<TestplanViewProps, {}> {
                 return [];
             } else {
                 return [
-                    <Button label="Complete" icon="write square" key="complete" onClick={this.showNewRunForm.bind(this, tc)} />
+                    <Button label="Contribute" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, tc)} />
                 ];
             }
         } else {
