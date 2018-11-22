@@ -13,8 +13,9 @@ func LoadSuite(fn string) (*protocol.TestSuite, error) {
 	}
 
 	var result protocol.TestSuite
-	if err = yaml.Unmarshal(fc, &result); err != nil {
+	if err := yaml.Unmarshal(fc, &result); err != nil {
 		return nil, err
 	}
+
 	return &result, nil
 }

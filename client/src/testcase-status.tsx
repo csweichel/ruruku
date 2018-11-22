@@ -32,7 +32,7 @@ export class TestCaseStatusView extends React.Component<TestCaseStatusViewProps,
             }
         }
         for(let i = 0; i < remainingCellCount; i++) {
-            content.push(<div className="user outline" key={content.length} about="Unclaimed" />);
+            content.push(<Icon name="user outline" key={content.length} about="Unclaimed" />);
         }
         return <div className="case-status-view">{content}</div>
     }
