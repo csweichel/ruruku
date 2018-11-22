@@ -13,11 +13,14 @@ import (
 )
 
 type sessionStore struct {
+	Name         string
+
 	suite        *protocol.TestSuite
 	run          *protocol.TestRun
-	Name         string
 	conn         map[*websocket.Conn]string
 	participants map[string]*protocol.TestParticipant
+
+    runidx map[string]*protocol.TestCaseRun
 }
 
 func LoadSessionOrNew(name string, suite *protocol.TestSuite) (*sessionStore, error) {
@@ -30,6 +33,7 @@ func LoadSessionOrNew(name string, suite *protocol.TestSuite) (*sessionStore, er
 		Name:         name,
 		conn:         make(map[*websocket.Conn]string),
 		participants: make(map[string]*protocol.TestParticipant),
+        runidx:       make(map[string]*protocol.TestCaseRun),
 	}
 
 	if _, err := os.Stat(name); err == nil {
@@ -44,8 +48,14 @@ func LoadSessionOrNew(name string, suite *protocol.TestSuite) (*sessionStore, er
 			return nil, err
 		}
 
+        // build participant index
         for _, pcp := range r.run.Participants {
             r.participants[pcp.Name] = &pcp
+        }
+
+        // build run index
+        for _, run := range r.run.Cases {
+            r.runidx[fmt.Sprintf("%s#%s", run.Tester, run.CaseID)] = &run
         }
 
 		log.WithField("session", name).Info("Restored session")
@@ -167,16 +177,30 @@ func (session *sessionStore) handleNewTestcaseRun(conn *websocket.Conn, msg prot
 		return fmt.Errorf("User %s seems not to participate in the testing. Looks like a bug.", name)
 	}
 
-    tcr := protocol.TestCaseRun{
-        CaseID: msg.CaseID,
-        Comment: msg.Comment,
-        Result: msg.Result,
-        Start: msg.Start,
-        Tester: participant.Name,
+    // check if we have this run in the index already
+    idxkey := fmt.Sprintf("%s#%s", participant.Name, msg.CaseID)
+    if run, ok := session.runidx[idxkey]; ok {
+        run.Comment = msg.Comment
+        run.Result = msg.Result
+    } else {
+        tcr := protocol.TestCaseRun{
+            CaseID: msg.CaseID,
+            Comment: msg.Comment,
+            Result: msg.Result,
+            Start: msg.Start,
+            Tester: participant.Name,
+        }
+        session.runidx[idxkey] = &tcr
     }
-    log.WithField("participant", participant.Name).WithField("case", msg.CaseID).WithField("result", msg.Result).Info("Participant submitted testcase run")
 
-    session.run.Cases = append(session.run.Cases, tcr)
+    session.run.Cases = make([]protocol.TestCaseRun, len(session.runidx))
+    i := 0
+    for _, run := range session.runidx {
+        session.run.Cases[i] = *run
+        i++
+    }
+
+    log.WithField("participant", participant.Name).WithField("case", msg.CaseID).WithField("result", msg.Result).Info("Participant submitted testcase run")
 
 	if err := session.Save(); err != nil {
 		return err
