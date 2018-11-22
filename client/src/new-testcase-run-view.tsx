@@ -1,9 +1,10 @@
-import { TestCaseResult, TestCase } from '../../protocol/protocol';
+import { TestCaseResult, TestCase, TestCaseRun } from '../../protocol/protocol';
 import * as React from 'react';
 import { Card, Button, ButtonOr, Form, Label, Dropdown, TextArea, DropdownProps, TextAreaProps, ButtonGroup } from 'semantic-ui-react';
 
 export interface NewTestcaseRunViewProps {
     testcase: TestCase;
+    previousRun?: TestCaseRun;
     onSubmit: (testcase: TestCase, result: TestCaseResult, comment: string) => void;
     onClose: () => void;
     claimTestCase: (testcase: TestCase, claim: boolean) => void;
@@ -18,6 +19,7 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
 
     constructor(props: NewTestcaseRunViewProps) {
         super(props);
+
         this.onCancel = this.onCancel.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
         this.onUnclaim = this.onUnclaim.bind(this);
@@ -27,13 +29,22 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
 
     public componentWillMount() {
         this.setState({
-            result: "undecided",
-            comment: ""
+            result: this.props.previousRun && this.props.previousRun.result ? this.props.previousRun.result : "undecided",
+            comment: this.props.previousRun ? this.props.previousRun.comment : ""
         });
     }
 
     public render() {
         const tc = this.props.testcase;
+
+        let unclaim: any | undefined;
+        if (!this.props.previousRun) {
+            unclaim = (
+                <Card.Content extra={true}>
+                    <Button basic={true} onClick={this.onUnclaim} fluid={true}>Unclaim</Button>
+                </Card.Content>
+            );
+        }
 
         return <Card>
             <Card.Content>
@@ -66,9 +77,7 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
                     <Button onClick={this.onCancel}>Cancel</Button>
                 </ButtonGroup>
             </Card.Content>
-            <Card.Content extra={true}>
-                <Button basic={true} onClick={this.onUnclaim} fluid={true}>Unclaim</Button>
-            </Card.Content>
+            {unclaim}
         </Card>;
     }
 

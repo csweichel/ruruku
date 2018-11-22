@@ -58,9 +58,10 @@ export class TestplanView extends React.Component<TestplanViewProps, {}> {
 
     protected getActions(tc: TestCase) {
         if (this.isClaimed(tc)) {
-            if (this.isCompleted(tc)) {
+            const previousRun = this.isCompleted(tc);
+            if (previousRun) {
                 // TODO: add edit button - see #4
-                return [];
+                return [<Button label="Edit" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, tc, previousRun)} />];
             } else {
                 return [
                     <Button label="Contribute" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, tc)} />
@@ -78,8 +79,8 @@ export class TestplanView extends React.Component<TestplanViewProps, {}> {
         this.props.showDetails(<TestcaseDetailView testcase={cse} runs={runs} onClose={this.props.showDetails} />);
     }
 
-    protected showNewRunForm(cse: TestCase) {
-        this.props.showDetails(<NewTestcaseRunView testcase={cse} onSubmit={this.props.submitTestCaseRun} claimTestCase={this.props.claimTestCase} onClose={this.props.showDetails} />)
+    protected showNewRunForm(cse: TestCase, previousRun?: TestCaseRun) {
+        this.props.showDetails(<NewTestcaseRunView testcase={cse} previousRun={previousRun} onSubmit={this.props.submitTestCaseRun} claimTestCase={this.props.claimTestCase} onClose={this.props.showDetails} />)
     }
 
     protected getRunsAndClaims(cse: TestCase, runs: TestCaseRun[]): TestCaseParticipant[] {
@@ -103,8 +104,8 @@ export class TestplanView extends React.Component<TestplanViewProps, {}> {
         return this.props.participant.claimedCases[`${cse.group}/${cse.id}`];
     }
 
-    protected isCompleted(cse: TestCase): boolean {
-        return !!(this.props.run.cases || []).find(r => r.caseId === `${cse.group}/${cse.id}` && r.tester === this.props.participant.name);
+    protected isCompleted(cse: TestCase): TestCaseRun | undefined {
+        return (this.props.run.cases || []).find(r => r.caseId === `${cse.group}/${cse.id}` && r.tester === this.props.participant.name);
     }
 
     protected claim(cse: TestCase, claim: boolean, evt: React.SyntheticEvent): void {
