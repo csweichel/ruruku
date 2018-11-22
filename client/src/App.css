@@ -69,3 +69,7 @@ input[type="submit"]:disabled {
 .no-padding {
     padding: 0px !important;
 }
+
+.ui.card {
+    width: 100% !important;
+}
