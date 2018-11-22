@@ -8,6 +8,6 @@
     "quicktype": "^15.0.152"
   },
   "scripts": {
-      "build": "quicktype -l go --package protocol protocol.ts > protocol.go"
+      "build": "quicktype -l go --package protocol protocol.ts | go run ../build/post_quicktype_gofilter.go > protocol.go"
   }
 }
