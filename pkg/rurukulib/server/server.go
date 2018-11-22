@@ -1,12 +1,14 @@
 package server
 
 import (
+	"os"
 	"fmt"
 	"github.com/32leaves/ruruku/protocol"
 	"github.com/gorilla/websocket"
 	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+    "net/url"
 )
 
 var upgrader = websocket.Upgrader{
@@ -70,6 +72,20 @@ func Start(cfg *Config, suite *protocol.TestSuite, sessionName string) error {
 	http.HandleFunc("/", staticFiles)
 
 	// fmt.Println("\nSuccess! Please navigate your browser to http://localhost:8000")
-	log.Printf("Server started: http://localhost:%d/?token=%s", cfg.Port, cfg.Token)
+	log.Printf("Server started: %s", serverUrl(cfg.Port, cfg.Token))
 	return http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), nil)
+}
+
+func serverUrl(port int32, token string) string {
+    protocol := "https"
+    host := "localhost"
+    wsURL := os.Getenv("GITPOD_WORKSPACE_URL")
+    if wsURL != "" {
+        parsedWsURL, err := url.Parse(wsURL)
+        if err == nil {
+            host = fmt.Sprintf("%d-%s", port, parsedWsURL.Host)
+            protocol = parsedWsURL.Scheme
+        }
+    }
+    return fmt.Sprintf("%s://%s/?token=%s", protocol, host, token)
 }
