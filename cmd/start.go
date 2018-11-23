@@ -8,7 +8,7 @@ import (
 	"github.com/32leaves/ruruku/pkg/rurukulib/server"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-    "github.com/spf13/viper"
+	"github.com/spf13/viper"
 )
 
 var sessionName string
@@ -43,9 +43,9 @@ func init() {
 	sn := time.Now().Format("20060102-150405")
 	startCmd.Flags().StringVar(&sessionName, "session-name", fmt.Sprintf("ruruku-%s.yaml", sn), "The name of the session to run")
 
-    startCmd.Flags().Int("port", 8080, "Port to run the server on")
-    viper.BindPFlag("server.port", startCmd.Flags().Lookup("port"))
+	startCmd.Flags().Int("port", 8080, "Port to run the server on")
+	viper.BindPFlag("server.port", startCmd.Flags().Lookup("port"))
 
-    startCmd.Flags().String("token", "", "The authentication token users need to know (default is auto-generated)")
-    viper.BindPFlag("server.token", startCmd.Flags().Lookup("token"))
+	startCmd.Flags().String("token", "", "The authentication token users need to know (default is auto-generated)")
+	viper.BindPFlag("server.token", startCmd.Flags().Lookup("token"))
 }

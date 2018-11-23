@@ -73,7 +73,7 @@ type Config struct {
 }
 
 func GetConfigFromViper() (*Config, error) {
-    viper.SetDefault("server.port", 8080)
+	viper.SetDefault("server.port", 8080)
 
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
