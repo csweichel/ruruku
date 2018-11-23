@@ -1,12 +1,19 @@
 ![ruruku](logo.png)
 
-A simple manual test coordinator written in Go and TypeScript/React.
+Suppose you and your team have a list of testcases you want to execute prior to a new release.
+Because things are moving quickly many of those tests aren't yet automated, so testing becomes a team effort.
+Ruruku helps coordinate this team effort by offering a single, low friction contact point where testers can sign up, claim test cases and provide feedback.
 
-**Beware: this is a spare-time project and by no means ready for actual use just yet. There will be dragons.**
-
-Ruruku offers text-based test-case description that is meant to live next to your code.
+Ruruku offers a YAML-based testcase description that is meant to live next to your code.
 When the time has come to go through the tests, run `ruruku start testcases.yaml` to spawn a webserver that allows others to participate in the test.
 During the test run the server persists a test-report YAML file which can be used as pre-deployment gate or kept for reference.
+
+**Beware: this is a side project and is by no means ready for actual use just yet. There will be dragons.**
+
+## Getting started
+At the moment the best way to run ruruku is in a Gitpod workspace, but there are other means, too:
+- **Gitpod:** You can either open use our [demo repository](https://gitpod.io/#github.com/32leaves/ruruku-demo) which also serves a good starter for your own projects, or jump right in with the [development workspace](https://gitpod.io#https://github.com/32leaves/ruruku) of ruruku which runs a full build.
+- **Serveo:** [Serveo](https://serveo.net) exposes local servers to the internet. This way you can run ruruku on your local machine and share it with others. To get started download ruruku, run clone this repo and run `ruruku start example-suite.yaml && ssh -R 80:localhost:8080 serveo.net`.
 
 ## Development
 [![Open in Gitpod](http://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io#https://github.com/32leaves/ruruku)
@@ -19,6 +26,6 @@ Ruruku is Maori and means *to draw together with a cord, bind together, lash, co
 It is pronounced just the way it's written - checkout the [Maori dictionary](http://maoridictionary.co.nz/search?idiom=&phrase=&proverb=&loan=&histLoanWords=&keywords=ruruku) for an audio sample.
 
 ### Why are you building this?
-1. I wanted a fun spare-time project that integrates Go and React in a single project.
+1. I wanted a fun side project that integrates Go and React in a single project.
 2. Gitpod allows for a new kind of tools which no longer require complex hosting so that they can be available on the Internet. Your workspace becomes your hosting platform. I wanted to explore this concept in a real-world use-case.
-3. When testing Gitpod we still have a handful of manual test-cases. I hope that ruruku will be handy for testing those.
+3. When testing Gitpod we still have a handful of manual testcases. I hope that ruruku will be handy for testing those.
