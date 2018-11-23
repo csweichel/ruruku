@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
+    "github.com/GeertJohan/go.rice"
 	"net/http"
     "net/url"
 )
@@ -15,10 +16,6 @@ var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin:     func(r *http.Request) bool { return true }, // not checking origin
-}
-
-func staticFiles(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./client/build"+r.URL.Path)
 }
 
 // this is also the handler for joining to the chat
@@ -69,7 +66,7 @@ func Start(cfg *Config, suite *protocol.TestSuite, sessionName string) error {
 	}
 
 	http.HandleFunc(fmt.Sprintf("/ws/%s", cfg.Token), wsHandler(session))
-	http.HandleFunc("/", staticFiles)
+	http.Handle("/", http.FileServer(rice.MustFindBox("../../../client/build").HTTPBox()))
 
 	// fmt.Println("\nSuccess! Please navigate your browser to http://localhost:8000")
 	log.Printf("Server started: %s", serverUrl(cfg.Port, cfg.Token))
