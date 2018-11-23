@@ -1,11 +1,18 @@
 language: go
-
 go:
-  - "1.11"
-
+- '1.11'
 before_install:
-  - cd protocol && yarn install && yarn build; cd -
-
+- cd protocol && yarn install && yarn build; cd -
 script:
-  - cd client && yarn install && yarn build; cd -
-  - go build
+- cd client && yarn install && yarn build; cd -
+- "./build/build_release.sh"
+deploy:
+  provider: releases
+  skip_cleanup: true
+  draft: true
+  api_key:
+    secure: OvBw2ez8i5smytbrBKv3cxiPDpUcgwRWDMBDwulMnVY1AwHRB3x+lhsox09H7ZB+MC+DTv8R/FaB3qmL3ZrDsuwLid0jPV/xuFTL3HdpZPRHO0nw+UnVD+D1uF1P8i532CJVMcxL6mEUq0mPtiNtkLein8UpnyIVbkNRvqSAn2nVOAFs+/ts3vzeTAe2BhUkbe8j6QlQJTILGEuOgePttZn40P1egLH3QEwKHQ5gvLdnynesZCvtfE2iGA+wgI4BesLWwnWOXJNk8W/6x6rROWTR6bmUeZUDNTFhdZ2oZbdPqO2sJm8fR0PkaGzu8POwm3ldlqzNEJmQDwACI0bRrwlhasJeEhAja+fd6JZBPIjgOazxfMA3fzwZmL4NbuQkBFMTNoWI48hg6Xj1hU5D/mPJcS1p0b3YLOiwBPSUAMmniX9f8ieRS+lIJNJwglvM04Kgrfctv2o+Cw9wSPmnG+NOnvFGg6gzGbMKckZPpIGGK9zpUJjUU3MbWmqn80h8c9Zbu1M/VRg9JZdslK7Z/OXgV+fJ8b3ylR/n+VQsxOitTj8zBXdx9i97q02p3ESUC02RRmi6zRqP16BTymEvSPo4u31kSPnfUv1cwdARohgfU+NBJvt4seiexFZQhXn5TqfA2Fz8P88Bk+QIaiBc9MIcJwGmtwKZugfkZJ4wEGw=
+  file_glob: true
+  file: build/release/*
+  on:
+    tags: true
