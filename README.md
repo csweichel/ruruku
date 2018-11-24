@@ -13,7 +13,11 @@ During the test run the server persists a test-report YAML file which can be use
 ## Getting started
 At the moment the best way to run ruruku is in a Gitpod workspace, but there are other means, too:
 - **Gitpod:** You can either open use our [demo repository](https://gitpod.io/#github.com/32leaves/ruruku-demo) which also serves a good starter for your own projects, or jump right in with the [development workspace](https://gitpod.io#https://github.com/32leaves/ruruku) of ruruku which runs a full build.
-- **Serveo:** [Serveo](https://serveo.net) exposes local servers to the internet. This way you can run ruruku on your local machine and share it with others. To get started download ruruku, run clone this repo and run `ruruku start example-suite.yaml && ssh -R 80:localhost:8080 serveo.net`.
+- **On your local machine:** Ruruku runs on [OSX, Linux and Windows](https://github.com/32leaves/ruruku/releases). To share a ruruku session with others, [Serveo](https://serveo.net) comes in handy, which exposes local servers to the internet. This way you can run ruruku on your local machine and share it with others. To get started download ruruku, run clone this repo and run `ruruku start example-suite.yaml && ssh -R 80:localhost:8080 serveo.net`.
+
+### Create a testsuite
+To create your own testsuite run `ruruku init` which will guide you through the process.
+If you want to a converter that takes an existing testcase description and produces a ruruku one, make sure to look at `ruruku init --help` and `ruruku init testcase --help`.
 
 ## Development
 [![Open in Gitpod](http://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io#https://github.com/32leaves/ruruku)
