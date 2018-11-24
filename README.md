@@ -8,7 +8,7 @@ Ruruku offers a YAML-based testcase description that is meant to live next to yo
 When the time has come to go through the tests, run `ruruku start testcases.yaml` to spawn a webserver that allows others to participate in the test.
 During the test run the server persists a test-report YAML file which can be used as pre-deployment gate or kept for reference.
 
-**Beware: this is a side project and is by no means ready for actual use just yet. There will be dragons.**
+**Beware: this is a side project and it's early days. Here be dragons.**
 
 ## Getting started
 At the moment the best way to run ruruku is in a Gitpod workspace, but there are other means, too:
