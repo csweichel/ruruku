@@ -22,6 +22,7 @@ If you want to a converter that takes an existing testcase description and produ
 ## Development
 [![Open in Gitpod](http://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io#https://github.com/32leaves/ruruku)
 [![Build Status](https://travis-ci.org/32leaves/ruruku.svg?branch=master)](https://travis-ci.org/32leaves/ruruku)
+[![Stability: Experimental](https://masterminds.github.io/stability/experimental.svg)](https://masterminds.github.io/stability/experimental.html)
 
 ## FAQ
 
