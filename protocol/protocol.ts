@@ -62,6 +62,7 @@ export interface TestCase {
 
 
 export interface TestRun {
+    name: string
     suiteName: string
     start: Date
     participants: TestParticipant[]
