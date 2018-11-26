@@ -73,3 +73,6 @@ input[type="submit"]:disabled {
 .ui.card {
     width: 100% !important;
 }
+.ui.overlay.sidebar {
+    background-color: white;
+}
