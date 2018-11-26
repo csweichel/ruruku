@@ -15,16 +15,32 @@ export interface TestplanViewProps {
     showDetails(content?: any): void
 }
 
-export class TestplanView extends React.Component<TestplanViewProps, {}> {
+type SortableColumns = "group" | "name" | "actions";
+interface TestplanViewState {
+    column: SortableColumns
+    direction: 'ascending' | 'descending'
+}
+
+export class TestplanView extends React.Component<TestplanViewProps, TestplanViewState> {
+
+    public constructor(props: TestplanViewProps) {
+        super(props);
+        this.state = {
+            column: 'group',
+            direction: 'ascending'
+        };
+    }
 
     public render() {
+        const { column, direction } = this.state;
+
         const testcases = this.buildRows();
-        return <Table celled={true} compact={true} sortable={true} fixed={true}>
+        return <Table celled={true} sortable={true} fixed={true}>
             <Table.Header>
                 <Table.Row>
-                    <Table.HeaderCell />
-                    <Table.HeaderCell>Group</Table.HeaderCell>
-                    <Table.HeaderCell>Name</Table.HeaderCell>
+                    <Table.HeaderCell sorted={column === 'actions' ? direction : undefined} onClick={this.handleSort.bind(this, 'actions')} />
+                    <Table.HeaderCell sorted={column === 'group' ? direction : undefined} onClick={this.handleSort.bind(this, 'group')}>Group</Table.HeaderCell>
+                    <Table.HeaderCell sorted={column === 'name' ? direction : undefined} onClick={this.handleSort.bind(this, 'name')}>Name</Table.HeaderCell>
                     <Table.HeaderCell>Testers</Table.HeaderCell>
                 </Table.Row>
             </Table.Header>
@@ -34,19 +50,50 @@ export class TestplanView extends React.Component<TestplanViewProps, {}> {
         </Table>
     }
 
+    protected handleSort(column: SortableColumns) {
+        if (this.state.column === column) {
+            this.setState({direction: this.state.direction === 'ascending' ? 'descending' : 'ascending'});
+        } else {
+            this.setState({
+                column,
+                direction: 'ascending'
+            })
+        }
+    }
+
     protected buildRows() {
         if (!this.props.suite) {
             return [];
         }
 
+        const { column, direction } = this.state;
         const matchedCases = this.props.suite.cases.map(cse => {
             const runs = (this.props.run.cases || []).filter(cser => cser.caseId === `${cse.group}/${cse.id}`);
             return { case: cse, runs };
+        }).sort((a, b) => {
+            let result = 0;
+            if (column === 'actions') {
+                if (this.isClaimed(a.case)) {
+                    result = 1;
+                } else if (this.isClaimed(b.case)) {
+                    result = -1;
+                } else {
+                    result = 0;
+                }
+            } else if (column === 'group') {
+                result = a.case.group.localeCompare(b.case.group);
+            } else if (column === 'name') {
+                result = a.case.name.localeCompare(b.case.name);
+            }
+            if (direction === 'descending') {
+                result *= -1;
+            }
+            return result;
         });
 
         return matchedCases.map(mc => {
             return <Table.Row key={mc.case.id}>
-                <Table.Cell>
+                <Table.Cell collapsing={true}>
                     {this.getActions(mc.case)}
                 </Table.Cell>
                 <Table.Cell>{mc.case.group}</Table.Cell>
