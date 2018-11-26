@@ -27,6 +27,7 @@ var initTestcaseCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		initTestcaseFlags.Filename = initFlags.Filename
 		initTestcaseFlags.NonInteractive = initFlags.NonInteractive
+        initTestcaseFlags.MinTesterCountSet = cmd.Flag("min-tester-count").Changed
 
 		if err := initTestcaseFlags.Run(); err != nil {
 			log.WithError(err).Error()
