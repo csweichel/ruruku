@@ -10,11 +10,11 @@ export interface WorkspaceProps {
 }
 
 interface WorkspaceState {
-    suite: TestSuite
-    run: TestRun
-    participant: TestParticipant
+    suite?: TestSuite
+    run?: TestRun
+    participant?: TestParticipant
     view: "none" | "plan"
-    sidebar: any | undefined
+    sidebar?: any
 }
 
 export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
@@ -29,13 +29,12 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
         this.submitTestcaseRun = this.submitTestcaseRun.bind(this);
         this.showSidebar = this.showSidebar.bind(this);
 
-        this.sendWelcome();
-        this.keepAliveDisposable = this.keepConnectionAlive();
+        this.state = { view: "none" };
     }
 
     public componentWillMount() {
-        this.setState({ view: "none" });
         this.sendWelcome();
+        this.keepAliveDisposable = this.keepConnectionAlive();
     }
 
     public componentWillUnmount() {
@@ -45,11 +44,31 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
     }
 
     public render() {
+        let mainContent = <div>No testplan available</div>;
+
+        if (this.state.suite && this.state.run && this.state.participant) {
+            mainContent = <TestplanView
+                suite={this.state.suite}
+                run={this.state.run}
+                participant={this.state.participant}
+                claimTestCase={this.claimTestCase}
+                submitTestCaseRun={this.submitTestcaseRun}
+                showDetails={this.showSidebar} />;
+        }
+
+        let session = "";
+        if (this.state.run) {
+            session = `${this.state.run.suiteName}: ${this.state.run.name}`;
+        }
+
         return (
             <div className="workspace">
                 <div id="header">
                     <img src={logo} className="app-logo" alt="logo" />
-                    <div className="username">{this.props.name}</div>
+                    <div className="info">
+                        <div className="session">{session}</div>
+                        <div className="username">{this.props.name}</div>
+                    </div>
                 </div>
 
                 <div className="main">
@@ -59,13 +78,7 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
                         </Sidebar>
                         <Sidebar.Pusher>
                             <Segment basic={true} className="no-padding">
-                                <TestplanView
-                                    suite={this.state.suite}
-                                    run={this.state.run}
-                                    participant={this.state.participant}
-                                    claimTestCase={this.claimTestCase}
-                                    submitTestCaseRun={this.submitTestcaseRun}
-                                    showDetails={this.showSidebar} />
+                                {mainContent}
                             </Segment>
                         </Sidebar.Pusher>
                     </Sidebar.Pushable>

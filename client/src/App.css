@@ -45,7 +45,7 @@ input[type="submit"]:disabled {
     padding-left: 1em;
     padding-right: 1em;
 }
-.app-connected #header .username {
+.app-connected .info {
     justify-content: flex-end;
 }
 .app-connected .main {

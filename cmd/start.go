@@ -41,7 +41,7 @@ func init() {
 	rootCmd.AddCommand(startCmd)
 
 	sn := time.Now().Format("20060102-150405")
-	startCmd.Flags().StringVar(&sessionName, "session-name", fmt.Sprintf("ruruku-%s.yaml", sn), "The name of the session to run")
+	startCmd.Flags().StringVar(&sessionName, "session-name", fmt.Sprintf("ruruku-%s", sn), "The name of the session to run")
 
 	startCmd.Flags().Int("port", 8080, "Port to run the server on")
 	viper.BindPFlag("server.port", startCmd.Flags().Lookup("port"))

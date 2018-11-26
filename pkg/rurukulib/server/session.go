@@ -13,8 +13,6 @@ import (
 )
 
 type sessionStore struct {
-	Name string
-
 	suite        *protocol.TestSuite
 	run          *protocol.TestRun
 	conn         map[*websocket.Conn]string
@@ -27,24 +25,25 @@ func LoadSessionOrNew(name string, suite *protocol.TestSuite) (*sessionStore, er
 	r := &sessionStore{
 		suite: suite,
 		run: &protocol.TestRun{
+			Name:      name,
 			SuiteName: suite.Name,
 			Start:     time.Now().Format(time.RFC3339),
 		},
-		Name:         name,
 		conn:         make(map[*websocket.Conn]string),
 		participants: make(map[string]*protocol.TestParticipant),
 		runidx:       make(map[string]*protocol.TestCaseRun),
 	}
 
-	if _, err := os.Stat(name); err == nil {
-		fc, err := ioutil.ReadFile(name)
+	storage := fmt.Sprintf("%s.yaml", name)
+	if _, err := os.Stat(storage); err == nil {
+		fc, err := ioutil.ReadFile(storage)
 		if err != nil {
-			log.WithField("session", name).WithError(err).Error("Cannot read session file")
+			log.WithField("session", storage).WithError(err).Error("Cannot read session file")
 			return nil, err
 		}
 
 		if err := yaml.Unmarshal(fc, r.run); err != nil {
-			log.WithField("session", name).WithError(err).Error("Error while restoring session")
+			log.WithField("session", storage).WithError(err).Error("Error while restoring session")
 			return nil, err
 		}
 
@@ -215,7 +214,15 @@ func (session *sessionStore) handleNewTestcaseRun(conn *websocket.Conn, msg prot
 }
 
 func (session *sessionStore) Exit(conn *websocket.Conn) error {
-	return nil
+	if name, ok := session.conn[conn]; ok {
+		delete(session.participants, name)
+		log.WithField("participant", name).Info("Participant exiting")
+	} else {
+		log.Warn("Exiting session with unknown participant")
+	}
+
+	delete(session.conn, conn)
+	return conn.Close()
 }
 
 func (session *sessionStore) Save() error {
@@ -224,8 +231,9 @@ func (session *sessionStore) Save() error {
 		return err
 	}
 
-	log.WithField("name", session.Name).Println("Wrote session log")
-	if err := ioutil.WriteFile(session.Name, fc, 0644); err != nil {
+	storage := fmt.Sprintf("%s.yaml", session.run.Name)
+	log.WithField("name", storage).Println("Wrote session log")
+	if err := ioutil.WriteFile(storage, fc, 0644); err != nil {
 		return err
 	}
 
@@ -237,7 +245,8 @@ func (session *sessionStore) Save() error {
 			Run:         *(session.run),
 		})
 		if err != nil {
-			log.WithError(err).Warn("Error while updating participant")
+			log.WithError(err).Warn("Error while updating participant - dropping participant")
+			session.Exit(conn)
 		}
 	}
 	return nil
