@@ -1,8 +1,10 @@
 package cli
 
 import (
+	"github.com/manifoldco/promptui"
 	"strings"
 	"fmt"
+    "strconv"
 	"github.com/32leaves/ruruku/pkg/rurukulib"
 	"github.com/32leaves/ruruku/protocol"
 )
@@ -11,6 +13,7 @@ type InitTestCase struct {
 	Init
 	protocol.TestCase
 	MinTesterCount int32
+    MinTesterCountSet bool
 }
 
 func (cfg *InitTestCase) Complete(suite *protocol.TestSuite) error {
@@ -31,6 +34,24 @@ func (cfg *InitTestCase) Complete(suite *protocol.TestSuite) error {
     if cfg.Description, err = cfg.checkOrAskString(cfg.Description, "Description", "", false, nil); err != nil {
         return err
     }
+
+    if !cfg.MinTesterCountSet && !cfg.NonInteractive {
+        p := promptui.Prompt{
+            Label: "minimum tester count",
+            Validate: validateMinTesterCount,
+            Default: "0",
+        }
+        val, err := p.Run()
+        if err != nil {
+            return err
+        }
+        if mtc, err := strconv.ParseInt(val, 10, 32); err != nil {
+            return err
+        } else {
+            cfg.MinTesterCount = int32(mtc)
+        }
+    }
+    cfg.TestCase.MinTesterCount = float64(cfg.MinTesterCount)
 
 	return nil
 }
@@ -71,6 +92,11 @@ func validateID(suite *protocol.TestSuite, grp string) func(string) error {
 
         return nil
     }
+}
+
+func validateMinTesterCount(val string) error {
+    _, err := strconv.ParseInt(val, 10, 32)
+    return err
 }
 
 func (cfg *InitTestCase) Run() error {
