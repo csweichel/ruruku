@@ -6,59 +6,33 @@ import (
 	"github.com/32leaves/ruruku/protocol"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"os"
-	"time"
+    "sync"
 )
 
 type sessionStore struct {
-	suite        *protocol.TestSuite
-	run          *protocol.TestRun
 	conn         map[*websocket.Conn]string
-	participants map[string]*protocol.TestParticipant
-
-	runidx map[string]*protocol.TestCaseRun
+    mux sync.Mutex
+	st *FileStorage
 }
 
 func LoadSessionOrNew(name string, suite *protocol.TestSuite) (*sessionStore, error) {
+    var st *FileStorage
+    fn := fmt.Sprintf("%s.yaml", name)
+    if _, err := os.Stat(fn); err == nil {
+        st, err = LoadFileStorage(fn, suite)
+        if err != nil {
+            return nil, err
+        }
+    } else {
+        st = NewFileStorage(fn, suite, name)
+    }
+
 	r := &sessionStore{
-		suite: suite,
-		run: &protocol.TestRun{
-			Name:      name,
-			SuiteName: suite.Name,
-			Start:     time.Now().Format(time.RFC3339),
-		},
 		conn:         make(map[*websocket.Conn]string),
-		participants: make(map[string]*protocol.TestParticipant),
-		runidx:       make(map[string]*protocol.TestCaseRun),
+        st: st,
 	}
-
-	storage := fmt.Sprintf("%s.yaml", name)
-	if _, err := os.Stat(storage); err == nil {
-		fc, err := ioutil.ReadFile(storage)
-		if err != nil {
-			log.WithField("session", storage).WithError(err).Error("Cannot read session file")
-			return nil, err
-		}
-
-		if err := yaml.Unmarshal(fc, r.run); err != nil {
-			log.WithField("session", storage).WithError(err).Error("Error while restoring session")
-			return nil, err
-		}
-
-		// build participant index
-		for _, pcp := range r.run.Participants {
-			r.participants[pcp.Name] = &pcp
-		}
-
-		// build run index
-		for _, run := range r.run.Cases {
-			r.runidx[fmt.Sprintf("%s#%s", run.Tester, run.CaseID)] = &run
-		}
-
-		log.WithField("session", name).Info("Restored session")
-	}
+    st.OnSave = r.updateClients
 
 	return r, nil
 }
@@ -103,57 +77,44 @@ func (session *sessionStore) HandleMessage(conn *websocket.Conn, msg []byte) err
 }
 
 func (session *sessionStore) handleWelcome(conn *websocket.Conn, msg protocol.WelcomeRequest) error {
+    session.mux.Lock()
 	session.conn[conn] = msg.Name
+    session.mux.Unlock()
+
 	conn.SetCloseHandler(session.closeHandler(conn))
 
-	var pc protocol.TestParticipant
-	if existingPc, ok := session.participants[msg.Name]; !ok {
+    if err := session.st.AddParticipant(msg.Name); err == nil {
 		log.WithField("participant", msg.Name).Info("New participant joined")
-		pc = protocol.TestParticipant{
-			Name:         msg.Name,
-			ClaimedCases: make(map[string]bool),
-		}
-		session.participants[msg.Name] = &pc
-	} else {
+        if err := session.st.Save(); err != nil {
+            log.WithError(err).Warn("Unable to persist session")
+        }
+    } else {
 		log.WithField("participant", msg.Name).Info("Old participant came back")
-		pc = *existingPc
-	}
+    }
 
-	session.run.Participants = make([]protocol.TestParticipant, len(session.participants))
-	idx := 0
-	for _, nme := range session.participants {
-		session.run.Participants[idx] = *nme
-		idx++
-	}
-	session.Save()
-
+    p, _ := session.st.GetParticipant(msg.Name)
 	resp := protocol.WelcomeResponse{
 		Type:        "welcome",
-		Run:         *session.run,
-		Suite:       *session.suite,
-		Participant: pc,
+		Run:         session.st.GetRun(),
+		Suite:       session.st.GetSuite(),
+        Participant: p,
 	}
 	return conn.WriteJSON(resp)
 }
 
 func (session *sessionStore) handleClaim(conn *websocket.Conn, msg protocol.ClaimRequest) error {
-	name, ok := session.conn[conn]
+    session.mux.Lock()
+    tester, ok := session.conn[conn]
+    session.mux.Unlock()
 	if !ok {
 		return fmt.Errorf("No user associated with this connection. Did you say welcome?")
 	}
 
-	participant, ok := session.participants[name]
-	if !ok {
-		return fmt.Errorf("User %s seems not to participate in the testing. Looks like a bug.", name)
-	}
+    if err := session.st.ClaimTestcase(tester, msg.CaseID, msg.Claim); err != nil {
+        return err
+    }
 
-	log.WithField("participant", participant.Name).WithField("case", msg.CaseID).WithField("claim", msg.Claim).Info("Participant claimed test case")
-	if msg.Claim {
-		participant.ClaimedCases[msg.CaseID] = true
-	} else {
-		delete(participant.ClaimedCases, msg.CaseID)
-	}
-	if err := session.Save(); err != nil {
+	if err := session.st.Save(); err != nil {
 		return err
 	}
 
@@ -166,101 +127,69 @@ func (session *sessionStore) handleClaim(conn *websocket.Conn, msg protocol.Clai
 }
 
 func (session *sessionStore) handleNewTestcaseRun(conn *websocket.Conn, msg protocol.NewTestCaseRunRequest) error {
-	name, ok := session.conn[conn]
+    session.mux.Lock()
+    tester, ok := session.conn[conn]
+    session.mux.Unlock()
 	if !ok {
 		return fmt.Errorf("No user associated with this connection. Did you say welcome?")
 	}
 
-	participant, ok := session.participants[name]
-	if !ok {
-		return fmt.Errorf("User %s seems not to participate in the testing. Looks like a bug.", name)
-	}
+    if err := session.st.SetTestcaseRun(tester, msg.CaseID, msg.Result, msg.Comment); err != nil {
+        return err
+    }
 
-	// check if we have this run in the index already
-	idxkey := fmt.Sprintf("%s#%s", participant.Name, msg.CaseID)
-	if run, ok := session.runidx[idxkey]; ok {
-		run.Comment = msg.Comment
-		run.Result = msg.Result
-	} else {
-		tcr := protocol.TestCaseRun{
-			CaseID:  msg.CaseID,
-			Comment: msg.Comment,
-			Result:  msg.Result,
-			Start:   msg.Start,
-			Tester:  participant.Name,
-		}
-		session.runidx[idxkey] = &tcr
-	}
+	log.WithField("participant", tester).WithField("case", msg.CaseID).WithField("result", msg.Result).Info("Participant submitted testcase run")
 
-	session.run.Cases = make([]protocol.TestCaseRun, len(session.runidx))
-	i := 0
-	for _, run := range session.runidx {
-		session.run.Cases[i] = *run
-		i++
-	}
-
-	log.WithField("participant", participant.Name).WithField("case", msg.CaseID).WithField("result", msg.Result).Info("Participant submitted testcase run")
-
-	if err := session.Save(); err != nil {
+	if err := session.st.Save(); err != nil {
 		return err
 	}
 
 	resp := protocol.NewTestCaseRunResponse{
 		Type: "newTestCaseRun",
 	}
-	return conn.WriteJSON(resp)
+	if err := conn.WriteJSON(resp); err != nil {
+        return err
+    }
 
-	return nil
+    return nil
 }
 
 func (session *sessionStore) Exit(conn *websocket.Conn) error {
+    session.mux.Lock()
 	if name, ok := session.conn[conn]; ok {
-		delete(session.participants, name)
 		log.WithField("participant", name).Info("Participant exiting")
 	} else {
 		log.Warn("Exiting session with unknown participant")
 	}
 
 	delete(session.conn, conn)
+    session.mux.Unlock()
+
 	return conn.Close()
 }
 
-func (session *sessionStore) Save() error {
-	fc, err := yaml.Marshal(session.run)
-	if err != nil {
-		return err
-	}
-
-	storage := fmt.Sprintf("%s.yaml", session.run.Name)
-	log.WithField("name", storage).Println("Wrote session log")
-	if err := ioutil.WriteFile(storage, fc, 0644); err != nil {
-		return err
-	}
-
-	for conn, name := range session.conn {
-		participant := session.participants[name]
+func (session *sessionStore) updateClients(st *FileStorage) {
+    session.mux.Lock()
+    run := session.st.GetRun()
+    for conn, name := range session.conn {
+		participant, _ := session.st.GetParticipant(name)
 		err := conn.WriteJSON(protocol.UpdateMessage{
 			Type:        "update",
-			Participant: *participant,
-			Run:         *(session.run),
+			Participant: participant,
+			Run:         run,
 		})
 		if err != nil {
 			log.WithError(err).Warn("Error while updating participant - dropping participant")
+            session.mux.Unlock()
 			session.Exit(conn)
+            session.mux.Lock()
 		}
 	}
-	return nil
+    session.mux.Unlock()
 }
 
 func (session *sessionStore) closeHandler(conn *websocket.Conn) func(code int, text string) error {
 	return func(code int, text string) error {
-		pn, ok := session.conn[conn]
-		if !ok {
-			log.Warn("Connection without participant closed")
-		}
-
-		delete(session.conn, conn)
-		log.WithField("participant", pn).Info("Participant left")
-		return nil
+        return session.Exit(conn)
 	}
 }
