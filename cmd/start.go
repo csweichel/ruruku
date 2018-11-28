@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/32leaves/ruruku/pkg/rurukulib"
-	"github.com/32leaves/ruruku/pkg/rurukulib/server"
+	"github.com/32leaves/ruruku/pkg/storage"
+	"github.com/32leaves/ruruku/pkg/server"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -25,7 +25,7 @@ var startCmd = &cobra.Command{
 			log.Fatalf("Error while loading the configuration: %s", err)
 		}
 
-		suite, err := rurukulib.LoadSuite(args[0])
+		suite, err := storage.LoadSuite(args[0])
 		if err != nil {
 			log.Fatalf("Error while loading test suite: %s", err)
 		}

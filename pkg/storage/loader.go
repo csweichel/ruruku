@@ -1,4 +1,4 @@
-package rurukulib
+package storage
 
 import (
 	"github.com/32leaves/ruruku/protocol"

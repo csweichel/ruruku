@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/32leaves/ruruku/protocol"
+    "github.com/32leaves/ruruku/pkg/storage"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 	"os"
@@ -13,19 +14,19 @@ import (
 type sessionStore struct {
 	conn         map[*websocket.Conn]string
     mux sync.Mutex
-	st *FileStorage
+	st *storage.FileStorage
 }
 
 func LoadSessionOrNew(name string, suite *protocol.TestSuite) (*sessionStore, error) {
-    var st *FileStorage
+    var st *storage.FileStorage
     fn := fmt.Sprintf("%s.yaml", name)
     if _, err := os.Stat(fn); err == nil {
-        st, err = LoadFileStorage(fn, suite)
+        st, err = storage.LoadFileStorage(fn, suite)
         if err != nil {
             return nil, err
         }
     } else {
-        st = NewFileStorage(fn, suite, name)
+        st = storage.NewFileStorage(fn, suite, name)
     }
 
 	r := &sessionStore{
@@ -168,7 +169,7 @@ func (session *sessionStore) Exit(conn *websocket.Conn) error {
 	return conn.Close()
 }
 
-func (session *sessionStore) updateClients(st *FileStorage) {
+func (session *sessionStore) updateClients(st *storage.FileStorage) {
     session.mux.Lock()
     run := session.st.GetRun()
     for conn, name := range session.conn {

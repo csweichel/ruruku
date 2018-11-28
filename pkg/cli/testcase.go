@@ -2,7 +2,7 @@ package cli
 
 import (
 	"fmt"
-	"github.com/32leaves/ruruku/pkg/rurukulib"
+	"github.com/32leaves/ruruku/pkg/storage"
 	"github.com/32leaves/ruruku/protocol"
 	"github.com/manifoldco/promptui"
 	"strconv"
@@ -105,7 +105,7 @@ func (cfg *InitTestCase) Run() error {
 		return err
 	}
 
-	suite, err := rurukulib.LoadSuite(fn)
+	suite, err := storage.LoadSuite(fn)
 	if err != nil {
 		return err
 	}

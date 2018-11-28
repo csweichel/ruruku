@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/32leaves/ruruku/pkg/rurukulib/server"
+	"github.com/32leaves/ruruku/pkg/server"
 )
 
 var cfgFile string
