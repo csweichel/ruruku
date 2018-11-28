@@ -1,13 +1,13 @@
 import { TestCaseResult, TestCase, TestCaseRun } from '../../protocol/protocol';
 import * as React from 'react';
 import { Card, Button, ButtonOr, Form, Label, Dropdown, TextArea, DropdownProps, TextAreaProps, ButtonGroup } from 'semantic-ui-react';
+import { TestcaseDetailViewBody } from './testcase-detail-view-body';
 
 export interface NewTestcaseRunViewProps {
     testcase: TestCase;
     previousRun?: TestCaseRun;
     onSubmit: (testcase: TestCase, result: TestCaseResult, comment: string) => void;
     onClose: () => void;
-    claimTestCase: (testcase: TestCase, claim: boolean) => void;
 }
 
 interface NewTestcaseRunViewState {
@@ -16,13 +16,14 @@ interface NewTestcaseRunViewState {
 }
 
 export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps, NewTestcaseRunViewState> {
+    protected focusElement: any | undefined;
 
     constructor(props: NewTestcaseRunViewProps) {
         super(props);
 
+        this.setFocusElement = this.setFocusElement.bind(this);
         this.onCancel = this.onCancel.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
-        this.onUnclaim = this.onUnclaim.bind(this);
         this.onResultChange = this.onResultChange.bind(this);
         this.updateComment = this.updateComment.bind(this);
     }
@@ -34,16 +35,14 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
         });
     }
 
+    public componentDidMount(){
+        if (this.focusElement) {
+            // this.focusElement.focus();
+        }
+    }
+
     public render() {
         const tc = this.props.testcase;
-
-        let unclaim: any | undefined;
-        if (!this.props.previousRun) {
-            unclaim = [
-                <Button onClick={this.onUnclaim} color="red" key={0}>Unclaim</Button>,
-                <ButtonOr key={1} />
-            ];
-        }
 
         return <Card>
             <Card.Content>
@@ -65,7 +64,7 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
                     </Form.Field>
                     <Form.Field>
                         <Label>Comment</Label>
-                        <TextArea value={this.state.comment} onChange={this.updateComment} />
+                        <TextArea value={this.state.comment} onChange={this.updateComment} ref={this.setFocusElement} />
                     </Form.Field>
                 </Form>
             </Card.Content>
@@ -73,11 +72,15 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
                 <ButtonGroup>
                     <Button positive={true} onClick={this.onSubmit} fluid={true}>Submit</Button>
                     <ButtonOr />
-                    {unclaim}
                     <Button onClick={this.onCancel}>Cancel</Button>
                 </ButtonGroup>
             </Card.Content>
+            <TestcaseDetailViewBody tc={this.props.testcase} />
         </Card>;
+    }
+
+    protected setFocusElement(element: any) {
+        this.focusElement = element;
     }
 
     protected onSubmit() {
@@ -86,11 +89,6 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
     }
 
     protected onCancel() {
-        this.props.onClose();
-    }
-
-    protected onUnclaim() {
-        this.props.claimTestCase(this.props.testcase, false);
         this.props.onClose();
     }
 

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { TestSuite, TestRun, TestParticipant, TestCase, TestCaseRun, TestCaseResult } from '../../protocol/protocol';
-import { Table, Button } from 'semantic-ui-react';
+import { Table, Button, ButtonGroup, ButtonOr } from 'semantic-ui-react';
 import { TestCaseStatusView, TestCaseParticipant } from './testcase-status';
 import { TestcaseDetailView } from './testcase-detail-view';
 import { NewTestcaseRunView } from './new-testcase-run-view';
@@ -108,16 +108,20 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
             const previousRun = this.isCompleted(tc);
             if (previousRun) {
                 // TODO: add edit button - see #4
-                return [<Button label="Edit" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, tc, previousRun)} />];
+                return <Button label="Edit" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, tc, previousRun)} />;
             } else {
-                return [
-                    <Button label="Contribute" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, tc, undefined)} />
-                ];
+                return (
+                    <ButtonGroup>
+                        <Button icon="check" key="pass" onClick={this.showNewRunForm.bind(this, tc, { result: "passed" })} />
+                        <Button icon="question" key="undecided" onClick={this.showNewRunForm.bind(this, tc, { result: "undecided" })} />
+                        <Button icon="times" key="fail" onClick={this.showNewRunForm.bind(this, tc, { result: "failed" })} />
+                        <ButtonOr />
+                        <Button label="Unclaim" icon="minus circle" onClick={this.claim.bind(this, tc, false)} key="claim" />;
+                    </ButtonGroup>
+                );
             }
         } else {
-            return [
-                <Button label="Claim" icon="plus circle" onClick={this.claim.bind(this, tc, true)} key="claim" />
-            ];
+            return <Button label="Claim" icon="plus circle" onClick={this.claim.bind(this, tc, true)} key="claim" />;
         }
     }
 
@@ -127,7 +131,7 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
     }
 
     protected showNewRunForm(cse: TestCase, previousRun?: TestCaseRun) {
-        this.props.showDetails(<NewTestcaseRunView testcase={cse} previousRun={previousRun} onSubmit={this.props.submitTestCaseRun} claimTestCase={this.props.claimTestCase} onClose={this.props.showDetails} />)
+        this.props.showDetails(<NewTestcaseRunView testcase={cse} previousRun={previousRun} onSubmit={this.props.submitTestCaseRun} onClose={this.props.showDetails} />)
     }
 
     protected getRunsAndClaims(cse: TestCase, runs: TestCaseRun[]): TestCaseParticipant[] {
