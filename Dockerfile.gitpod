@@ -1,0 +1,6 @@
+FROM gitpod/workspace-full
+
+USER root
+RUN cd /tmp && curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip && \
+    cd /usr/local && unzip protoc-3.6.1-linux-x86_64.zip && \
+    rm /tmp/protoc-3.6.1-linux-x86_64.zip
