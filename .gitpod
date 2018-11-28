@@ -1,10 +1,12 @@
 ports:
 - port: 8080
+image:
+  file: Dockerfile.gitpod
 tasks:
 - command: >
-    cd src/github.com/32leaves/ruruku;
-    cd protocol && yarn install && yarn build; cd -;
-    cd client && yarn install && yarn build; cd -;
-    go get -v ./... && go run main.go start example-suite.yaml
+    go get -u github.com/golang/protobuf/protoc-gen-go &&
+    go get -u google.golang.org/grpc &&
+    cd src/github.com/32leaves/ruruku && go get -v ./...;
+    cd client && yarn install && yarn build; cd -
 checkoutLocation: src/github.com/32leaves/ruruku
 workspaceLocation: .
