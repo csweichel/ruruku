@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/32leaves/ruruku/pkg/rurukulib/cli"
+	"github.com/32leaves/ruruku/pkg/cli"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
