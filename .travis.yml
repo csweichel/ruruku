@@ -5,9 +5,10 @@ before_install:
 - cd protocol && yarn install && yarn build; cd -
 script:
 - cd client && yarn install && yarn build; cd -
-- "./build/build_release.sh"
+- '[ ! "${TRAVIS_EVENT_TYPE}" = "cron" ] ||  ./build/trigger_nightly.sh'
+- '[ "${TRAVIS_EVENT_TYPE}" = "cron" ] ||  ./build/build_release.sh'
 deploy:
-  provider: releases
+- provider: releases
   skip_cleanup: true
   draft: true
   api_key:
@@ -16,3 +17,20 @@ deploy:
   file: build/release/*
   on:
     tags: true
+    condition: $TRAVIS_TAG != "nightly"
+- provider: releases
+  skip_cleanup: true
+  draft: false
+  name: Nightly
+  body: "Nightly build of ruruku - might not work as expected"
+  prelease: true
+  api_key:
+    secure: OvBw2ez8i5smytbrBKv3cxiPDpUcgwRWDMBDwulMnVY1AwHRB3x+lhsox09H7ZB+MC+DTv8R/FaB3qmL3ZrDsuwLid0jPV/xuFTL3HdpZPRHO0nw+UnVD+D1uF1P8i532CJVMcxL6mEUq0mPtiNtkLein8UpnyIVbkNRvqSAn2nVOAFs+/ts3vzeTAe2BhUkbe8j6QlQJTILGEuOgePttZn40P1egLH3QEwKHQ5gvLdnynesZCvtfE2iGA+wgI4BesLWwnWOXJNk8W/6x6rROWTR6bmUeZUDNTFhdZ2oZbdPqO2sJm8fR0PkaGzu8POwm3ldlqzNEJmQDwACI0bRrwlhasJeEhAja+fd6JZBPIjgOazxfMA3fzwZmL4NbuQkBFMTNoWI48hg6Xj1hU5D/mPJcS1p0b3YLOiwBPSUAMmniX9f8ieRS+lIJNJwglvM04Kgrfctv2o+Cw9wSPmnG+NOnvFGg6gzGbMKckZPpIGGK9zpUJjUU3MbWmqn80h8c9Zbu1M/VRg9JZdslK7Z/OXgV+fJ8b3ylR/n+VQsxOitTj8zBXdx9i97q02p3ESUC02RRmi6zRqP16BTymEvSPo4u31kSPnfUv1cwdARohgfU+NBJvt4seiexFZQhXn5TqfA2Fz8P88Bk+QIaiBc9MIcJwGmtwKZugfkZJ4wEGw=
+  file_glob: true
+  file: build/release/*
+  on:
+    tags: true
+    condition: $TRAVIS_TAG = "nightly"
+env:
+  global:
+    secure: HWLKohpZtixtzXilPZJygx64AJcG5+0RJvvEez62oN352w1WXsuhZuA4EO4zDMXnaI7+uVPZluRF3mCxU24fBMFQssPnOP1MQxTeaok7HrkBtrNqCzo7E0iZFyqDMA1BYW9Dy2k8bZ0GGRlVYiK9fCA7L3EJ2+SEgsAIJiGKzFSubZuLt90GLCbLxrwb8sK2E7FnE6vLrcDEJz3ZcXtzbKhLrXCgGlkRDaeDQkQLcQwF0FzMFBScP5RR9r5pyZ1UqYG+LSdfuLBZcPgdcncJ/gnXu51rjd3ckFD6bKRfwr72Rfmnrx3L0f6QLaZ0zXdwJjIarlBNgqnWe9vkycaSaCGKs8tMswHRsWDmdnUYwpecBB3LlcA8wCbynxr1cRq9ZHbq+rLg4dy609RgU/pf0q2alP+mta9VS6QD9CQnCZswTHQ0cHJqD8islAzPDd85eUbqsdSAl8mr3qPM8OPKTE1y6Eef3wW+d4mmLEHa8rfjzOk7vcxjsOcSEbtb7GO5UHNGFzt3m66UirLFgn8gPDm8TTyaNqclMNxlVUWeWLX8bM3YcuZwglZB36icW5YJ779aQWDG2xdh7cc5obGTDsZlz6dfJ5rMNVjmF30oiT6l7m8POHdt0N/Hzy6KYBfigMOdC9AwSP+SRerq+/ZVoVHLHR02FnDfihbjdwjHDZ0=

@@ -15,4 +15,5 @@ node_modules/
 
 ruruku-*.yaml
 build/release
+build/deployKey
 **/rice-box.go
