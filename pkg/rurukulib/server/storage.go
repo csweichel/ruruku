@@ -54,7 +54,7 @@ func LoadFileStorage(fn string, suite *protocol.TestSuite) (*FileStorage, error)
         return nil, err
     }
 
-    if err := yaml.Unmarshal(fc, r.run); err != nil {
+    if err := yaml.Unmarshal(fc, &r.run); err != nil {
         log.WithField("filename", fn).WithError(err).Error("Error while restoring storage")
         return nil, err
     }
