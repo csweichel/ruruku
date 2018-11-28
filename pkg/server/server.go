@@ -66,7 +66,7 @@ func Start(cfg *Config, suite *protocol.TestSuite, sessionName string) error {
 	}
 
 	http.HandleFunc(fmt.Sprintf("/ws/%s", cfg.Token), wsHandler(session))
-	http.Handle("/", http.FileServer(rice.MustFindBox("../../../client/build").HTTPBox()))
+	http.Handle("/", http.FileServer(rice.MustFindBox("../../client/build").HTTPBox()))
 
 	// fmt.Println("\nSuccess! Please navigate your browser to http://localhost:8000")
 	log.Printf("Server started: %s", serverUrl(cfg.Port, cfg.Token))
