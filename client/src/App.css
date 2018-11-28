@@ -76,3 +76,11 @@ input[type="submit"]:disabled {
 .ui.overlay.sidebar {
     background-color: white;
 }
+
+.ui.pushable {
+    overflow-y: hidden;
+}
+.ui.pushable .pusher {
+    overflow-y: scroll;
+    height: 100%;
+}
