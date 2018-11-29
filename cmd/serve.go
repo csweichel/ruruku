@@ -23,7 +23,7 @@ var serveCmd = &cobra.Command{
 		}
 
 		srvcfg := cfg.Server
-		if err := server.Start(&srvcfg, server.NewMemoryBackedSession()); err != nil {
+		if err := server.Start(&srvcfg, server.NewMemoryBackedSessionStore()); err != nil {
 			log.Fatalf("Error while starting the ruruku server", err)
 		}
 
