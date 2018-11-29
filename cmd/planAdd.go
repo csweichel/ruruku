@@ -8,8 +8,8 @@ import (
 
 // initTestcaseCmd represents the initTestcase command
 var initTestcaseCmd = &cobra.Command{
-	Use:   "testcase",
-	Short: "Add a testcase to a testsuite",
+	Use:   "add",
+	Short: "Add a testcase to a plan",
 	Run: func(cmd *cobra.Command, args []string) {
 		initTestcaseFlags.Filename = initFlags.Filename
 		initTestcaseFlags.NonInteractive = initFlags.NonInteractive

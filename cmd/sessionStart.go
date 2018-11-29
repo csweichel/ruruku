@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+	"github.com/32leaves/ruruku/pkg/cli"
     api "github.com/32leaves/ruruku/pkg/server/api/v1"
 	"google.golang.org/grpc"
 	"github.com/spf13/cobra"
@@ -18,15 +20,24 @@ type sessionStartFlags struct {
 var sessionStartFlagValues sessionStartFlags
 
 func (s *sessionStartFlags) Run() error {
-    name := moniker.New().Name()
+    req := &api.StartSessionRequest{
+        Name: moniker.New().Name(),
+    }
+
     if s.name == "" {
-        log.WithField("name", name).Info("Using an auto-generated session name")
+        log.WithField("name", req.Name).Info("Using an auto-generated session name")
     } else {
-        name = s.name
+        req.Name = s.name
     }
 
     if s.planfn == "" {
-        log.Warn("Starting a session without a plan")
+        return fmt.Errorf("Cannot start a session without a plan (use --plan)")
+    } else {
+        plan, err := cli.LoadTestplan(s.planfn)
+        if err != nil {
+            return err
+        }
+        req.Plan = api.ConvertTestPlan(plan)
     }
 
     conn, err := grpc.Dial(sessionFlagValues.server, grpc.WithInsecure())
@@ -39,9 +50,6 @@ func (s *sessionStartFlags) Run() error {
     ctx, cancel := context.WithTimeout(context.Background(), time.Duration(sessionFlagValues.timeout)*time.Second)
     defer cancel()
 
-    req := &api.StartSessionRequest{
-        Name: name,
-    }
     resp, err := client.Start(ctx, req)
     if err != nil {
         return err

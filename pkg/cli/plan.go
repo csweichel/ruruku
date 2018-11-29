@@ -7,24 +7,43 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
+    "github.com/technosophos/moniker"
 )
 
-type InitSuite struct {
+type InitPlan struct {
 	Init
+    ID string
 	Name string
 }
 
-func (cfg *InitSuite) Run() error {
+func validatePlanID(val string) error {
+	if err := validateNotEmpty(val); err != nil {
+        return err
+    }
+
+    if err := validateIdentifier(val); err != nil {
+        return err
+    }
+
+	return nil
+}
+
+func (cfg *InitPlan) Run() error {
 	r := types.TestPlan{
 		Name: cfg.Name,
 		Case: make([]types.Testcase, 0),
 	}
 
-	val, err := cfg.checkOrAskString(r.Name, "name", "", true, nil)
+    var err error
+    r.ID, err = cfg.checkOrAskString(r.ID, "id", "", true, validatePlanID)
 	if err != nil {
 		return err
 	}
-	r.Name = val
+
+	r.Name, err = cfg.checkOrAskString(r.Name, "name", moniker.New().Name(), true, nil)
+	if err != nil {
+		return err
+	}
 
 	if err := cfg.saveSuite(r, false); err != nil {
 		return err
@@ -42,7 +61,7 @@ func validateNotEmpty(val string) error {
 
 func (cfg *Init) saveSuite(ts types.TestPlan, forceOverwrite bool) error {
 	fn := cfg.Filename
-	fn, err := cfg.checkOrAskString(fn, "filename", "testsuite.yaml", true, nil)
+	fn, err := cfg.checkOrAskString(fn, "filename", "testplan.yaml", true, nil)
 	if err != nil {
 		return err
 	}

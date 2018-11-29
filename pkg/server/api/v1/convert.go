@@ -20,6 +20,18 @@ func (s *Testcase) Convert() types.Testcase {
 	}
 }
 
+func ConvertTestcase(s *types.Testcase) *Testcase {
+	return &Testcase{
+		Id:             s.ID,
+		Name:           s.Name,
+		Group:          s.Group,
+		Description:    s.Description,
+		Steps:          s.Steps,
+		MustPass:       s.MustPass,
+		MinTesterCount: s.MinTesterCount,
+	}
+}
+
 func (s *TestcaseRunResult) Convert() types.TestcaseRunResult {
 	return types.TestcaseRunResult{
 		State:   types.TestRunState(s.State),
@@ -66,6 +78,19 @@ func (s *TestPlan) Convert() types.TestPlan {
 	}
 	return types.TestPlan{
 		ID:          s.Id,
+		Name:        s.Name,
+		Description: s.Description,
+		Case:        cases,
+	}
+}
+
+func ConvertTestPlan(s *types.TestPlan) *TestPlan {
+    cases := make([]*Testcase, len(s.Case))
+	for i, c := range s.Case {
+		cases[i] = ConvertTestcase(&c)
+	}
+	return &TestPlan{
+		Id:          s.ID,
 		Name:        s.Name,
 		Description: s.Description,
 		Case:        cases,

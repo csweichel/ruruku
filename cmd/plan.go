@@ -9,25 +9,25 @@ import (
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Creates a new testsuite",
-	Long: `Init creates a new testsuite. It goes into interactive mode if called without flags, e.g.:
-    ruruku init
+	Use:   "plan",
+	Short: "Creates a new testplan",
+	Long: `Creates a new testplan. It goes into interactive mode if called without flags, e.g.:
+    ruruku plan
 
 Most fields are available as flags as well, e.g.:
-    ruruku init -f testsuite.yaml --name Demo
-    ruruku init -f testsuite.yaml add --name "My testcase" --id tc1 --group grp
+    ruruku plan -f testplan.yaml --name Demo
+    ruruku plan -f testplan.yaml add --name "My testcase" --id tc1 --group grp
     `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := initFlags.Run(); err != nil {
 			log.WithError(err).Error()
 			return
 		}
-		log.Info(fmt.Sprintf("Use ruruku init testcase -f %s to add testcases", initFlags.Filename))
+		log.Info(fmt.Sprintf("Use ruruku plan add -f %s to add testcases", initFlags.Filename))
 	},
 }
 
-var initFlags = cli.InitSuite{}
+var initFlags = cli.InitPlan{}
 
 func init() {
 	rootCmd.AddCommand(initCmd)
@@ -35,5 +35,6 @@ func init() {
 	initCmd.PersistentFlags().BoolVarP(&initFlags.NonInteractive, "non-interactive", "y", false, "do not use an interactive prompt. Excepts all fields to be provided as flags.")
 	initCmd.PersistentFlags().StringVarP(&initFlags.Filename, "filename", "f", "", "the output filename")
 
-	initCmd.Flags().StringVarP(&initFlags.Name, "name", "n", "", "name of the testsuite")
+    initCmd.Flags().StringVarP(&initFlags.ID, "id", "i", "", "ID of the testplan")
+	initCmd.Flags().StringVarP(&initFlags.Name, "name", "n", "", "name of the testplan")
 }

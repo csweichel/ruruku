@@ -6,6 +6,7 @@ import (
 	"github.com/manifoldco/promptui"
 	"strconv"
 	"strings"
+    "os"
 )
 
 type InitTestcase struct {
@@ -79,7 +80,7 @@ func validateID(suite *types.TestPlan, grp string) func(string) error {
 			return err
 		}
 
-		if err := suiteHasTestcase(suite, grp, val); err != nil {
+		if err := suiteHasTestcase(suite, val); err != nil {
 			return err
 		}
 
@@ -97,17 +98,22 @@ func validateMinTesterCount(val string) error {
 }
 
 func (cfg *InitTestcase) Run() error {
-	_, err := cfg.checkOrAskString(cfg.Filename, "filename", "", true, nil)
+    var err error
+	cfg.Filename, err = cfg.checkOrAskString(cfg.Filename, "filename", "testplan.yaml", true, validateFileExists)
 	if err != nil {
 		return err
 	}
 
-	suite := &types.TestPlan{}
+	suite, err := LoadTestplan(cfg.Filename)
+    if err != nil {
+        return err
+    }
+
 	if err := cfg.Complete(suite); err != nil {
 		return err
 	}
 
-	if err := suiteHasTestcase(suite, cfg.Group, cfg.ID); err != nil {
+	if err := suiteHasTestcase(suite, cfg.ID); err != nil {
 		return err
 	}
 
@@ -116,11 +122,15 @@ func (cfg *InitTestcase) Run() error {
 	return cfg.saveSuite(*suite, true)
 }
 
-func suiteHasTestcase(suite *types.TestPlan, group string, id string) error {
+func validateFileExists(val string) error {
+    _, err := os.Stat(val)
+    return err
+}
+
+func suiteHasTestcase(suite *types.TestPlan, id string) error {
 	for _, tc := range suite.Case {
-		if group == tc.Group && id == tc.ID {
-			key := fmt.Sprintf("%s/%s", group, id)
-			return fmt.Errorf("Testcase %s already exists", key)
+		if id == tc.ID {
+			return fmt.Errorf("Testcase %s already exists", tc.ID)
 		}
 	}
 	return nil
