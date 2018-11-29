@@ -73,7 +73,7 @@ func (s *memoryBackedSessionStore) Start(ctx context.Context, req *api.StartSess
     }
     s.Sessions[req.Name] = session
 
-    log.WithField("id", id).WithField("name", req.Name).Info("Starting session")
+    log.WithField("id", id).WithField("name", req.Name).WithField("cases", len(cases)).Info("Starting session")
 
 	return &api.StartSessionResponse{ Id: id }, nil
 }
