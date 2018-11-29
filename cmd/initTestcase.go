@@ -21,7 +21,7 @@ var initTestcaseCmd = &cobra.Command{
 	},
 }
 
-var initTestcaseFlags = cli.InitTestCase{}
+var initTestcaseFlags = cli.InitTestcase{}
 
 func init() {
 	initCmd.AddCommand(initTestcaseCmd)
@@ -31,6 +31,6 @@ func init() {
 	initTestcaseCmd.Flags().StringVarP(&initTestcaseFlags.Name, "name", "n", "", "name/short description of the testcase")
 	initTestcaseCmd.Flags().StringVarP(&initTestcaseFlags.Description, "description", "d", "", "long description - can be markdown")
 	initTestcaseCmd.Flags().StringVarP(&initTestcaseFlags.Steps, "steps", "s", "", "steps to perform during the test - can be markdown")
-	initTestcaseCmd.Flags().Int32VarP(&initTestcaseFlags.MinTesterCount, "min-tester-count", "", 0, "number of testers for this testcase")
+	initTestcaseCmd.Flags().Uint32VarP(&initTestcaseFlags.MinTesterCount, "min-tester-count", "", 0, "number of testers for this testcase")
 	initTestcaseCmd.Flags().BoolVarP(&initTestcaseFlags.MustPass, "must-pass", "", false, "test must pass for the testsuite to pass")
 }

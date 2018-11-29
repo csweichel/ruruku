@@ -1,88 +1,68 @@
 package server
 
 import (
-	"fmt"
-	"github.com/32leaves/ruruku/protocol"
-	"github.com/GeertJohan/go.rice"
-	"github.com/gorilla/websocket"
-	"github.com/satori/go.uuid"
-	log "github.com/sirupsen/logrus"
-	"net/http"
-	"net/url"
-	"os"
+    "fmt"
+	api "github.com/32leaves/ruruku/pkg/server/api/v1"
+	"google.golang.org/grpc"
+    "github.com/improbable-eng/grpc-web/go/grpcweb"
+    "github.com/GeertJohan/go.rice"
+	"net"
+    "net/http"
+    "log"
+    "time"
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin:     func(r *http.Request) bool { return true }, // not checking origin
+func Start(cfg *Config, srv api.SessionServiceServer) error {
+    var opts []grpc.ServerOption
+    grpcServer := grpc.NewServer(opts...)
+    api.RegisterSessionServiceServer(grpcServer, srv)
+
+    if cfg.GRPC.Enabled {
+        lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.GRPC.Port))
+        if err != nil {
+            return err
+        }
+
+        go func() { log.Fatal(grpcServer.Serve(lis)) }()
+    }
+
+    if cfg.UI.Enabled {
+        wrappedGrpc := grpcweb.WrapServer(grpcServer)
+        srv := &http.Server{
+            // These interfere with websocket streams, disable for now
+            // ReadTimeout: 5 * time.Second,
+            // WriteTimeout: 10 * time.Second,
+            ReadHeaderTimeout: 5 * time.Second,
+            IdleTimeout:       120 * time.Second,
+            Addr:              fmt.Sprintf(":%d", cfg.UI.Port),
+            Handler: hstsHandler(
+                grpcTrafficSplitter(
+                    http.FileServer(rice.MustFindBox("../../client/build").HTTPBox()),
+                    wrappedGrpc,
+                ),
+            ),
+        }
+        go func() { log.Fatal(srv.ListenAndServe()) }()
+    }
+
+    return nil
 }
 
-// this is also the handler for joining to the chat
-func wsHandler(session *sessionStore) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		conn, err := upgrader.Upgrade(w, r, nil)
-		if err != nil {
-			log.WithError(err).Error("Error upgrading to websocket")
-			return
-		}
-
-		go func() {
-			log.Info("New websocket connection")
-
-			if err := session.Join(conn); err != nil {
-				log.WithError(err).Error("Unable to join session")
-				return
-			}
-
-			// then watch for incoming messages
-			for {
-				_, message, err := conn.ReadMessage()
-				if err != nil { // if error then assuming that the connection is closed
-					log.WithError(err).Error("Error while reading message from WS")
-					session.Exit(conn)
-					return
-				}
-
-				if err := session.HandleMessage(conn, message); err != nil {
-					log.WithError(err).Error("Error while handling message")
-					return
-				}
-			}
-
-		}()
-	}
+// hstsHandler wraps an http.HandlerFunc such that it sets the HSTS header.
+func hstsHandler(fn http.HandlerFunc) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
+		fn(w, r)
+	})
 }
 
-func Start(cfg *Config, suite *protocol.TestSuite, sessionName string) error {
-	if cfg.Token == "" {
-		cfg.Token = uuid.Must(uuid.NewV4()).String()
-	}
+func grpcTrafficSplitter(fallback http.Handler, wrappedGrpc *grpcweb.WrappedGrpcServer) http.HandlerFunc {
+	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+        if wrappedGrpc.IsGrpcWebRequest(req) {
+            wrappedGrpc.ServeHTTP(resp, req)
+        }
 
-	var err error
-	session, err := LoadSessionOrNew(sessionName, suite)
-	if err != nil {
-		log.WithError(err).Fatal("Error during startup")
-	}
-
-	http.HandleFunc(fmt.Sprintf("/ws/%s", cfg.Token), wsHandler(session))
-	http.Handle("/", http.FileServer(rice.MustFindBox("../../client/build").HTTPBox()))
-
-	// fmt.Println("\nSuccess! Please navigate your browser to http://localhost:8000")
-	log.Printf("Server started: %s", serverUrl(cfg.Port, cfg.Token))
-	return http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), nil)
-}
-
-func serverUrl(port int32, token string) string {
-	protocol := "https"
-	host := "localhost"
-	wsURL := os.Getenv("GITPOD_WORKSPACE_URL")
-	if wsURL != "" {
-		parsedWsURL, err := url.Parse(wsURL)
-		if err == nil {
-			host = fmt.Sprintf("%d-%s", port, parsedWsURL.Host)
-			protocol = parsedWsURL.Scheme
-		}
-	}
-	return fmt.Sprintf("%s://%s/?%s", protocol, host, token)
+        // Fall back to other servers.
+        fallback.ServeHTTP(resp, req)
+	})
 }

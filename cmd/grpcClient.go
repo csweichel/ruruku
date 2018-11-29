@@ -1,28 +1,14 @@
-// Copyright © 2018 NAME HERE <EMAIL ADDRESS>
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package cmd
 
 import (
+	"context"
 	"fmt"
-	"log"
-    "time"
-    "context"
-    "io"
+	api "github.com/32leaves/ruruku/pkg/server/api/v1"
 	"github.com/spf13/cobra"
-    api "github.com/32leaves/ruruku/pkg/server/api"
-    "google.golang.org/grpc"
+	"google.golang.org/grpc"
+	"io"
+	"log"
+	"time"
 )
 
 // grpcClientCmd represents the grpcClient command
@@ -36,42 +22,42 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-        conn, err := grpc.Dial("localhost:1234", grpc.WithInsecure())
-        if err != nil {
-            log.Fatalf("fail to dial: %v", err)
-        }
-        defer conn.Close()
-        client := api.NewSessionServiceClient(conn)
+		conn, err := grpc.Dial("localhost:1234", grpc.WithInsecure())
+		if err != nil {
+			log.Fatalf("fail to dial: %v", err)
+		}
+		defer conn.Close()
+		client := api.NewSessionServiceClient(conn)
 
-        ctx, cancelVersionReq := context.WithTimeout(context.Background(), 10*time.Second)
-	    defer cancelVersionReq()
-        version, _ := client.Version(ctx, &api.VersionRequest{})
-        fmt.Printf("%s\n", version)
+		ctx, cancelVersionReq := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancelVersionReq()
+		version, _ := client.Version(ctx, &api.VersionRequest{})
+		fmt.Printf("%s\n", version)
 
-        ctx, cancelUpdates := context.WithTimeout(context.Background(), 1*time.Second)
-        updates, err := client.Updates(ctx, &api.SessionUpdatesRequest{})
-        if err != nil {
-            log.Fatalf("Error while subscribing: %v", err)
-        }
-        for {
-            update, err := updates.Recv()
-            if err == io.EOF {
-                break
-            } else if err != nil {
-                log.Fatalf("Error while receving update: %v", err)
-            } else {
-                fmt.Printf("Update: %s\n", update)
-            }
-        }
-        cancelUpdates()
+		ctx, cancelUpdates := context.WithTimeout(context.Background(), 1*time.Second)
+		updates, err := client.Updates(ctx, &api.SessionUpdatesRequest{})
+		if err != nil {
+			log.Fatalf("Error while subscribing: %v", err)
+		}
+		for {
+			update, err := updates.Recv()
+			if err == io.EOF {
+				break
+			} else if err != nil {
+				log.Fatalf("Error while receving update: %v", err)
+			} else {
+				fmt.Printf("Update: %s\n", update)
+			}
+		}
+		cancelUpdates()
 
-        _, err = client.Register(context.Background(), &api.RegistrationRequest{
-            Name: "foobar",
-            SessionID: "foo",
-        })
-        if err != nil {
-            log.Fatalf("cannot register: %v", err)
-        }
+		_, err = client.Register(context.Background(), &api.RegistrationRequest{
+			Name:      "foobar",
+			SessionID: "foo",
+		})
+		if err != nil {
+			log.Fatalf("cannot register: %v", err)
+		}
 	},
 }
 

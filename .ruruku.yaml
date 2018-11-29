@@ -1,2 +1,8 @@
+
 server:
-    port: 8080
+    ui:
+        enabled: true
+        port: 8080
+    gRPC:
+        enabled: true
+        port: 1234

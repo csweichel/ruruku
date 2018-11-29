@@ -2,7 +2,7 @@ package cli
 
 import (
 	"fmt"
-	"github.com/32leaves/ruruku/protocol"
+	"github.com/32leaves/ruruku/pkg/types"
 	"github.com/manifoldco/promptui"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -15,9 +15,9 @@ type InitSuite struct {
 }
 
 func (cfg *InitSuite) Run() error {
-	r := protocol.TestSuite{
-		Name:  cfg.Name,
-		Cases: make([]protocol.TestCase, 0),
+	r := types.TestPlan{
+		Name: cfg.Name,
+		Case: make([]types.Testcase, 0),
 	}
 
 	val, err := cfg.checkOrAskString(r.Name, "name", "", true, nil)
@@ -40,7 +40,7 @@ func validateNotEmpty(val string) error {
 	return nil
 }
 
-func (cfg *Init) saveSuite(ts protocol.TestSuite, forceOverwrite bool) error {
+func (cfg *Init) saveSuite(ts types.TestPlan, forceOverwrite bool) error {
 	fn := cfg.Filename
 	fn, err := cfg.checkOrAskString(fn, "filename", "testsuite.yaml", true, nil)
 	if err != nil {

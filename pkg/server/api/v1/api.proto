@@ -2,16 +2,9 @@ syntax = "proto3";
 
 package v1;
 
-import "google/api/annotations.proto";
-
 service SessionService {
     // Version returns the service release name, service version.
-    rpc Version(VersionRequest) returns (VersionResponse) {
-        option (google.api.http) = {
-            post: "/v1/example/echo"
-            body: "*"
-        };
-    }
+    rpc Version(VersionRequest) returns (VersionResponse) {}
 
     // Start begins a new test run session
     rpc Start(StartSessionRequest) returns (StartSessionResponse) {}
@@ -159,6 +152,8 @@ message Testcase {
     string steps = 5;
     // If true this testcase must pass for the suite to pass
     bool mustPass = 6;
+    // MinTesterCount is the number of participants who need to run this test
+    uint32 minTesterCount = 7;
 }
 
 enum TestRunState {
