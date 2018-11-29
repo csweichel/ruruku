@@ -9,6 +9,9 @@
 # production
 /build
 
+# protoc generates
+src/proto
+
 # misc
 .DS_Store
 .env.local

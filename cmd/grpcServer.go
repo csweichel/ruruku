@@ -2,12 +2,12 @@ package cmd
 
 import (
 	"fmt"
-    "net"
-    "log"
+	"github.com/32leaves/ruruku/pkg/server"
+	api "github.com/32leaves/ruruku/pkg/server/api/v1"
 	"github.com/spf13/cobra"
-    "github.com/32leaves/ruruku/pkg/server"
-    api "github.com/32leaves/ruruku/pkg/server/api"
-    "google.golang.org/grpc"
+	"google.golang.org/grpc"
+	"log"
+	"net"
 )
 
 // grpcServerCmd represents the grpcServer command
@@ -22,13 +22,13 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", 1234))
-        if err != nil {
-            log.Fatalf("failed to listen: %v", err)
-        }
-        var opts []grpc.ServerOption
-        grpcServer := grpc.NewServer(opts...)
-        api.RegisterSessionServiceServer(grpcServer, server.NewStorageBackedSession())
-        grpcServer.Serve(lis)
+		if err != nil {
+			log.Fatalf("failed to listen: %v", err)
+		}
+		var opts []grpc.ServerOption
+		grpcServer := grpc.NewServer(opts...)
+		api.RegisterSessionServiceServer(grpcServer, server.NewMemoryBackedSession())
+		grpcServer.Serve(lis)
 	},
 }
 

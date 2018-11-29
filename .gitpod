@@ -2,11 +2,13 @@ ports:
 - port: 8080
 image:
   file: Dockerfile.gitpod
+  context: .
 tasks:
 - command: >
     go get -u github.com/golang/protobuf/protoc-gen-go &&
     go get -u google.golang.org/grpc &&
     cd src/github.com/32leaves/ruruku && go get -v ./...;
+    ./build/protoc.sh;
     cd client && yarn install && yarn build; cd -
 checkoutLocation: src/github.com/32leaves/ruruku
 workspaceLocation: .

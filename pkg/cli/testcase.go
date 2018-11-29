@@ -2,21 +2,19 @@ package cli
 
 import (
 	"fmt"
-	"github.com/32leaves/ruruku/pkg/storage"
-	"github.com/32leaves/ruruku/protocol"
+	"github.com/32leaves/ruruku/pkg/types"
 	"github.com/manifoldco/promptui"
 	"strconv"
 	"strings"
 )
 
-type InitTestCase struct {
+type InitTestcase struct {
 	Init
-	protocol.TestCase
-	MinTesterCount    int32
+	types.Testcase
 	MinTesterCountSet bool
 }
 
-func (cfg *InitTestCase) Complete(suite *protocol.TestSuite) error {
+func (cfg *InitTestcase) Complete(suite *types.TestPlan) error {
 	var err error
 
 	if cfg.Group, err = cfg.checkOrAskString(cfg.Group, "Group", "", true, validateGroup(suite)); err != nil {
@@ -45,18 +43,17 @@ func (cfg *InitTestCase) Complete(suite *protocol.TestSuite) error {
 		if err != nil {
 			return err
 		}
-		if mtc, err := strconv.ParseInt(val, 10, 32); err != nil {
+		if mtc, err := strconv.ParseUint(val, 10, 32); err != nil {
 			return err
 		} else {
-			cfg.MinTesterCount = int32(mtc)
+			cfg.MinTesterCount = uint32(mtc)
 		}
 	}
-	cfg.TestCase.MinTesterCount = float64(cfg.MinTesterCount)
 
 	return nil
 }
 
-func validateGroup(suite *protocol.TestSuite) func(string) error {
+func validateGroup(suite *types.TestPlan) func(string) error {
 	return func(val string) error {
 		if err := validateNotEmpty(val); err != nil {
 			return err
@@ -66,7 +63,7 @@ func validateGroup(suite *protocol.TestSuite) func(string) error {
 			return err
 		}
 
-		for _, tc := range suite.Cases {
+		for _, tc := range suite.Case {
 			if strings.ToLower(tc.Group) == strings.ToLower(val) && tc.Group != val {
 				return fmt.Errorf("A group named %s already exists, but case does not match (use %s instead)", tc.Group, tc.Group)
 			}
@@ -76,7 +73,7 @@ func validateGroup(suite *protocol.TestSuite) func(string) error {
 	}
 }
 
-func validateID(suite *protocol.TestSuite, grp string) func(string) error {
+func validateID(suite *types.TestPlan, grp string) func(string) error {
 	return func(val string) error {
 		if err := validateNotEmpty(val); err != nil {
 			return err
@@ -99,17 +96,13 @@ func validateMinTesterCount(val string) error {
 	return err
 }
 
-func (cfg *InitTestCase) Run() error {
-	fn, err := cfg.checkOrAskString(cfg.Filename, "filename", "", true, nil)
+func (cfg *InitTestcase) Run() error {
+	_, err := cfg.checkOrAskString(cfg.Filename, "filename", "", true, nil)
 	if err != nil {
 		return err
 	}
 
-	suite, err := storage.LoadSuite(fn)
-	if err != nil {
-		return err
-	}
-
+	suite := &types.TestPlan{}
 	if err := cfg.Complete(suite); err != nil {
 		return err
 	}
@@ -118,13 +111,13 @@ func (cfg *InitTestCase) Run() error {
 		return err
 	}
 
-	suite.Cases = append(suite.Cases, cfg.TestCase)
+	suite.Case = append(suite.Case, cfg.Testcase)
 
 	return cfg.saveSuite(*suite, true)
 }
 
-func suiteHasTestcase(suite *protocol.TestSuite, group string, id string) error {
-	for _, tc := range suite.Cases {
+func suiteHasTestcase(suite *types.TestPlan, group string, id string) error {
+	for _, tc := range suite.Case {
 		if group == tc.Group && id == tc.ID {
 			key := fmt.Sprintf("%s/%s", group, id)
 			return fmt.Errorf("Testcase %s already exists", key)

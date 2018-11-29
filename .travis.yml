@@ -1,10 +1,11 @@
 language: go
 go:
 - '1.11'
-before_install:
-- cd protocol && yarn install && yarn build; cd -
+before_script:
+- ./build/install-protobuf.sh
 script:
-- cd client && yarn install && yarn build; cd -
+- cd client && yarn install && yarn protoc && yarn build; cd -
+- ./build/protoc.sh
 - '[ ! "${TRAVIS_EVENT_TYPE}" = "cron" ] ||  ./build/trigger_nightly.sh'
 - '[ "${TRAVIS_EVENT_TYPE}" = "cron" ] ||  ./build/build_release.sh'
 deploy:

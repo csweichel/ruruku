@@ -1,6 +1,12 @@
 package server
 
 type Config struct {
-	Port  int32
-	Token string
+    GRPC struct {
+        Enabled bool
+        Port uint32
+    }
+    UI struct {
+        Enabled bool
+        Port uint32
+    }
 }

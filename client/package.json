@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "grpc-web-client": "^0.7.0",
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
     "react-scripts-ts": "3.1.0",
@@ -14,14 +15,17 @@
     "start": "react-scripts-ts start",
     "build": "react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject"
+    "eject": "react-scripts-ts eject",
+    "protoc": "protoc -I ../pkg --plugin=\"protoc-gen-ts=./node_modules/.bin/protoc-gen-ts\" --js_out=\"import_style=commonjs,binary:src/proto\" --ts_out=\"src/proto\" ../pkg/server/api/v1/*.proto"
   },
   "devDependencies": {
+    "@types/google-protobuf": "^3.2.7",
     "@types/jest": "^23.3.9",
     "@types/node": "^10.12.7",
     "@types/react": "^16.7.6",
     "@types/react-dom": "^16.0.9",
     "@types/showdown": "^1.7.5",
+    "ts-protoc-gen": "^0.8.0",
     "typescript": "^3.1.6"
   }
 }
