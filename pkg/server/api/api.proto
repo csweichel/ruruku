@@ -1,0 +1,203 @@
+syntax = "proto3";
+
+package v1;
+
+service SessionService {
+    // Version returns the service release name, service version.
+    rpc Version(VersionRequest) returns (VersionResponse) {}
+
+    // Start begins a new test run session
+    rpc Start(StartSessionRequest) returns (StartSessionResponse) {}
+
+    // Close closes a session so that no further participation is possible
+    rpc Close(CloseSessionRequest) returns (CloseSessionResponse) {}
+
+    // List returns all sessions
+    rpc List(ListSessionsRequest) returns (stream ListSessionsResponse) {}
+
+    // Register adds a new participant to the session. Returns an error
+    // if a participant with that name already exists.
+    rpc Register(RegistrationRequest) returns (RegistrationResponse) {}
+
+    // Claim expresses a participants intent to execute a testcase
+    rpc Claim(ClaimRequest) returns (ClaimResponse) {}
+
+    // Contribute submitts the result of a testcas execution/run.
+    // The same participant may contribute to the same testcase multiple times,
+    // which updates previous contributions.
+    rpc Contribute(ContributionRequest) returns (ContributionResponse) {}
+
+    // Status returns the status of a test run
+    rpc Status(SessionStatusRequest) returns (SessionStatusResponse) {}
+
+    // Subscribes to updates on a test run
+    rpc Updates(SessionUpdatesRequest) returns (stream SessionUpdateResponse) {}
+}
+
+message VersionRequest {
+    // Version of the service.
+    string version = 1;
+}
+
+message VersionResponse {
+    // Version of the service.
+    string version = 1;
+    // Release name of the server implementation
+    string releaseName = 2;
+}
+
+message StartSessionRequest {
+    // Name is the globally unique name of the session
+    string name = 1;
+    // Plan are the tests of the new session
+    TestPlan plan = 2;
+}
+
+message StartSessionResponse {
+    // ID is the unique session ID required for participating
+    string id = 1;
+}
+
+message CloseSessionRequest {
+    // ID of the session to close
+    string id = 1;
+}
+
+message CloseSessionResponse {}
+
+message ListSessionsRequest {}
+
+message ListSessionsResponse {
+    // The ID of the session
+    string id = 1;
+    // The name of the session
+    string name = 2;
+    // IsOpen is true if the session is still open for participation
+    bool isOpen = 3;
+}
+
+message RegistrationRequest {
+    // SessionID is the ID of the session a participant wants to join
+    string sessionID = 1;
+    // Name is the globally unique name of the participant
+    string name = 2;
+}
+
+message RegistrationResponse {
+    // The token uniquely identifies a participant and must be passed in subsequent operations
+    string token = 1;
+    // Status is the current state of affairs
+    TestRunStatus status = 2;
+}
+
+message ClaimRequest {
+    // The token of the participant claiming a testcase
+    string participantToken = 1;
+    // ID of the testcase to claim
+    string testcaseID = 2;
+}
+
+message ClaimResponse {}
+
+message ContributionRequest {
+    // The token of the contributing participant
+    string participantToken = 1;
+    // ID of the testcase to contribute to
+    string testcaseID = 2;
+    // Result indicates the success of the testcase run
+    TestRunState result = 3;
+    // Comment is Markdown formatted text entered by the participant
+    string comment = 4;
+}
+
+message ContributionResponse {}
+
+message SessionStatusRequest {
+    // The ID of the test run whose status to return
+    string id = 1;
+}
+
+message SessionStatusResponse {
+    TestRunStatus status = 1;
+}
+
+message SessionUpdatesRequest {
+    // The ID of the test run to subscribe to
+    string id = 1;
+}
+
+message SessionUpdateResponse {
+    // ID of the session where this update originates from
+    string id = 1;
+    // Status is the current state of affairs
+    TestRunStatus status = 2;
+}
+
+
+message Participant {
+    // Name of the participant. Must be unique among all participants
+    string name = 1;
+}
+
+message Testcase {
+    // ID of the testcase. Must be unique within the test suite.
+    string id = 1;
+    // Name is the short description of the testcase
+    string name = 2;
+    // Groups helps organize testcases
+    string group = 3;
+    // Description is a long description
+    string description = 4;
+    // Steps lists the individual steps a tester should perform
+    string steps = 5;
+    // If true this testcase must pass for the suite to pass
+    bool mustPass = 6;
+}
+
+enum TestRunState {
+    PASSED = 0;
+    UNDECIDED = 1;
+    FAILED = 2;
+}
+
+message TestcaseRunResult {
+    // State denotes the success of a testcase
+    TestRunState state = 1;
+    // Comment is free text entered by the participant
+    string comment = 2;
+}
+
+message TestcaseStatus {
+    // The testcase this run concerns
+    Testcase case = 1;
+    // Claims mark testers who want to run a testcase
+    repeated Participant claim = 2;
+    // Runs are completed testcase executions
+    repeated TestcaseRunResult result = 3;
+    // State is the overall testcase success state
+    TestRunState state = 4;
+}
+
+message TestRunStatus {
+    // ID is the globally unique ID of this test run
+    string id = 1;
+    // Name is a short description of this run
+    string name = 2;
+    // Plan ID is the ID of the testplan being executed
+    string planID = 3;
+    // Status lists the status for each testcase of the plan
+    repeated TestcaseStatus status = 4;
+    // State is the overall test run state
+    TestRunState state = 5;
+}
+
+message TestPlan {
+    // ID is the globally unique ID of this testplan
+    string id = 1;
+    // Name is the short description of the testplan
+    string name = 2;
+    // Description is a long description
+    string description = 3;
+    // Case lists the testcases of this plan
+    repeated Testcase case = 4;
+}
