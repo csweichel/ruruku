@@ -3,7 +3,7 @@ package server
 import (
     "context"
     "fmt"
-    api "github.com/32leaves/ruruku/pkg/server/api"
+    api "github.com/32leaves/ruruku/pkg/server/api/v1"
 )
 
 type storageBackedSession struct {

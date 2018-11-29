@@ -2,9 +2,16 @@ syntax = "proto3";
 
 package v1;
 
+import "google/api/annotations.proto";
+
 service SessionService {
     // Version returns the service release name, service version.
-    rpc Version(VersionRequest) returns (VersionResponse) {}
+    rpc Version(VersionRequest) returns (VersionResponse) {
+        option (google.api.http) = {
+            post: "/v1/example/echo"
+            body: "*"
+        };
+    }
 
     // Start begins a new test run session
     rpc Start(StartSessionRequest) returns (StartSessionResponse) {}
