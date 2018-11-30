@@ -1,17 +1,17 @@
 package server
 
 import (
-	"encoding/hex"
-	"io"
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	api "github.com/32leaves/ruruku/pkg/server/api/v1"
 	"github.com/32leaves/ruruku/pkg/types"
 	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
+	"io"
 	"strings"
 	"sync"
-    "crypto/rand"
 )
 
 type memoryBackedSessionStore struct {
@@ -52,9 +52,9 @@ func (s *memoryBackedSessionStore) Start(ctx context.Context, req *api.StartSess
 	defer s.Mux.Unlock()
 
 	sid, err := toSessionID(req.Name)
-    if err != nil {
-        return nil, err
-    }
+	if err != nil {
+		return nil, err
+	}
 	if _, exists := s.Sessions[sid]; exists {
 		return nil, fmt.Errorf("Session '%s' exists already", req.Name)
 	}
@@ -294,23 +294,23 @@ func parseParticipantToken(token string) (string, string, error) {
 }
 
 func toSessionID(name string) (string, error) {
-    candidate := strings.ToLower(name)
-    candidate = strings.Replace(candidate, "\n", " ", -1)
-    candidate = strings.Replace(candidate, "-", " ", -1)
-    candidate = strings.Replace(candidate, "_", " ", -1)
-    segments := strings.Split(candidate, " ")
-    if len(segments) > 3 {
-        segments = segments[0:2]
-    }
+	candidate := strings.ToLower(name)
+	candidate = strings.Replace(candidate, "\n", " ", -1)
+	candidate = strings.Replace(candidate, "-", " ", -1)
+	candidate = strings.Replace(candidate, "_", " ", -1)
+	segments := strings.Split(candidate, " ")
+	if len(segments) > 3 {
+		segments = segments[0:2]
+	}
 
-    uid := make([]byte, 4)
-    n, err := io.ReadFull(rand.Reader, uid)
-    if err != nil {
-        return "", err
-    } else if n < len(uid) {
-        return "", fmt.Errorf("Did not read enough random bytes")
-    }
-    segments = append(segments, hex.EncodeToString(uid))
+	uid := make([]byte, 4)
+	n, err := io.ReadFull(rand.Reader, uid)
+	if err != nil {
+		return "", err
+	} else if n < len(uid) {
+		return "", fmt.Errorf("Did not read enough random bytes")
+	}
+	segments = append(segments, hex.EncodeToString(uid))
 
-    return strings.Join(segments, "-"), nil
+	return strings.Join(segments, "-"), nil
 }

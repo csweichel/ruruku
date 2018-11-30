@@ -30,6 +30,8 @@ var sessionListCmd = &cobra.Command{
 			log.WithError(err).Fatal()
 		}
 
+		resp := make([]*api.ListSessionsResponse, 0)
+		mxidlen := 0
 		for {
 			session, err := stream.Recv()
 			if err == io.EOF {
@@ -37,8 +39,20 @@ var sessionListCmd = &cobra.Command{
 			} else if err != nil {
 				log.WithError(err).Fatal()
 			}
+			resp = append(resp, session)
+			if len(session.Id) > mxidlen {
+				mxidlen = len(session.Id)
+			}
+		}
 
-			log.WithField("ID", session.Id).WithField("Name", session.Name).WithField("Open", session.IsOpen).Info()
+        tpl := `ID	IS OPEN	NAME
+{{- range . }}
+{{ .Id }}	{{ .IsOpen }}	{{ .Name -}}
+{{ end }}
+`
+        ctnt := sessionFlagValues.GetOutputFormat(resp, tpl)
+		if err := ctnt.Print(); err != nil {
+			log.WithError(err).Fatal()
 		}
 	},
 }

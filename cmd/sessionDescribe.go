@@ -13,7 +13,7 @@ import (
 var sessionDescribeCmd = &cobra.Command{
 	Use:   "describe",
 	Short: "Prints session details and its testcases",
-    Args:  cobra.ExactArgs(1),
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		conn, err := grpc.Dial(sessionFlagValues.server, grpc.WithInsecure())
 		if err != nil {
@@ -30,7 +30,7 @@ var sessionDescribeCmd = &cobra.Command{
 			log.WithError(err).Fatal()
 		}
 
-        log.WithField("status", status).Info()
+		log.WithField("status", status).Info()
 	},
 }
 

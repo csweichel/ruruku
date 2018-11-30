@@ -15,7 +15,6 @@ var sessionName string
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Starts a ruruku API server",
-
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg, err := GetConfigFromViper()
 		if err != nil {
