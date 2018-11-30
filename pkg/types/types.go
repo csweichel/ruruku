@@ -29,6 +29,16 @@ const (
 	Failed    TestRunState = "Failed"
 )
 
+func WorseState(a TestRunState, b TestRunState) TestRunState {
+	if a == Passed {
+		return b
+	}
+	if a == Undecided && b == Failed {
+		return b
+	}
+	return a
+}
+
 type TestcaseRunResult struct {
 	// State denotes the success of a testcase
 	State TestRunState `validate:"required"`

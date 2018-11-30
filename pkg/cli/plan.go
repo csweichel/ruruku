@@ -4,26 +4,26 @@ import (
 	"fmt"
 	"github.com/32leaves/ruruku/pkg/types"
 	"github.com/manifoldco/promptui"
+	"github.com/technosophos/moniker"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
-    "github.com/technosophos/moniker"
 )
 
 type InitPlan struct {
 	Init
-    ID string
+	ID   string
 	Name string
 }
 
 func validatePlanID(val string) error {
 	if err := validateNotEmpty(val); err != nil {
-        return err
-    }
+		return err
+	}
 
-    if err := validateIdentifier(val); err != nil {
-        return err
-    }
+	if err := validateIdentifier(val); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -34,8 +34,8 @@ func (cfg *InitPlan) Run() error {
 		Case: make([]types.Testcase, 0),
 	}
 
-    var err error
-    r.ID, err = cfg.checkOrAskString(r.ID, "id", "", true, validatePlanID)
+	var err error
+	r.ID, err = cfg.checkOrAskString(r.ID, "id", "", true, validatePlanID)
 	if err != nil {
 		return err
 	}

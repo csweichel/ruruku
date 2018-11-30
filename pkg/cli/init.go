@@ -2,11 +2,11 @@ package cli
 
 import (
 	"fmt"
+	"github.com/32leaves/ruruku/pkg/types"
 	"github.com/manifoldco/promptui"
-	"strings"
-    "github.com/32leaves/ruruku/pkg/types"
-    "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"strings"
 )
 
 type Init struct {
@@ -25,10 +25,10 @@ func (cfg *Init) checkOrAskString(value string, label string, dflt string, requi
 		}
 
 		p := promptui.Prompt{
-			Label:    fmt.Sprintf("%s%s", strings.ToUpper(label[0:1]), label[1:]),
-			Validate: validation,
-			Default:  dflt,
-            AllowEdit: true,
+			Label:     fmt.Sprintf("%s%s", strings.ToUpper(label[0:1]), label[1:]),
+			Validate:  validation,
+			Default:   dflt,
+			AllowEdit: true,
 		}
 		nme, err := p.Run()
 		if err != nil {
@@ -41,15 +41,15 @@ func (cfg *Init) checkOrAskString(value string, label string, dflt string, requi
 }
 
 func LoadTestplan(fn string) (*types.TestPlan, error) {
-    fc, err := ioutil.ReadFile(fn)
-    if err != nil {
-        return nil, err
-    }
+	fc, err := ioutil.ReadFile(fn)
+	if err != nil {
+		return nil, err
+	}
 
-    r := types.TestPlan{}
-    if err := yaml.Unmarshal(fc, &r); err != nil {
-        return nil, err
-    }
+	r := types.TestPlan{}
+	if err := yaml.Unmarshal(fc, &r); err != nil {
+		return nil, err
+	}
 
-    return &r, nil
+	return &r, nil
 }

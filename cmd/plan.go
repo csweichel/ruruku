@@ -35,6 +35,6 @@ func init() {
 	initCmd.PersistentFlags().BoolVarP(&initFlags.NonInteractive, "non-interactive", "y", false, "do not use an interactive prompt. Excepts all fields to be provided as flags.")
 	initCmd.PersistentFlags().StringVarP(&initFlags.Filename, "filename", "f", "", "the output filename")
 
-    initCmd.Flags().StringVarP(&initFlags.ID, "id", "i", "", "ID of the testplan")
+	initCmd.Flags().StringVarP(&initFlags.ID, "id", "i", "", "ID of the testplan")
 	initCmd.Flags().StringVarP(&initFlags.Name, "name", "n", "", "name of the testplan")
 }

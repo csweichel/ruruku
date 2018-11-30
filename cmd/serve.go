@@ -1,12 +1,12 @@
 package cmd
 
 import (
-    "os"
-    "os/signal"
 	"github.com/32leaves/ruruku/pkg/server"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
+	"os/signal"
 )
 
 var sessionName string
@@ -27,9 +27,9 @@ var serveCmd = &cobra.Command{
 			log.Fatalf("Error while starting the ruruku server", err)
 		}
 
-        signal_channel := make(chan os.Signal, 1)
-        signal.Notify(signal_channel, os.Interrupt)
-        <-signal_channel
+		signal_channel := make(chan os.Signal, 1)
+		signal.Notify(signal_channel, os.Interrupt)
+		<-signal_channel
 	},
 }
 

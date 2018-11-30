@@ -8,6 +8,12 @@ func (s *Participant) Convert() types.Participant {
 	}
 }
 
+func ConvertParticipant(s *types.Participant) *Participant {
+	return &Participant{
+		Name: s.Name,
+	}
+}
+
 func (s *Testcase) Convert() types.Testcase {
 	return types.Testcase{
 		ID:             s.Id,
@@ -35,6 +41,13 @@ func ConvertTestcase(s *types.Testcase) *Testcase {
 func (s *TestcaseRunResult) Convert() types.TestcaseRunResult {
 	return types.TestcaseRunResult{
 		State:   types.TestRunState(s.State),
+		Comment: s.Comment,
+	}
+}
+
+func ConvertTestcaseRunResult(s *types.TestcaseRunResult) *TestcaseRunResult {
+	return &TestcaseRunResult{
+		State:   ConvertTestRunState(s.State),
 		Comment: s.Comment,
 	}
 }
@@ -85,7 +98,7 @@ func (s *TestPlan) Convert() types.TestPlan {
 }
 
 func ConvertTestPlan(s *types.TestPlan) *TestPlan {
-    cases := make([]*Testcase, len(s.Case))
+	cases := make([]*Testcase, len(s.Case))
 	for i, c := range s.Case {
 		cases[i] = ConvertTestcase(&c)
 	}
@@ -95,4 +108,14 @@ func ConvertTestPlan(s *types.TestPlan) *TestPlan {
 		Description: s.Description,
 		Case:        cases,
 	}
+}
+
+func ConvertTestRunState(s types.TestRunState) TestRunState {
+	if s == types.Passed {
+		return TestRunState_PASSED
+	}
+	if s == types.Undecided {
+		return TestRunState_UNDECIDED
+	}
+	return TestRunState_FAILED
 }

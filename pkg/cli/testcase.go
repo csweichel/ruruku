@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/32leaves/ruruku/pkg/types"
 	"github.com/manifoldco/promptui"
+	"os"
 	"strconv"
 	"strings"
-    "os"
 )
 
 type InitTestcase struct {
@@ -98,16 +98,16 @@ func validateMinTesterCount(val string) error {
 }
 
 func (cfg *InitTestcase) Run() error {
-    var err error
+	var err error
 	cfg.Filename, err = cfg.checkOrAskString(cfg.Filename, "filename", "testplan.yaml", true, validateFileExists)
 	if err != nil {
 		return err
 	}
 
 	suite, err := LoadTestplan(cfg.Filename)
-    if err != nil {
-        return err
-    }
+	if err != nil {
+		return err
+	}
 
 	if err := cfg.Complete(suite); err != nil {
 		return err
@@ -123,8 +123,8 @@ func (cfg *InitTestcase) Run() error {
 }
 
 func validateFileExists(val string) error {
-    _, err := os.Stat(val)
-    return err
+	_, err := os.Stat(val)
+	return err
 }
 
 func suiteHasTestcase(suite *types.TestPlan, id string) error {
