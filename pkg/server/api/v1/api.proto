@@ -95,6 +95,8 @@ message ClaimRequest {
     string participantToken = 1;
     // ID of the testcase to claim
     string testcaseID = 2;
+    // True to claim the testcase, false to unclaim
+    bool claim = 3;
 }
 
 message ClaimResponse {}
@@ -163,10 +165,12 @@ enum TestRunState {
 }
 
 message TestcaseRunResult {
+    // Participant who contributed this result
+    Participant participant = 1;
     // State denotes the success of a testcase
-    TestRunState state = 1;
+    TestRunState state = 2;
     // Comment is free text entered by the participant
-    string comment = 2;
+    string comment = 3;
 }
 
 message TestcaseStatus {

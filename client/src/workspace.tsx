@@ -1,20 +1,23 @@
 import * as React from 'react';
-import { WelcomeRequest, TestSuite, TestRun, TestParticipant, TestCase, ClaimRequest, TestCaseResult, NewTestCaseRunRequest } from '../../protocol/protocol'
 import logo from './logo.svg';
+// import { TestplanView } from './testplan-view';
+import { Sidebar, Segment, Message } from 'semantic-ui-react';
+import { Participant } from './types/participant';
+import { TestRunStatus, SessionStatusRequest, SessionStatusResponse, Testcase, TestRunState, ClaimRequest } from './api/v1/api_pb';
+import { grpc } from 'grpc-web-client';
+import { SessionService } from './api/v1/api_pb_service';
+import { HOST } from './api/host';
 import { TestplanView } from './testplan-view';
-import { Sidebar, Segment } from 'semantic-ui-react';
+
 
 export interface WorkspaceProps {
-    ws: WebSocket
-    name: string
+    participant: Participant
 }
 
 interface WorkspaceState {
-    suite?: TestSuite
-    run?: TestRun
-    participant?: TestParticipant
-    view: "none" | "plan"
+    status?: TestRunStatus
     sidebar?: any
+    error?: string
 }
 
 export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
@@ -24,42 +27,34 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
         super(props);
 
         // ES6 classes do not autobind to this
-        props.ws.onmessage = this.onMessage.bind(this);
         this.claimTestCase = this.claimTestCase.bind(this);
         this.submitTestcaseRun = this.submitTestcaseRun.bind(this);
         this.showSidebar = this.showSidebar.bind(this);
+        this.getStatus = this.getStatus.bind(this);
 
-        this.state = { view: "none" };
+        this.state = { };
     }
 
     public componentWillMount() {
-        this.sendWelcome();
-        this.keepAliveDisposable = this.keepConnectionAlive();
-    }
-
-    public componentWillUnmount() {
-        if (this.keepAliveDisposable) {
-            this.keepAliveDisposable();
-        }
+        this.getStatus();
     }
 
     public render() {
+        let session = "";
         let mainContent = <div>No testplan available</div>;
-
-        if (this.state.suite && this.state.run && this.state.participant) {
+        if (this.state.status) {
+            session = `${this.state.status.getName()}: ${this.state.status.getPlanid()}`;
             mainContent = <TestplanView
-                suite={this.state.suite}
-                run={this.state.run}
-                participant={this.state.participant}
+                status={this.state.status}
+                participant={this.props.participant}
                 claimTestCase={this.claimTestCase}
                 submitTestCaseRun={this.submitTestcaseRun}
                 showDetails={this.showSidebar} />;
         }
 
-        let session = "";
-        if (this.state.run) {
-            session = `${this.state.run.suiteName}: ${this.state.run.name}`;
-        }
+        const error = this.state.error
+            ? <Message error={true}>{this.state.error}</Message>
+            : undefined;
 
         return (
             <div className="workspace">
@@ -67,11 +62,12 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
                     <img src={logo} className="app-logo" alt="logo" />
                     <div className="info">
                         <div className="session">{session}</div>
-                        <div className="username">{this.props.name}</div>
+                        <div className="username">{this.props.participant.name}</div>
                     </div>
                 </div>
 
                 <div className="main">
+                    {error}
                     <Sidebar.Pushable as={Segment} attached="bottom" className="no-border">
                         <Sidebar width="very wide" animation="overlay" visible={!!this.state.sidebar} icon="labeled" vertical={true} inline={true} inverted={false} direction="left">
                             {this.state.sidebar}
@@ -87,68 +83,49 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
         )
     }
 
-    protected onMessage(ev: MessageEvent) {
-        const msg = JSON.parse(ev.data);
-        if (!msg) {
-            console.warn("Received unparseable message", ev.data);
-        }
+    protected getStatus() {
+        try {
+            const req = new SessionStatusRequest();
+            req.setId(this.props.participant.sessionID);
 
-        if (msg.type === "welcome") {
-            this.setState({
-                view: "plan",
-                suite: msg.suite,
-                run: msg.run,
-                participant: msg.participant
+            grpc.invoke(SessionService.Status, {
+                request: req,
+                host: HOST,
+                onMessage: msg => {
+                    const resp = msg as SessionStatusResponse;
+                    this.setState({ status: resp.getStatus() });
+                },
+                onEnd: res => {
+                    // nothing to do here
+                }
             });
-        } else if (msg.type === "update") {
-            this.setState({
-                run: msg.run,
-                participant: msg.participant
-            });
+        } catch (err) {
+            console.error("Error while retrieving status", err);
+            this.setState({ error: err.toString() });
         }
     }
 
-    protected sendWelcome() {
-        const welcome: WelcomeRequest = {
-            type: "welcome",
-            name: this.props.name
-        };
-        this.props.ws.send(JSON.stringify(welcome));
+    protected claimTestCase(testcaseId: string, participantToken: string, claim: boolean) {
+        const req = new ClaimRequest();
+        req.setParticipanttoken(participantToken);
+        req.setTestcaseid(testcaseId);
+        req.setClaim(claim);
+
+        grpc.invoke(SessionService.Claim, {
+            request: req,
+            host: HOST,
+            onEnd: res => {
+                this.getStatus();
+            }
+        });
     }
 
-    protected claimTestCase(testCase: TestCase, claim: boolean) {
-        const msg: ClaimRequest = {
-            type: "claim",
-            caseId: `${testCase.group}/${testCase.id}`,
-            claim
-        };
-        this.props.ws.send(JSON.stringify(msg));
-    }
-
-    protected submitTestcaseRun(testcase: TestCase, result: TestCaseResult, comment: string) {
-        const msg: NewTestCaseRunRequest = {
-            type: "newTestCaseRun",
-            caseId: `${testcase.group}/${testcase.id}`,
-            comment,
-            result,
-            start: new Date(),
-        };
-        this.props.ws.send(JSON.stringify(msg));
+    protected submitTestcaseRun(testCase: Testcase, participant: Participant, result: TestRunState, comment: string) {
+        console.log("submitTestcaseRun", testCase, participant, result, comment);
     }
 
     protected showSidebar(sidebar: any | undefined) {
         this.setState({ sidebar });
-    }
-
-    protected keepConnectionAlive(): () => void {
-        const timeout = setInterval(() => {
-            try {
-                this.props.ws.send(JSON.stringify({ type: "keep-alive" }));
-            } catch(err) {
-                // ignore for now until we have better connection management
-            }
-        }, 10000);
-        return () => clearTimeout(timeout);
     }
 
 }

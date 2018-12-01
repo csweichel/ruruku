@@ -1,16 +1,17 @@
-.app.app-login {
+.app.select-session {
     text-align: center;
 }
-.app.app-connected {
-    padding: 1em;
+.app.select-session .body {
+    display: flex;
+    align-items: center;
 }
 
-.app-login .app-logo {
+.app.select-session .app-logo {
   padding-top: 100px;
   padding-bottom: 100px;
 }
 
-.app-connected .app-logo {
+.app.in-session .app-logo {
     height: 40px;
     justify-content: flex-start;
 }
@@ -33,7 +34,7 @@ input[type="submit"]:disabled {
     color: #211A30;
 }
 
-.app-connected #header {
+.app.in-session #header {
     position: absolute;
     top: 0;
     bottom: calc(100vh - 50px);
@@ -45,10 +46,10 @@ input[type="submit"]:disabled {
     padding-left: 1em;
     padding-right: 1em;
 }
-.app-connected .info {
+.app.in-session .info {
     justify-content: flex-end;
 }
-.app-connected .main {
+.app.in-session .main {
     position: absolute;
     top: 50px;
     left: 0;
@@ -59,7 +60,7 @@ input[type="submit"]:disabled {
     padding: 1em;
 }
 
-.app-connected .main > .ui {
+.app.in-session .main > .ui {
     border: 0px solid white;
 }
 
@@ -81,6 +82,6 @@ input[type="submit"]:disabled {
     overflow-y: hidden;
 }
 .ui.pushable .pusher {
-    overflow-y: scroll;
+    overflow-y: auto;
     height: 100%;
 }

@@ -1,17 +1,20 @@
-import { TestCaseResult, TestCase, TestCaseRun } from '../../protocol/protocol';
 import * as React from 'react';
 import { Card, Button, ButtonOr, Form, Label, Dropdown, TextArea, DropdownProps, TextAreaProps, ButtonGroup } from 'semantic-ui-react';
 import { TestcaseDetailViewBody } from './testcase-detail-view-body';
+import { Testcase, TestRunState, TestcaseStatus } from './api/v1/api_pb';
+import { Participant } from './types/participant';
 
 export interface NewTestcaseRunViewProps {
-    testcase: TestCase;
-    previousRun?: TestCaseRun;
-    onSubmit: (testcase: TestCase, result: TestCaseResult, comment: string) => void;
+    testcase: TestcaseStatus;
+    participant: Participant;
+    result?: TestRunState;
+    comment?: string;
+    onSubmit: (testCase: Testcase, participant: Participant, result: TestRunState, comment: string) => void;
     onClose: () => void;
 }
 
 interface NewTestcaseRunViewState {
-    result: TestCaseResult;
+    result: TestRunState;
     comment: string;
 }
 
@@ -21,18 +24,16 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
     constructor(props: NewTestcaseRunViewProps) {
         super(props);
 
+        this.state = {
+            result: this.props.result ? this.props.result : TestRunState.UNDECIDED,
+            comment: this.props.comment ? this.props.comment : ""
+        };
+
         this.setFocusElement = this.setFocusElement.bind(this);
         this.onCancel = this.onCancel.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
         this.onResultChange = this.onResultChange.bind(this);
         this.updateComment = this.updateComment.bind(this);
-    }
-
-    public componentWillMount() {
-        this.setState({
-            result: this.props.previousRun && this.props.previousRun.result ? this.props.previousRun.result : "undecided",
-            comment: this.props.previousRun ? this.props.previousRun.comment : ""
-        });
     }
 
     public componentDidMount(){
@@ -42,23 +43,25 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
     }
 
     public render() {
-        const tc = this.props.testcase;
+        const tcs = this.props.testcase;
+        const tc = tcs.getCase()!;
+        const resultOptions = [
+            { value: TestRunState.PASSED, text: "Passed", icon: "check" },
+            { value: TestRunState.UNDECIDED, text: "Undecided", icon: "question" },
+            { value: TestRunState.FAILED, text: "Failed", icon: "times" }
+        ];
 
         return <Card>
             <Card.Content>
-                <Card.Header>{tc.name}</Card.Header>
-                <Card.Meta>{tc.group} / {tc.id}</Card.Meta>
+                <Card.Header>{tc.getName()}</Card.Header>
+                <Card.Meta>{tc.getGroup()} / {tc.getId()}</Card.Meta>
             </Card.Content>
             <Card.Content>
                 <Form>
                     <Form.Field>
                         <Label>Result</Label>
                         <Dropdown
-                            options={[
-                                { value: "passed", text: "Passed", icon: "check" },
-                                { value: "undecided", text: "Undecided", icon: "question" },
-                                { value: "failed", text: "Failed", icon: "times" }
-                            ]}
+                            options={resultOptions}
                             onChange={this.onResultChange}
                             value={this.state.result} />
                     </Form.Field>
@@ -75,7 +78,7 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
                     <Button onClick={this.onCancel}>Cancel</Button>
                 </ButtonGroup>
             </Card.Content>
-            <TestcaseDetailViewBody tc={this.props.testcase} />
+            <TestcaseDetailViewBody tcs={tcs} />
         </Card>;
     }
 
@@ -84,7 +87,7 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
     }
 
     protected onSubmit() {
-        this.props.onSubmit(this.props.testcase, this.state.result, this.state.comment);
+        this.props.onSubmit(this.props.testcase.getCase()!, this.props.participant, this.state.result, this.state.comment);
         this.props.onClose();
     }
 
@@ -93,7 +96,7 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
     }
 
     protected onResultChange(evt: React.SyntheticEvent, props: DropdownProps) {
-        this.setState({ result: props.value as TestCaseResult });
+        this.setState({ result: props.value as TestRunState });
     }
 
     protected updateComment(evt: React.SyntheticEvent, props: TextAreaProps) {

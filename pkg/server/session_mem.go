@@ -146,7 +146,12 @@ func (s *memoryBackedSessionStore) Register(ctx context.Context, req *api.Regist
 	}
 	token := fmt.Sprintf("%s/%s", req.SessionID, id.String())
 
-	session.Participants[id.String()] = &types.Participant{Name: req.Name}
+	pcp := &types.Participant{Name: req.Name}
+	if err := types.ValidateParticipant(pcp); err != nil {
+		return nil, err
+	}
+	session.Participants[id.String()] = pcp
+	log.WithField("session", req.SessionID).WithField("name", req.Name).Info("Participant joined session")
 
 	return &api.RegistrationResponse{
 		Token:  token,
@@ -176,7 +181,13 @@ func (s *memoryBackedSessionStore) Claim(ctx context.Context, req *api.ClaimRequ
 		return nil, fmt.Errorf("Testcase %s does not exist in session", req.TestcaseID)
 	}
 
-	tc.Claims[uid] = participant
+	if req.Claim {
+		tc.Claims[uid] = participant
+		log.WithField("session", sid).WithField("participant", participant.Name).WithField("testcase", req.TestcaseID).Info("Participant claimed testcase")
+	} else {
+		delete(tc.Claims, uid)
+		log.WithField("session", sid).WithField("participant", participant.Name).WithField("testcase", req.TestcaseID).Info("Participant unclaimed testcase")
+	}
 
 	return &api.ClaimResponse{}, nil
 }

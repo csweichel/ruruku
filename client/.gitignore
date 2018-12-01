@@ -10,7 +10,7 @@
 /build
 
 # protoc generates
-src/proto
+src/api/v1
 
 # misc
 .DS_Store

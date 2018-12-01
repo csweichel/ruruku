@@ -9,6 +9,10 @@ func init() {
 	validate = validator.New()
 }
 
+func ValidateParticipant(obj *Participant) error {
+	return validate.Struct(obj)
+}
+
 func ValidateTestcase(obj *Testcase) error {
 	return validate.Struct(obj)
 }

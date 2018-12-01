@@ -1,17 +1,17 @@
 import * as React from 'react';
-import { TestSuite, TestRun, TestParticipant, TestCase, TestCaseRun, TestCaseResult } from '../../protocol/protocol';
 import { Table, Button, ButtonGroup, ButtonOr } from 'semantic-ui-react';
-import { TestCaseStatusView, TestCaseParticipant } from './testcase-status';
+import { TestRunStatus, TestcaseStatus, Testcase, TestcaseRunResult, TestRunState } from './api/v1/api_pb';
+import { Participant } from './types/participant';
 import { TestcaseDetailView } from './testcase-detail-view';
+import { TestCaseStatusView } from './testcase-status'
 import { NewTestcaseRunView } from './new-testcase-run-view';
 
 export interface TestplanViewProps {
-    suite: TestSuite
-    run: TestRun
-    participant: TestParticipant
+    status: TestRunStatus
+    participant: Participant
 
-    claimTestCase(testCase: TestCase, claim: boolean): void
-    submitTestCaseRun(testCase: TestCase, result: TestCaseResult, comment: string): void
+    claimTestCase(testcaseId: string, participantToken: string, claim: boolean): void
+    submitTestCaseRun(testCase: Testcase, participant: Participant, result: TestRunState, comment: string): void
     showDetails(content?: any): void
 }
 
@@ -26,7 +26,7 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
     public constructor(props: TestplanViewProps) {
         super(props);
         this.state = {
-            column: 'group',
+            column: 'name',
             direction: 'ascending'
         };
     }
@@ -62,28 +62,32 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
     }
 
     protected buildRows() {
-        if (!this.props.suite) {
+        if (!this.props.status) {
+            return [];
+        }
+
+        const cases = this.props.status.getStatusList();
+        if (!cases) {
+            console.warn("Session has empty case list");
             return [];
         }
 
         const { column, direction } = this.state;
-        const matchedCases = this.props.suite.cases.map(cse => {
-            const runs = (this.props.run.cases || []).filter(cser => cser.caseId === `${cse.group}/${cse.id}`);
-            return { case: cse, runs };
-        }).sort((a, b) => {
+        const sortedCases = cases.sort((a, b) => {
             let result = 0;
+
             if (column === 'actions') {
-                if (this.isClaimed(a.case)) {
+                if (this.isClaimed(a)) {
                     result = 1;
-                } else if (this.isClaimed(b.case)) {
+                } else if (this.isClaimed(b)) {
                     result = -1;
                 } else {
                     result = 0;
                 }
             } else if (column === 'group') {
-                result = a.case.group.localeCompare(b.case.group);
+                result =  a.getCase()!.getGroup()!.localeCompare(b.getCase()!.getGroup());
             } else if (column === 'name') {
-                result = a.case.name.localeCompare(b.case.name);
+                result = a.getCase()!.getName()!.localeCompare(b.getCase()!.getName());
             }
             if (direction === 'descending') {
                 result *= -1;
@@ -91,30 +95,31 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
             return result;
         });
 
-        return matchedCases.map(mc => {
-            return <Table.Row key={mc.case.id}>
+        return sortedCases.map(tcs => {
+            const cse = tcs.getCase()!;
+            return <Table.Row key={cse.getId()}>
                 <Table.Cell collapsing={true}>
-                    {this.getActions(mc.case)}
+                    {this.getActions(tcs)}
                 </Table.Cell>
-                <Table.Cell>{mc.case.group}</Table.Cell>
-                <Table.Cell><a href="#" onClick={this.showDetails.bind(this, mc.case, mc.runs)}>{mc.case.name}</a></Table.Cell>
-                <Table.Cell><TestCaseStatusView case={mc.case} runs={this.getRunsAndClaims(mc.case, mc.runs)} /></Table.Cell>
+                <Table.Cell>{cse.getGroup()}</Table.Cell>
+                <Table.Cell><a href="#" onClick={this.showDetails.bind(this, tcs)}>{cse.getName()}</a></Table.Cell>
+                <Table.Cell><TestCaseStatusView case={tcs} /></Table.Cell>
             </Table.Row>
         });
     }
 
-    protected getActions(tc: TestCase) {
+    protected getActions(tc: TestcaseStatus) {
         if (this.isClaimed(tc)) {
-            const previousRun = this.isCompleted(tc);
+            const previousRun = this.getPreviousRun(tc);
             if (previousRun) {
                 // TODO: add edit button - see #4
-                return <Button label="Edit" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, tc, previousRun)} />;
+                return <Button label="Edit" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, tc)} />;
             } else {
                 return (
                     <ButtonGroup>
-                        <Button icon="check" key="pass" onClick={this.showNewRunForm.bind(this, tc, { result: "passed" })} />
-                        <Button icon="question" key="undecided" onClick={this.showNewRunForm.bind(this, tc, { result: "undecided" })} />
-                        <Button icon="times" key="fail" onClick={this.showNewRunForm.bind(this, tc, { result: "failed" })} />
+                        <Button icon="check" key="pass" onClick={this.showNewRunForm.bind(this, tc, TestRunState.PASSED)} />
+                        <Button icon="question" key="undecided" onClick={this.showNewRunForm.bind(this, tc, TestRunState.UNDECIDED)} />
+                        <Button icon="times" key="fail" onClick={this.showNewRunForm.bind(this, tc, TestRunState.FAILED)} />
                         <ButtonOr />
                         <Button label="Unclaim" icon="minus circle" onClick={this.claim.bind(this, tc, false)} key="claim" />;
                     </ButtonGroup>
@@ -125,43 +130,34 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
         }
     }
 
-    protected showDetails(cse: TestCase, runs: TestCaseRun[], evt: React.SyntheticEvent) {
+    protected showDetails(cse: TestcaseStatus, evt: React.SyntheticEvent) {
         evt.preventDefault();
-        this.props.showDetails(<TestcaseDetailView testcase={cse} runs={runs} onClose={this.props.showDetails} />);
+        this.props.showDetails(<TestcaseDetailView testcase={cse} onClose={this.props.showDetails} />);
     }
 
-    protected showNewRunForm(cse: TestCase, previousRun?: TestCaseRun) {
-        this.props.showDetails(<NewTestcaseRunView testcase={cse} previousRun={previousRun} onSubmit={this.props.submitTestCaseRun} onClose={this.props.showDetails} />)
+    protected showNewRunForm(cse: TestcaseStatus, result?: TestRunState) {
+        this.props.showDetails(<NewTestcaseRunView
+            testcase={cse}
+            participant={this.props.participant}
+            result={result}
+            onSubmit={this.props.submitTestCaseRun}
+            onClose={this.props.showDetails} />)
     }
 
-    protected getRunsAndClaims(cse: TestCase, runs: TestCaseRun[]): TestCaseParticipant[] {
-        const participants = this.props.run.participants.filter(p =>
-            Object.keys(p.claimedCases).indexOf(`${cse.group}/${cse.id}`) > -1 &&
-            !runs.find(r => r.tester === p.name)
-        );
-
-        return participants.map(p => {
-            return {
-                participant: p
-            } as TestCaseParticipant
-        }).concat(runs.map(r => {
-            return {
-                run: r
-            } as TestCaseParticipant
-        }));
+    protected isClaimed(cse: TestcaseStatus): boolean {
+        return !!cse.getClaimList().find(c => c.getName() === this.props.participant.name);
     }
 
-    protected isClaimed(cse: TestCase): boolean {
-        return this.props.participant.claimedCases[`${cse.group}/${cse.id}`];
+    protected getPreviousRun(cse: TestcaseStatus): TestcaseRunResult | undefined {
+        return cse.getResultList().find(r => {
+            const p = r.getParticipant();
+            return !!(p && p.getName() === this.props.participant.name);
+        });
     }
 
-    protected isCompleted(cse: TestCase): TestCaseRun | undefined {
-        return (this.props.run.cases || []).find(r => r.caseId === `${cse.group}/${cse.id}` && r.tester === this.props.participant.name);
-    }
-
-    protected claim(cse: TestCase, claim: boolean, evt: React.SyntheticEvent): void {
+    protected claim(cse: TestcaseStatus, claim: boolean, evt: React.SyntheticEvent): void {
         evt.preventDefault();
-        this.props.claimTestCase(cse, claim);
+        this.props.claimTestCase(cse.getCase()!.getId(), this.props.participant.token, claim);
     }
 
 }

@@ -9,8 +9,22 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
+	"runtime/debug"
+	"strings"
 	"time"
 )
+
+// debugLogger is from https://rocketeer.be/blog/2018/01/multiple-response-writeheader-calls/
+type debugLogger struct{}
+
+func (d debugLogger) Write(p []byte) (n int, err error) {
+	s := string(p)
+	if strings.Contains(s, "multiple response.WriteHeader") {
+		debug.PrintStack()
+	}
+	return os.Stderr.Write(p)
+}
 
 func Start(cfg *Config, srv api.SessionServiceServer) error {
 	var opts []grpc.ServerOption
@@ -28,6 +42,16 @@ func Start(cfg *Config, srv api.SessionServiceServer) error {
 
 	if cfg.UI.Enabled {
 		wrappedGrpc := grpcweb.WrapServer(grpcServer)
+		handler := hstsHandler(
+			grpcTrafficSplitter(
+				http.FileServer(rice.MustFindBox("../../client/build").HTTPBox()),
+				wrappedGrpc,
+			),
+		)
+
+		// Now use the logger with your http.Server:
+		logger := log.New(debugLogger{}, "", 0)
+
 		srv := &http.Server{
 			// These interfere with websocket streams, disable for now
 			// ReadTimeout: 5 * time.Second,
@@ -35,12 +59,8 @@ func Start(cfg *Config, srv api.SessionServiceServer) error {
 			ReadHeaderTimeout: 5 * time.Second,
 			IdleTimeout:       120 * time.Second,
 			Addr:              fmt.Sprintf(":%d", cfg.UI.Port),
-			Handler: hstsHandler(
-				grpcTrafficSplitter(
-					http.FileServer(rice.MustFindBox("../../client/build").HTTPBox()),
-					wrappedGrpc,
-				),
-			),
+			Handler:           handler,
+			ErrorLog:          logger,
 		}
 		go func() { log.Fatal(srv.ListenAndServe()) }()
 	}
@@ -60,9 +80,9 @@ func grpcTrafficSplitter(fallback http.Handler, wrappedGrpc *grpcweb.WrappedGrpc
 	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		if wrappedGrpc.IsGrpcWebRequest(req) {
 			wrappedGrpc.ServeHTTP(resp, req)
+		} else {
+			// Fall back to other servers.
+			fallback.ServeHTTP(resp, req)
 		}
-
-		// Fall back to other servers.
-		fallback.ServeHTTP(resp, req)
 	})
 }
