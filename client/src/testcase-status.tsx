@@ -1,34 +1,38 @@
-import { TestCase, TestCaseRun, TestParticipant } from '../../protocol/protocol';
 import * as React from 'react';
 import './testcase-status.css';
 import { Icon } from 'semantic-ui-react';
-
-export interface TestCaseParticipant {
-    run?: TestCaseRun
-    participant?: TestParticipant
-}
+import { TestcaseStatus, TestRunState } from './api/v1/api_pb';
 
 export interface TestCaseStatusViewProps {
-    case: TestCase
-    runs: TestCaseParticipant[]
+    case: TestcaseStatus
 }
 
 export class TestCaseStatusView extends React.Component<TestCaseStatusViewProps, {}> {
 
     public render() {
-        const remainingCellCount = Math.max(this.props.case.minTesterCount, this.props.runs.length) - this.props.runs.length;
+        const cse = this.props.case.getCase()!;
+        const results = this.props.case.getResultList() || [];
+        const claims = this.props.case.getClaimList() || [];
+        const remainingCellCount = Math.max(cse.getMintestercount(), results.length) - results.length;
+        const resolvedClaims = new Map<string, boolean>();
+
         const content = [];
-        for(const r of this.props.runs) {
-            if (r.run) {
-                if (r.run.result === "passed") {
-                    content.push(<Icon name="check" className="passed" key={content.length}  about="Passed" />);
-                } else if (r.run.result === "failed") {
-                    content.push(<Icon name="times" className="failed" key={content.length} about="Failed" />);
-                } else {
-                    content.push(<Icon name="circle outline" className="undecided" key={content.length} about="Undecided" />);
-                }
+        for(const r of results) {
+            const participantName = r.getParticipant()!.getName();
+            resolvedClaims.set(participantName, true);
+
+            const state = r.getState();
+            if (state === TestRunState.PASSED) {
+                content.push(<Icon name="check" className="passed" key={content.length}  about="Passed" />);
+            } else if (state === TestRunState.FAILED) {
+                content.push(<Icon name="times" className="failed" key={content.length} about="Failed" />);
             } else {
-                content.push(<Icon name="user" key={content.length} about={r.participant!.name} />);
+                content.push(<Icon name="circle outline" className="undecided" key={content.length} about="Undecided" />);
+            }
+        }
+        for(const c of claims) {
+            if (!resolvedClaims.has(c.getName())) {
+                content.push(<Icon name="user" key={content.length} about={c.getName()} />);
             }
         }
         for(let i = 0; i < remainingCellCount; i++) {

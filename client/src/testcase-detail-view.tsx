@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { TestCase, TestCaseRun } from '../../protocol/protocol';
 import { Card, Button } from 'semantic-ui-react';
 import { Converter } from 'showdown';
 import { TestcaseDetailViewBody } from './testcase-detail-view-body';
+import { TestcaseStatus } from './api/v1/api_pb';
 
 export interface TestcaseDetailViewProps {
-    testcase: TestCase
-    runs: TestCaseRun[]
+    testcase: TestcaseStatus
     onClose: () => void
 }
 
@@ -18,7 +17,8 @@ export class TestcaseDetailView extends React.Component<TestcaseDetailViewProps,
     }
 
     public render() {
-        const tc = this.props.testcase;
+        const tcs = this.props.testcase;
+        const tc = tcs.getCase()!;
 
         const markdown = new Converter({
             headerLevelStart: 4
@@ -26,11 +26,11 @@ export class TestcaseDetailView extends React.Component<TestcaseDetailViewProps,
 
         return <Card>
             <Card.Content>
-                <Card.Header>{tc.name}</Card.Header>
-                <Card.Meta>{tc.group} / {tc.id}</Card.Meta>
-                <Card.Description><div dangerouslySetInnerHTML={{__html: markdown.makeHtml(tc.description)}} /></Card.Description>
+                <Card.Header>{tc.getName()}</Card.Header>
+                <Card.Meta>{tc.getGroup()} / {tc.getId()}</Card.Meta>
+                <Card.Description><div dangerouslySetInnerHTML={{__html: markdown.makeHtml(tc.getDescription())}} /></Card.Description>
             </Card.Content>
-            <TestcaseDetailViewBody tc={tc} runs={this.props.runs} />
+            <TestcaseDetailViewBody tcs={tcs} />
             <Card.Content extra={true}>
                 <Button basic={true} color="red" onClick={this.onClose}>Close</Button>
             </Card.Content>

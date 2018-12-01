@@ -38,7 +38,8 @@ Tests:
 {{- range .Status }}
   {{ .Case.Id }}:
     Name:	{{ .Case.Name }}
-    Result:	{{ .State -}}
+    Result:	{{ .State }}
+    Claims:	{{ len .Claim -}}
 {{ end }}
 `
 		ctnt := remoteCmdValues.GetOutputFormat(resp.Status, tpl)

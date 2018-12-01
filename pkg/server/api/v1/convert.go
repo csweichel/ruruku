@@ -40,15 +40,17 @@ func ConvertTestcase(s *types.Testcase) *Testcase {
 
 func (s *TestcaseRunResult) Convert() types.TestcaseRunResult {
 	return types.TestcaseRunResult{
-		State:   types.TestRunState(s.State),
-		Comment: s.Comment,
+		Participant: s.Participant.Convert(),
+		State:       types.TestRunState(s.State),
+		Comment:     s.Comment,
 	}
 }
 
 func ConvertTestcaseRunResult(s *types.TestcaseRunResult) *TestcaseRunResult {
 	return &TestcaseRunResult{
-		State:   ConvertTestRunState(s.State),
-		Comment: s.Comment,
+		Participant: ConvertParticipant(&s.Participant),
+		State:       ConvertTestRunState(s.State),
+		Comment:     s.Comment,
 	}
 }
 

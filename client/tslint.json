@@ -9,7 +9,8 @@
             "config/**/*.js",
             "node_modules/**/*.ts",
             "coverage/lcov-report/*.js",
-            "src/proto/*"
+            "src/api/**/*.js",
+            "src/api/**/v1/*.ts"
         ]
     },
     "rules": {

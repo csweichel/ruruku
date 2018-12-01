@@ -40,6 +40,8 @@ func WorseState(a TestRunState, b TestRunState) TestRunState {
 }
 
 type TestcaseRunResult struct {
+	// Participant who contributed this result
+	Participant Participant
 	// State denotes the success of a testcase
 	State TestRunState `validate:"required"`
 	// Comment is free text entered by the participant

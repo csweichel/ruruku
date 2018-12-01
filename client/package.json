@@ -15,8 +15,7 @@
     "start": "react-scripts-ts start",
     "build": "react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject",
-    "protoc": "protoc -I ../pkg --plugin=\"protoc-gen-ts=./node_modules/.bin/protoc-gen-ts\" --js_out=\"import_style=commonjs,binary:src/proto\" --ts_out=\"src/proto\" ../pkg/server/api/v1/*.proto"
+    "eject": "react-scripts-ts eject"
   },
   "devDependencies": {
     "@types/google-protobuf": "^3.2.7",
