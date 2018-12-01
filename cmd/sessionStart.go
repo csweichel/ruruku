@@ -30,29 +30,31 @@ func (s *sessionStartFlags) Run() error {
 		req.Name = s.name
 	}
 
-	if s.planfn == "" {
-		return fmt.Errorf("Cannot start a session without a plan (use --plan)")
-	} else {
-		plan, err := cli.LoadTestplan(s.planfn)
-		if err != nil {
-			return err
-		}
-		req.Plan = api.ConvertTestPlan(plan)
+	plan, err := cli.LoadTestplan(s.planfn)
+	if err != nil {
+		return err
 	}
+	req.Plan = api.ConvertTestPlan(plan)
 
-	conn, err := grpc.Dial(sessionFlagValues.server, grpc.WithInsecure())
+	conn, err := grpc.Dial(remoteCmdValues.server, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
 	}
 	defer conn.Close()
 	client := api.NewSessionServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(sessionFlagValues.timeout)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(remoteCmdValues.timeout)*time.Second)
 	defer cancel()
 
 	resp, err := client.Start(ctx, req)
 	if err != nil {
 		return err
+	}
+
+	tpl := `{{ .Id }}`
+	ctnt := remoteCmdValues.GetOutputFormat(resp, tpl)
+	if err := ctnt.Print(); err != nil {
+		log.WithError(err).Fatal()
 	}
 
 	log.WithField("id", resp.Id).Info("Session started")
@@ -64,6 +66,12 @@ func (s *sessionStartFlags) Run() error {
 var sessionStartCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Starts a new test session based on a test plan",
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		if sessionStartFlagValues.planfn == "" {
+			return fmt.Errorf("Cannot start a session without a plan (use --plan)")
+		}
+		return nil
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := sessionStartFlagValues.Run(); err != nil {
 			log.WithError(err).Fatal()

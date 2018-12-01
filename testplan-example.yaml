@@ -1,0 +1,29 @@
+id: demo
+name: Demo Plan
+description: ""
+case:
+- id: basics_start_server
+  name: Start server
+  group: basics
+  description: Tests the basic server start
+  steps: |-
+    # Preparation
+    - Have everything compiled and ready to run.
+    - Have this test suite handy
+
+    # Execution
+    run `ruruku start example-suite.yaml`
+  mustpass: false
+  mintestercount: 5
+- id: basics_stop_server
+  name: Stop server
+  group: basics
+  description: Checks if the server saves the session log before it exits
+  steps: |-
+    # Preparation
+    - Have a ruruku session running
+
+    # Execution
+    use `Ctrl+C` on a running ruruku process
+  mustpass: false
+  mintestercount: 2

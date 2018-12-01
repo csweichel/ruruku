@@ -9,11 +9,11 @@ import (
 	"time"
 )
 
-// sessionCloseCmd represents the sessionClose command
-var sessionCloseCmd = &cobra.Command{
-	Use:   "close <session-id>",
-	Short: "Closes a testing session",
-	Args:  cobra.ExactArgs(1),
+// sessionJoinCmd represents the sessionJoin command
+var sessionJoinCmd = &cobra.Command{
+	Use:   "join <session-id> <participant-name>",
+	Short: "Joins a testing session",
+	Args:  cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		conn, err := grpc.Dial(remoteCmdValues.server, grpc.WithInsecure())
 		if err != nil {
@@ -25,13 +25,19 @@ var sessionCloseCmd = &cobra.Command{
 		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(remoteCmdValues.timeout)*time.Second)
 		defer cancel()
 
-		_, err = client.Close(ctx, &api.CloseSessionRequest{Id: args[0]})
+		resp, err := client.Register(ctx, &api.RegistrationRequest{SessionID: args[0], Name: args[1]})
 		if err != nil {
+			log.WithError(err).Fatal()
+		}
+
+		tpl := `{{ .Token }}`
+		ctnt := remoteCmdValues.GetOutputFormat(resp, tpl)
+		if err := ctnt.Print(); err != nil {
 			log.WithError(err).Fatal()
 		}
 	},
 }
 
 func init() {
-	sessionCmd.AddCommand(sessionCloseCmd)
+	sessionCmd.AddCommand(sessionJoinCmd)
 }

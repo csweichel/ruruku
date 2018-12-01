@@ -15,14 +15,14 @@ var sessionListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Prints a table of the available sessions and their status",
 	Run: func(cmd *cobra.Command, args []string) {
-		conn, err := grpc.Dial(sessionFlagValues.server, grpc.WithInsecure())
+		conn, err := grpc.Dial(remoteCmdValues.server, grpc.WithInsecure())
 		if err != nil {
 			log.Fatalf("fail to dial: %v", err)
 		}
 		defer conn.Close()
 		client := api.NewSessionServiceClient(conn)
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(sessionFlagValues.timeout)*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(remoteCmdValues.timeout)*time.Second)
 		defer cancel()
 
 		stream, err := client.List(ctx, &api.ListSessionsRequest{})
@@ -45,12 +45,12 @@ var sessionListCmd = &cobra.Command{
 			}
 		}
 
-        tpl := `ID	IS OPEN	NAME
+		tpl := `ID	IS OPEN	NAME
 {{- range . }}
 {{ .Id }}	{{ .IsOpen }}	{{ .Name -}}
 {{ end }}
 `
-        ctnt := sessionFlagValues.GetOutputFormat(resp, tpl)
+		ctnt := remoteCmdValues.GetOutputFormat(resp, tpl)
 		if err := ctnt.Print(); err != nil {
 			log.WithError(err).Fatal()
 		}
