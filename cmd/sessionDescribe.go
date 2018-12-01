@@ -15,22 +15,36 @@ var sessionDescribeCmd = &cobra.Command{
 	Short: "Prints session details and its testcases",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		conn, err := grpc.Dial(sessionFlagValues.server, grpc.WithInsecure())
+		conn, err := grpc.Dial(remoteCmdValues.server, grpc.WithInsecure())
 		if err != nil {
 			log.Fatalf("fail to dial: %v", err)
 		}
 		defer conn.Close()
 		client := api.NewSessionServiceClient(conn)
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(sessionFlagValues.timeout)*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(remoteCmdValues.timeout)*time.Second)
 		defer cancel()
 
-		status, err := client.Status(ctx, &api.SessionStatusRequest{Id: args[0]})
+		resp, err := client.Status(ctx, &api.SessionStatusRequest{Id: args[0]})
 		if err != nil {
 			log.WithError(err).Fatal()
 		}
 
-		log.WithField("status", status).Info()
+		tpl := `ID:	{{ .Id }}
+Name:	{{ .Name }}
+Plan:	{{ .PlanID }}
+Result:	{{ .State }}
+Tests:
+{{- range .Status }}
+  {{ .Case.Id }}:
+    Name:	{{ .Case.Name }}
+    Result:	{{ .State -}}
+{{ end }}
+`
+		ctnt := remoteCmdValues.GetOutputFormat(resp.Status, tpl)
+		if err := ctnt.Print(); err != nil {
+			log.WithError(err).Fatal()
+		}
 	},
 }
 

@@ -1,8 +1,8 @@
 package prettyprint
 
 import (
-    "text/template"
-    "text/tabwriter"
+	"text/tabwriter"
+	"text/template"
 )
 
 const TemplateFormat Format = "tpl"
@@ -13,12 +13,12 @@ func formatTemplate(pp *Content) error {
 		return err
 	}
 
-    w := tabwriter.NewWriter(pp.Writer, 8, 8, 8, ' ', 0)
-    if err := tmpl.Execute(w, pp.Obj); err != nil {
-        return err
-    }
-    if err := w.Flush(); err != nil {
-        return err
-    }
-    return nil
+	w := tabwriter.NewWriter(pp.Writer, 8, 8, 8, ' ', 0)
+	if err := tmpl.Execute(w, pp.Obj); err != nil {
+		return err
+	}
+	if err := w.Flush(); err != nil {
+		return err
+	}
+	return nil
 }

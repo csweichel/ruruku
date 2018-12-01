@@ -144,12 +144,12 @@ func (s *memoryBackedSessionStore) Register(ctx context.Context, req *api.Regist
 	if err != nil {
 		return nil, fmt.Errorf("Cannot create participant ID: %v", err)
 	}
-	uid := fmt.Sprintf("%s/%s", req.SessionID, id.String())
+	token := fmt.Sprintf("%s/%s", req.SessionID, id.String())
 
-	session.Participants[uid] = &types.Participant{Name: req.Name}
+	session.Participants[id.String()] = &types.Participant{Name: req.Name}
 
 	return &api.RegistrationResponse{
-		Token:  uid,
+		Token:  token,
 		Status: session.getStatus(req.SessionID),
 	}, nil
 }
@@ -169,7 +169,7 @@ func (s *memoryBackedSessionStore) Claim(ctx context.Context, req *api.ClaimRequ
 	defer session.Mux.Unlock()
 	participant, exists := session.Participants[uid]
 	if !exists {
-		return nil, fmt.Errorf("Invalid participant token: does not exist in session")
+		return nil, fmt.Errorf("Invalid participant token %s: does not exist in session", uid)
 	}
 	tc, exists := session.Status[req.TestcaseID]
 	if !exists {
@@ -205,10 +205,12 @@ func (s *memoryBackedSessionStore) Contribute(ctx context.Context, req *api.Cont
 		return nil, fmt.Errorf("Must claim the testcase before contributing")
 	}
 
-	tc.Results[uid] = &types.TestcaseRunResult{
+	contribution := &types.TestcaseRunResult{
 		State:   types.TestRunState(req.Result),
 		Comment: req.Comment,
 	}
+	tc.Results[uid] = contribution
+	log.WithField("state", contribution.State).WithField("testcase", tc).Debug("Recording contribution")
 
 	return &api.ContributionResponse{}, nil
 }
@@ -220,8 +222,9 @@ func (s *memoryBackedSessionStore) Status(ctx context.Context, req *api.SessionS
 	}
 
 	session.Mux.Lock()
-	defer session.Mux.Unlock()
-	return &api.SessionStatusResponse{Status: session.getStatus(req.Id)}, nil
+	status := session.getStatus(req.Id)
+	session.Mux.Unlock()
+	return &api.SessionStatusResponse{Status: status}, nil
 }
 
 func (s *memoryBackedSessionStore) Updates(req *api.SessionUpdatesRequest, update api.SessionService_UpdatesServer) error {
@@ -245,7 +248,7 @@ func (s *memoryBackedSessionStore) getOpenSession(id string) (*memoryBackedSessi
 
 func (s *memoryBackedSession) getStatus(id string) *api.TestRunStatus {
 	state := types.Passed
-	tcstatus := make([]*api.TestcaseStatus, len(s.Status))
+	tcstatus := make([]*api.TestcaseStatus, 0)
 	for _, tc := range s.Status {
 		claims := make([]*api.Participant, 0)
 		for _, p := range tc.Claims {
@@ -262,8 +265,9 @@ func (s *memoryBackedSession) getStatus(id string) *api.TestRunStatus {
 			state = types.WorseState(state, tcstate)
 		}
 
+		cse := api.ConvertTestcase(&tc.Case)
 		tcstatus = append(tcstatus, &api.TestcaseStatus{
-			Case:   api.ConvertTestcase(&tc.Case),
+			Case:   cse,
 			Claim:  claims,
 			Result: results,
 			State:  api.ConvertTestRunState(tcstate),
