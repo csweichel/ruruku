@@ -26,9 +26,9 @@ var serveCmd = &cobra.Command{
 			log.Fatalf("Error while starting the ruruku server", err)
 		}
 
-		signal_channel := make(chan os.Signal, 1)
-		signal.Notify(signal_channel, os.Interrupt)
-		<-signal_channel
+		signalChannel := make(chan os.Signal, 1)
+		signal.Notify(signalChannel, os.Interrupt)
+		<-signalChannel
 	},
 }
 

@@ -81,7 +81,7 @@ func TestConvertTestPlan(t *testing.T) {
 		Name:        "nme",
 		Description: "desc",
 		Case: []types.Testcase{
-			types.Testcase{},
+			{},
 		},
 	}
 
