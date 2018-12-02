@@ -1,11 +1,16 @@
 language: go
 go:
 - '1.11'
-before_script:
+before_install:
 - ./build/install-protobuf.sh
-script:
-- cd client && yarn install && yarn protoc && yarn build; cd -
+- export PATH=$HOME/protoc/bin:$PATH
+- go get -u google.golang.org/grpc
+- go get -u github.com/golang/protobuf/protoc-gen-go
+- cd client && yarn install; cd -
 - ./build/protoc.sh
+script:
+- cd client && yarn build; cd -
+- go test -v -race ./...
 - '[ ! "${TRAVIS_EVENT_TYPE}" = "cron" ] ||  ./build/trigger_nightly.sh'
 - '[ "${TRAVIS_EVENT_TYPE}" = "cron" ] ||  ./build/build_release.sh'
 deploy:

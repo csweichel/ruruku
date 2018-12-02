@@ -113,13 +113,13 @@ func ConvertTestPlan(s *types.TestPlan) *TestPlan {
 }
 
 func (s TestRunState) Convert() types.TestRunState {
-    if s == TestRunState_PASSED {
-        return types.Passed
-    }
-    if s == TestRunState_UNDECIDED {
-        return types.Undecided
-    }
-    return types.Failed
+	if s == TestRunState_PASSED {
+		return types.Passed
+	}
+	if s == TestRunState_UNDECIDED {
+		return types.Undecided
+	}
+	return types.Failed
 }
 
 func ConvertTestRunState(s types.TestRunState) TestRunState {
