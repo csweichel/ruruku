@@ -44,11 +44,12 @@ func (cfg *InitTestcase) Complete(suite *types.TestPlan) error {
 		if err != nil {
 			return err
 		}
-		if mtc, err := strconv.ParseUint(val, 10, 32); err != nil {
+		mtc, err := strconv.ParseUint(val, 10, 32)
+		if err != nil {
 			return err
-		} else {
-			cfg.MinTesterCount = uint32(mtc)
 		}
+
+		cfg.MinTesterCount = uint32(mtc)
 	}
 
 	return nil

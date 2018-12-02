@@ -150,11 +150,11 @@ func (s *memoryBackedSessionStore) Register(ctx context.Context, req *api.Regist
 	}
 
 	if uid == "" {
-		if id, err := uuid.NewV4(); err != nil {
+		id, err := uuid.NewV4()
+		if err != nil {
 			return nil, fmt.Errorf("Cannot create participant ID: %v", err)
-		} else {
-			uid = id.String()
 		}
+		uid = id.String()
 	}
 	token := fmt.Sprintf("%s/%s", req.SessionID, uid)
 

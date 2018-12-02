@@ -14,7 +14,7 @@ var validStartSessionRequest = func() *api.StartSessionRequest {
 			Name:        "testplan",
 			Description: "testplan descriptipn",
 			Case: []*api.Testcase{
-				&api.Testcase{
+				{
 					Id:             "tc00",
 					Group:          "grp",
 					Name:           "tcname 00",
@@ -23,7 +23,7 @@ var validStartSessionRequest = func() *api.StartSessionRequest {
 					MustPass:       true,
 					Steps:          "steps",
 				},
-				&api.Testcase{
+				{
 					Id:             "tc01",
 					Group:          "grp",
 					Name:           "tcname 01",
