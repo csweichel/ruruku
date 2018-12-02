@@ -5,7 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	api "github.com/32leaves/ruruku/pkg/server/api/v1"
+	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"github.com/32leaves/ruruku/pkg/types"
 	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
@@ -50,6 +50,10 @@ func (s *memoryBackedSessionStore) Version(ctx context.Context, req *api.Version
 func (s *memoryBackedSessionStore) Start(ctx context.Context, req *api.StartSessionRequest) (*api.StartSessionResponse, error) {
 	s.Mux.Lock()
 	defer s.Mux.Unlock()
+
+    if req.Name == "" {
+        return nil, fmt.Errorf("Cannot start a session with an empty name")
+    }
 
 	sid, err := toSessionID(req.Name)
 	if err != nil {

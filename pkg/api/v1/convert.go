@@ -41,7 +41,7 @@ func ConvertTestcase(s *types.Testcase) *Testcase {
 func (s *TestcaseRunResult) Convert() types.TestcaseRunResult {
 	return types.TestcaseRunResult{
 		Participant: s.Participant.Convert(),
-		State:       types.TestRunState(s.State),
+		State:       s.State.Convert(),
 		Comment:     s.Comment,
 	}
 }
@@ -68,7 +68,7 @@ func (s *TestcaseStatus) Convert() types.TestcaseStatus {
 		Case:   s.Case.Convert(),
 		Claim:  claims,
 		Result: results,
-		State:  types.TestRunState(s.State),
+		State:  s.State.Convert(),
 	}
 }
 
@@ -82,7 +82,7 @@ func (s *TestRunStatus) Convert() types.TestRunStatus {
 		Name:   s.Name,
 		PlanID: s.PlanID,
 		Status: status,
-		State:  types.TestRunState(s.State),
+		State:  s.State.Convert(),
 	}
 }
 
@@ -110,6 +110,16 @@ func ConvertTestPlan(s *types.TestPlan) *TestPlan {
 		Description: s.Description,
 		Case:        cases,
 	}
+}
+
+func (s TestRunState) Convert() types.TestRunState {
+    if s == TestRunState_PASSED {
+        return types.Passed
+    }
+    if s == TestRunState_UNDECIDED {
+        return types.Undecided
+    }
+    return types.Failed
 }
 
 func ConvertTestRunState(s types.TestRunState) TestRunState {

@@ -2,7 +2,7 @@ package server
 
 import (
 	"fmt"
-	api "github.com/32leaves/ruruku/pkg/server/api/v1"
+	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"github.com/GeertJohan/go.rice"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"google.golang.org/grpc"

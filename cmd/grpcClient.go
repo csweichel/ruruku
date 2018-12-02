@@ -3,7 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
-	api "github.com/32leaves/ruruku/pkg/server/api/v1"
+	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"io"
