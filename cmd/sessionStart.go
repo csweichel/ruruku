@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/32leaves/ruruku/pkg/cli"
-	api "github.com/32leaves/ruruku/pkg/server/api/v1"
+	api "github.com/32leaves/ruruku/pkg/api/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/technosophos/moniker"

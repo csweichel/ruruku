@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"context"
-	api "github.com/32leaves/ruruku/pkg/server/api/v1"
+	api "github.com/32leaves/ruruku/pkg/api/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
