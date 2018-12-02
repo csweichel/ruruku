@@ -51,9 +51,9 @@ func (s *memoryBackedSessionStore) Start(ctx context.Context, req *api.StartSess
 	s.Mux.Lock()
 	defer s.Mux.Unlock()
 
-    if req.Name == "" {
-        return nil, fmt.Errorf("Cannot start a session with an empty name")
-    }
+	if req.Name == "" {
+		return nil, fmt.Errorf("Cannot start a session with an empty name")
+	}
 
 	sid, err := toSessionID(req.Name)
 	if err != nil {
@@ -73,8 +73,13 @@ func (s *memoryBackedSessionStore) Start(ctx context.Context, req *api.StartSess
 				return nil, fmt.Errorf("Testcase '%s' exists already", cse.Id)
 			}
 
+			tcs := cse.Convert()
+			if err := types.ValidateTestcase(&tcs); err != nil {
+				return nil, err
+			}
+
 			cases[cse.Id] = &memoryBackedStatus{
-				Case:    cse.Convert(),
+				Case:    tcs,
 				Claims:  make(map[string]*types.Participant),
 				Results: make(map[string]*types.TestcaseRunResult),
 			}
@@ -135,31 +140,33 @@ func (s *memoryBackedSessionStore) Register(ctx context.Context, req *api.Regist
 
 	session.Mux.Lock()
 	defer session.Mux.Unlock()
+
+	uid := ""
 	for id, p := range session.Participants {
 		if p.Name == req.Name {
-			return &api.RegistrationResponse{
-				Token:  id,
-				Status: session.getStatus(req.SessionID),
-			}, nil
+			uid = id
+			break
 		}
 	}
 
-	id, err := uuid.NewV4()
-	if err != nil {
-		return nil, fmt.Errorf("Cannot create participant ID: %v", err)
+	if uid == "" {
+		if id, err := uuid.NewV4(); err != nil {
+			return nil, fmt.Errorf("Cannot create participant ID: %v", err)
+		} else {
+			uid = id.String()
+		}
 	}
-	token := fmt.Sprintf("%s/%s", req.SessionID, id.String())
+	token := fmt.Sprintf("%s/%s", req.SessionID, uid)
 
 	pcp := &types.Participant{Name: req.Name}
 	if err := types.ValidateParticipant(pcp); err != nil {
 		return nil, err
 	}
-	session.Participants[id.String()] = pcp
+	session.Participants[uid] = pcp
 	log.WithField("session", req.SessionID).WithField("name", req.Name).Info("Participant joined session")
 
 	return &api.RegistrationResponse{
-		Token:  token,
-		Status: session.getStatus(req.SessionID),
+		Token: token,
 	}, nil
 }
 
@@ -180,6 +187,7 @@ func (s *memoryBackedSessionStore) Claim(ctx context.Context, req *api.ClaimRequ
 	if !exists {
 		return nil, fmt.Errorf("Invalid participant token %s: does not exist in session", uid)
 	}
+
 	tc, exists := session.Status[req.TestcaseID]
 	if !exists {
 		return nil, fmt.Errorf("Testcase %s does not exist in session", req.TestcaseID)
@@ -209,7 +217,8 @@ func (s *memoryBackedSessionStore) Contribute(ctx context.Context, req *api.Cont
 
 	session.Mux.Lock()
 	defer session.Mux.Unlock()
-	if _, exists := session.Participants[uid]; !exists {
+	participant, exists := session.Participants[uid]
+	if !exists {
 		return nil, fmt.Errorf("Invalid participant token: does not exist in session")
 	}
 	tc, exists := session.Status[req.TestcaseID]
@@ -221,8 +230,9 @@ func (s *memoryBackedSessionStore) Contribute(ctx context.Context, req *api.Cont
 	}
 
 	contribution := &types.TestcaseRunResult{
-		State:   types.TestRunState(req.Result),
-		Comment: req.Comment,
+		Comment:     req.Comment,
+		State:       req.Result.Convert(),
+		Participant: *participant,
 	}
 	tc.Results[uid] = contribution
 	log.WithField("state", contribution.State).WithField("testcase", tc).Debug("Recording contribution")
@@ -262,7 +272,13 @@ func (s *memoryBackedSessionStore) getOpenSession(id string) (*memoryBackedSessi
 }
 
 func (s *memoryBackedSession) getStatus(id string) *api.TestRunStatus {
-	state := types.Passed
+	var state types.TestRunState
+	if len(s.Status) == 0 {
+		state = types.Undecided
+	} else {
+		state = types.Passed
+	}
+
 	tcstatus := make([]*api.TestcaseStatus, 0)
 	for _, tc := range s.Status {
 		claims := make([]*api.Participant, 0)
@@ -270,8 +286,14 @@ func (s *memoryBackedSession) getStatus(id string) *api.TestRunStatus {
 			claims = append(claims, api.ConvertParticipant(p))
 		}
 
+		var tcstate types.TestRunState
+		if len(tc.Results) == 0 {
+			tcstate = types.Undecided
+		} else {
+			tcstate = types.Passed
+		}
+
 		results := make([]*api.TestcaseRunResult, 0)
-		tcstate := types.Passed
 		for _, r := range tc.Results {
 			results = append(results, api.ConvertTestcaseRunResult(r))
 			tcstate = types.WorseState(tcstate, r.State)

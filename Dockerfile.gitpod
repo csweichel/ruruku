@@ -1,5 +1,6 @@
 FROM gitpod/workspace-full
 
-USER root
+USER gitpod
 COPY build/install-protobuf.sh .
 RUN ./install-protobuf.sh
+USER root

@@ -86,8 +86,6 @@ message RegistrationRequest {
 message RegistrationResponse {
     // The token uniquely identifies a participant and must be passed in subsequent operations
     string token = 1;
-    // Status is the current state of affairs
-    TestRunStatus status = 2;
 }
 
 message ClaimRequest {
