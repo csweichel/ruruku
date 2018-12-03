@@ -65,6 +65,11 @@ func RunTestInvalidRegistration(t *testing.T, s api.SessionServiceServer) {
 	}
 
 	resp, err := s.Start(context.Background(), validStartSessionRequest())
+	if err != nil {
+		t.Errorf("Cannot start session: %v", err)
+		return
+	}
+
 	_, err = s.Register(context.Background(), &api.RegistrationRequest{
 		Name:      "",
 		SessionID: resp.Id,

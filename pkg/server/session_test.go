@@ -5,10 +5,25 @@ import (
 	apitests "github.com/32leaves/ruruku/pkg/api/v1/test"
 	log "github.com/sirupsen/logrus"
 	"testing"
+
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"os"
 )
 
 var implementations = map[string]func() api.SessionServiceServer{
 	"session_mem": func() api.SessionServiceServer { return NewMemoryBackedSessionStore() },
+	"session_gorm": func() api.SessionServiceServer {
+		if _, err := os.Stat("test.db"); err == nil {
+			os.Remove("test.db")
+		}
+		db, err := gorm.Open("sqlite3", "test.db")
+		if err != nil {
+			panic("failed to connect database")
+		}
+
+		return NewGormBackedSessionStore(db)
+	},
 }
 
 func init() {
