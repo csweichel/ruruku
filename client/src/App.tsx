@@ -13,6 +13,7 @@ type AppMode = "select-session" | "in-session";
 
 interface AppState {
     mode: AppMode
+    sessionID?: string
     participant?: Participant
     error?: string
 }

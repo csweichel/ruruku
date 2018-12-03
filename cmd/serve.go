@@ -18,12 +18,12 @@ var serveCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg, err := GetConfigFromViper()
 		if err != nil {
-			log.Fatalf("Error while loading the configuration: %s", err)
+			log.Fatalf("Error while loading the configuration: %v", err)
 		}
 
 		srvcfg := cfg.Server
 		if err := server.Start(&srvcfg, server.NewMemoryBackedSessionStore()); err != nil {
-			log.Fatalf("Error while starting the ruruku server", err)
+			log.Fatalf("Error while starting the ruruku server: %v", err)
 		}
 
 		signalChannel := make(chan os.Signal, 1)

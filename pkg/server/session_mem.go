@@ -20,12 +20,14 @@ type memoryBackedSessionStore struct {
 }
 
 type memoryBackedSession struct {
+	ID           string
 	Name         string
 	PlanID       string
 	Open         bool
 	Status       map[string]*memoryBackedStatus
 	Participants map[string]*types.Participant
 	Mux          sync.Mutex
+	Notifier     *Notifier
 }
 
 type memoryBackedStatus struct {
@@ -87,11 +89,13 @@ func (s *memoryBackedSessionStore) Start(ctx context.Context, req *api.StartSess
 	}
 
 	session := &memoryBackedSession{
+		ID:           sid,
 		Name:         req.Name,
 		PlanID:       planID,
 		Open:         true,
 		Status:       cases,
 		Participants: make(map[string]*types.Participant),
+		Notifier:     NewNotifier(),
 	}
 	s.Sessions[sid] = session
 
@@ -108,7 +112,10 @@ func (s *memoryBackedSessionStore) Close(ctx context.Context, req *api.CloseSess
 	if !exists {
 		return nil, fmt.Errorf("Session %s does not exist", req.Id)
 	}
+	session.Mux.Lock()
 	session.Open = false
+	session.Mux.Unlock()
+	defer session.broadcastChange() // TODO: this deadlocks somehow
 
 	log.WithField("id", req.Id).WithField("name", session.Name).Info("Closing session")
 
@@ -140,6 +147,7 @@ func (s *memoryBackedSessionStore) Register(ctx context.Context, req *api.Regist
 
 	session.Mux.Lock()
 	defer session.Mux.Unlock()
+	defer session.broadcastChange()
 
 	uid := ""
 	for id, p := range session.Participants {
@@ -183,6 +191,8 @@ func (s *memoryBackedSessionStore) Claim(ctx context.Context, req *api.ClaimRequ
 
 	session.Mux.Lock()
 	defer session.Mux.Unlock()
+	defer session.broadcastChange()
+
 	participant, exists := session.Participants[uid]
 	if !exists {
 		return nil, fmt.Errorf("Invalid participant token %s: does not exist in session", uid)
@@ -217,6 +227,8 @@ func (s *memoryBackedSessionStore) Contribute(ctx context.Context, req *api.Cont
 
 	session.Mux.Lock()
 	defer session.Mux.Unlock()
+	defer session.broadcastChange()
+
 	participant, exists := session.Participants[uid]
 	if !exists {
 		return nil, fmt.Errorf("Invalid participant token: does not exist in session")
@@ -247,13 +259,27 @@ func (s *memoryBackedSessionStore) Status(ctx context.Context, req *api.SessionS
 	}
 
 	session.Mux.Lock()
-	status := session.getStatus(req.Id)
+	status := session.getStatus()
 	session.Mux.Unlock()
 	return &api.SessionStatusResponse{Status: status}, nil
 }
 
 func (s *memoryBackedSessionStore) Updates(req *api.SessionUpdatesRequest, update api.SessionService_UpdatesServer) error {
-	return fmt.Errorf("Not implemented")
+	sid := req.Id
+	session, exists := s.Sessions[sid]
+	if !exists {
+		return fmt.Errorf("Session %s does not exist", req.Id)
+	}
+
+	for {
+		status := session.Notifier.Listen()
+		if err := update.Send(&api.SessionUpdateResponse{Id: sid, Status: &status}); err == io.EOF {
+			break
+		} else if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // assumes you hold the store lock
@@ -271,7 +297,7 @@ func (s *memoryBackedSessionStore) getOpenSession(id string) (*memoryBackedSessi
 	return session, nil
 }
 
-func (s *memoryBackedSession) getStatus(id string) *api.TestRunStatus {
+func (s *memoryBackedSession) getStatus() *api.TestRunStatus {
 	var state types.TestRunState
 	if len(s.Status) == 0 {
 		state = types.Undecided
@@ -312,12 +338,18 @@ func (s *memoryBackedSession) getStatus(id string) *api.TestRunStatus {
 	}
 
 	return &api.TestRunStatus{
-		Id:     id,
+		Id:     s.ID,
 		Name:   s.Name,
 		PlanID: s.PlanID,
+		Open:   s.Open,
 		Status: tcstatus,
 		State:  api.ConvertTestRunState(state),
 	}
+}
+
+// broadcastChange notifies all listening Update goroutines - make sure you don't hold a mux.Lock on the session when calling this function
+func (s *memoryBackedSession) broadcastChange() {
+	s.Notifier.Update(s.getStatus())
 }
 
 func parseParticipantToken(token string) (string, string, error) {

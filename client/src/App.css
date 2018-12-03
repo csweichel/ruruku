@@ -48,6 +48,7 @@ input[type="submit"]:disabled {
 }
 .app.in-session .info {
     justify-content: flex-end;
+    color: white;
 }
 .app.in-session .main {
     position: absolute;

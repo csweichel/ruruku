@@ -113,7 +113,7 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
             const previousRun = this.getPreviousRun(tc);
             if (previousRun) {
                 // TODO: add edit button - see #4
-                return <Button label="Edit" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, tc)} />;
+                return <Button label="Edit" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, tc, undefined)} />;
             } else {
                 return (
                     <ButtonGroup>

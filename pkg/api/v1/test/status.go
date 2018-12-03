@@ -40,6 +40,9 @@ func RunTestBasicStatus(t *testing.T, s api.SessionServiceServer) {
 	if status.PlanID != sreq.Plan.Id {
 		t.Errorf("Status returned wrong planID: expected %s, actual %s", sreq.Plan.Id, status.PlanID)
 	}
+	if status.Open != true {
+		t.Errorf("Status returned wrong open flag: expected %v, actual %v", true, status.Open)
+	}
 	if status.State != api.TestRunState_UNDECIDED {
 		t.Errorf("Session without a single run should have \"undecided\" as state, not %s", status.State.String())
 	}

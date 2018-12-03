@@ -3,7 +3,7 @@ import logo from './logo.svg';
 // import { TestplanView } from './testplan-view';
 import { Sidebar, Segment, Message } from 'semantic-ui-react';
 import { Participant } from './types/participant';
-import { TestRunStatus, SessionStatusRequest, SessionStatusResponse, Testcase, TestRunState, ClaimRequest } from './api/v1/api_pb';
+import { TestRunStatus, SessionStatusRequest, SessionStatusResponse, Testcase, TestRunState, ClaimRequest, SessionUpdatesRequest, SessionUpdateResponse, ContributionRequest } from './api/v1/api_pb';
 import { grpc } from 'grpc-web-client';
 import { SessionService } from './api/v1/api_pb_service';
 import { HOST } from './api/host';
@@ -21,8 +21,6 @@ interface WorkspaceState {
 }
 
 export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
-    protected keepAliveDisposable?: () => void;
-
     constructor(props: WorkspaceProps) {
         super(props);
 
@@ -37,6 +35,7 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
 
     public componentWillMount() {
         this.getStatus();
+        this.subscribeToUpdates();
     }
 
     public render() {
@@ -106,22 +105,76 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
     }
 
     protected claimTestCase(testcaseId: string, participantToken: string, claim: boolean) {
-        const req = new ClaimRequest();
-        req.setParticipanttoken(participantToken);
-        req.setTestcaseid(testcaseId);
-        req.setClaim(claim);
+        try {
+            const req = new ClaimRequest();
+            req.setParticipanttoken(participantToken);
+            req.setTestcaseid(testcaseId);
+            req.setClaim(claim);
 
-        grpc.invoke(SessionService.Claim, {
-            request: req,
-            host: HOST,
-            onEnd: res => {
+            // TOOD: add error handling
+            grpc.invoke(SessionService.Claim, {
+                request: req,
+                host: HOST,
+                onEnd: res => {
+                    // nothing to do here
+                }
+            });
+        } catch (err) {
+            console.error("Error while claiming testcase", err);
+            this.setState({ error: err.toString() });
+        }
+    }
+
+    protected subscribeToUpdates() {
+        const req = new SessionUpdatesRequest();
+        req.setId(this.props.participant.sessionID);
+
+        try {
+            const client = grpc.invoke(SessionService.Updates, {
+                request: req,
+                host: HOST,
+                onMessage: (msg: SessionUpdateResponse) => {
+                    this.setState({ status: msg.getStatus() });
+                },
+                onEnd: res => {
+                    // nothing to do here
+                }
+            });
+            const reconnect = (() => {
+                client.close();
                 this.getStatus();
-            }
-        });
+                this.subscribeToUpdates();
+            }).bind(this);
+
+            // we need to reconnect every now and then to avoid timeouts along the transport (e.g. proxies)
+            setTimeout(reconnect, 10000);
+        } catch(err) {
+            console.warn("Error while retrieving updates. Reconnecting in 5 seconds", err);
+            setTimeout(this.subscribeToUpdates.bind(this), 5000);
+        }
+
     }
 
     protected submitTestcaseRun(testCase: Testcase, participant: Participant, result: TestRunState, comment: string) {
-        console.log("submitTestcaseRun", testCase, participant, result, comment);
+        try {
+            const req = new ContributionRequest();
+            req.setParticipanttoken(participant.token);
+            req.setTestcaseid(testCase.getId());
+            req.setResult(result);
+            req.setComment(comment);
+
+            // TOOD: add error handling
+            grpc.invoke(SessionService.Contribute, {
+                request: req,
+                host: HOST,
+                onEnd: res => {
+                    // nothing to do here
+                }
+            });
+        } catch (err) {
+            console.error("Error while contributing to testcase", err);
+            this.setState({ error: err.toString() });
+        }
     }
 
     protected showSidebar(sidebar: any | undefined) {

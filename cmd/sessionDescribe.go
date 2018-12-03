@@ -9,6 +9,19 @@ import (
 	"time"
 )
 
+const sessionDescribeTpl = `ID:	{{ .Id }}
+Name:	{{ .Name }}
+Plan:	{{ .PlanID }}
+Result:	{{ .State }}
+Tests:
+{{- range .Status }}
+  {{ .Case.Id }}:
+    Name:	{{ .Case.Name }}
+    Result:	{{ .State }}
+    Claims:	{{ len .Claim -}}
+{{ end }}
+`
+
 // sessionDescribeCmd represents the sessionDescribe command
 var sessionDescribeCmd = &cobra.Command{
 	Use:   "describe",
@@ -30,19 +43,7 @@ var sessionDescribeCmd = &cobra.Command{
 			log.WithError(err).Fatal()
 		}
 
-		tpl := `ID:	{{ .Id }}
-Name:	{{ .Name }}
-Plan:	{{ .PlanID }}
-Result:	{{ .State }}
-Tests:
-{{- range .Status }}
-  {{ .Case.Id }}:
-    Name:	{{ .Case.Name }}
-    Result:	{{ .State }}
-    Claims:	{{ len .Claim -}}
-{{ end }}
-`
-		ctnt := remoteCmdValues.GetOutputFormat(resp.Status, tpl)
+		ctnt := remoteCmdValues.GetOutputFormat(resp.Status, sessionDescribeTpl)
 		if err := ctnt.Print(); err != nil {
 			log.WithError(err).Fatal()
 		}
