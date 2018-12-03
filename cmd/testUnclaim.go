@@ -23,10 +23,10 @@ import (
 	"time"
 )
 
-// testClaimCmd represents the testClaim command
-var testClaimCmd = &cobra.Command{
-	Use:   "claim <testcase-id>",
-	Short: "Claim a test for a participant",
+// testUnclaimCmd represents the testUnclaim command
+var testUnclaimCmd = &cobra.Command{
+	Use:   "unclaim <testcase-id>",
+	Short: "Unclaim a test for a participant",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		conn, err := grpc.Dial(remoteCmdValues.server, grpc.WithInsecure())
@@ -42,7 +42,7 @@ var testClaimCmd = &cobra.Command{
 		_, err = client.Claim(ctx, &api.ClaimRequest{
 			ParticipantToken: testCmdToken,
 			TestcaseID:       args[0],
-			Claim:            true,
+			Claim:            false,
 		})
 		if err != nil {
 			log.WithError(err).Fatal()
@@ -51,5 +51,5 @@ var testClaimCmd = &cobra.Command{
 }
 
 func init() {
-	testCmd.AddCommand(testClaimCmd)
+	testCmd.AddCommand(testUnclaimCmd)
 }

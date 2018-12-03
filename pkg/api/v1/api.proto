@@ -189,10 +189,12 @@ message TestRunStatus {
     string name = 2;
     // Plan ID is the ID of the testplan being executed
     string planID = 3;
+    // Open denotes if participants can still join and contribute
+    bool open = 4;
     // Status lists the status for each testcase of the plan
-    repeated TestcaseStatus status = 4;
+    repeated TestcaseStatus status = 5;
     // State is the overall test run state
-    TestRunState state = 5;
+    TestRunState state = 6;
 }
 
 message TestPlan {

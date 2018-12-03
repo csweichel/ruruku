@@ -1,14 +1,13 @@
 import * as React from 'react';
 import { Card, Button, ButtonOr, Form, Label, Dropdown, TextArea, DropdownProps, TextAreaProps, ButtonGroup } from 'semantic-ui-react';
 import { TestcaseDetailViewBody } from './testcase-detail-view-body';
-import { Testcase, TestRunState, TestcaseStatus } from './api/v1/api_pb';
+import { Testcase, TestRunState, TestcaseStatus, TestcaseRunResult } from './api/v1/api_pb';
 import { Participant } from './types/participant';
 
 export interface NewTestcaseRunViewProps {
     testcase: TestcaseStatus;
     participant: Participant;
     result?: TestRunState;
-    comment?: string;
     onSubmit: (testCase: Testcase, participant: Participant, result: TestRunState, comment: string) => void;
     onClose: () => void;
 }
@@ -18,16 +17,36 @@ interface NewTestcaseRunViewState {
     comment: string;
 }
 
+function findContributionByParticipant(tc: TestcaseStatus, participant: string): TestcaseRunResult | undefined {
+    return tc.getResultList().find(r => {
+        const p = r.getParticipant();
+        if (p) {
+            if (p.getName() === participant) {
+                return true;
+            }
+        }
+        return false;
+    })
+}
+
 export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps, NewTestcaseRunViewState> {
     protected focusElement: any | undefined;
 
     constructor(props: NewTestcaseRunViewProps) {
         super(props);
 
-        this.state = {
-            result: this.props.result ? this.props.result : TestRunState.UNDECIDED,
-            comment: this.props.comment ? this.props.comment : ""
-        };
+        const ourContribution = findContributionByParticipant(props.testcase, props.participant.name);
+        if (ourContribution !== undefined) {
+            this.state = {
+                result: this.props.result !== undefined ? this.props.result : ourContribution.getState(),
+                comment: ourContribution.getComment()
+            };
+        } else {
+            this.state = {
+                result: this.props.result !== undefined ? this.props.result : TestRunState.UNDECIDED,
+                comment: ""
+            };
+        }
 
         this.setFocusElement = this.setFocusElement.bind(this);
         this.onCancel = this.onCancel.bind(this);
