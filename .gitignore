@@ -13,8 +13,10 @@
 
 node_modules/
 
+ruruku
 ruruku-*.yaml
 build/release
 build/deployKey
 **/rice-box.go
 **/*.pb.go
+**/test.db

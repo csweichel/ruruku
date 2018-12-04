@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package kvsession;
+
+message SessionMetadata {
+    string name = 1;
+    string planID = 2;
+    bool open = 3;
+}
+
+message TestplanMetadata {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+}
+
+message TestcaseContribution {
+    string result = 1;
+    string comment = 2;
+}

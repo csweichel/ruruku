@@ -6,7 +6,7 @@ type Participant struct {
 
 type Testcase struct {
 	// ID of the testcase. Must be unique within the test suite.
-	ID string `validate:"required"`
+	ID string `validate:"required" gorm:"primary_key"`
 	// Name is the short description of the testcase
 	Name string `validate:"required"`
 	// Groups helps organize testcases

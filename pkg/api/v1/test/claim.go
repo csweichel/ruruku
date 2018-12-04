@@ -132,7 +132,19 @@ func RunTestInvalidClaim(t *testing.T, s api.SessionServiceServer) {
 		TestcaseID:       "",
 	})
 	if err == nil {
-		t.Errorf("Claim did not return an error despite missing participant token: %v", err)
+		t.Errorf("Claim did not return an error despite missing testcase ID: %v", err)
+	}
+	if resp != nil {
+		t.Errorf("Claim returned a response despite an invalid request")
+	}
+
+	resp, err = s.Claim(context.Background(), &api.ClaimRequest{
+		Claim:            true,
+		ParticipantToken: rresp.Token,
+		TestcaseID:       "does-not-exist",
+	})
+	if err == nil {
+		t.Errorf("Claim did not return an error despite non-existent testcase ID")
 	}
 	if resp != nil {
 		t.Errorf("Claim returned a response despite an invalid request")

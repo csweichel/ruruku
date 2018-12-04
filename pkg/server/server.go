@@ -6,7 +6,7 @@ import (
 	"github.com/GeertJohan/go.rice"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"google.golang.org/grpc"
-	"log"
+	"log" // this has to be log for double header reporter
 	"net"
 	"net/http"
 	"os"

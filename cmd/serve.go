@@ -2,8 +2,7 @@ package cmd
 
 import (
 	"github.com/32leaves/ruruku/pkg/server"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/32leaves/ruruku/pkg/server/kvsession"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -23,13 +22,10 @@ var serveCmd = &cobra.Command{
 			log.Fatalf("Error while loading the configuration: %v", err)
 		}
 
-		db, err := gorm.Open("sqlite3", "test.db")
+		store, err := kvsession.NewSession("testdb")
 		if err != nil {
-			log.Fatalf("Error while opening database: %v", err)
+			log.Fatalf("Error while creating the session store: %v", err)
 		}
-        store := server.NewGormBackedSessionStore(db)
-        return
-        // store := server.NewMemoryBackedSessionStore()
 
 		srvcfg := cfg.Server
 		if err := server.Start(&srvcfg, store); err != nil {

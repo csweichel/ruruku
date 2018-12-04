@@ -1,4 +1,4 @@
-package server
+package notifier
 
 import (
 	api "github.com/32leaves/ruruku/pkg/api/v1"
