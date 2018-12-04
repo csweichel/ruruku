@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	api "github.com/32leaves/ruruku/pkg/api/v1"
+	"github.com/32leaves/ruruku/pkg/server/notifier"
 	"github.com/32leaves/ruruku/pkg/types"
 	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
@@ -27,7 +28,7 @@ type memoryBackedSession struct {
 	Status       map[string]*memoryBackedStatus
 	Participants map[string]*types.Participant
 	Mux          sync.Mutex
-	Notifier     *Notifier
+	Notifier     *notifier.Notifier
 }
 
 type memoryBackedStatus struct {
@@ -95,7 +96,7 @@ func (s *memoryBackedSessionStore) Start(ctx context.Context, req *api.StartSess
 		Open:         true,
 		Status:       cases,
 		Participants: make(map[string]*types.Participant),
-		Notifier:     NewNotifier(),
+		Notifier:     notifier.NewNotifier(),
 	}
 	s.Sessions[sid] = session
 
