@@ -5,19 +5,23 @@ Because things are moving quickly many of those tests aren't yet automated, so t
 Ruruku helps coordinate this team effort by offering a single, low friction contact point where testers can sign up, claim test cases and provide feedback.
 
 Ruruku offers a YAML-based testcase description that is meant to live next to your code.
-When the time has come to go through the tests, run `ruruku start testcases.yaml` to spawn a webserver that allows others to participate in the test.
-During the test run the server persists a test-report YAML file which can be used as pre-deployment gate or kept for reference.
+When the time has come to go through the tests, run `ruruku session start --plan testcases.yaml` to start a test session on your ruruku installation.
+You can also use `ruruku start testcases.yaml` to spawn a local webserver that allows others to participate in the test.
 
 **Beware: this is a side project and it's early days. Here be dragons.**
 
 ## Getting started
 At the moment the best way to run ruruku is in a Gitpod workspace, but there are other means, too:
 - **Gitpod:** You can either open use our [demo repository](https://gitpod.io/#github.com/32leaves/ruruku-demo) which also serves a good starter for your own projects, or jump right in with the [development workspace](https://gitpod.io#https://github.com/32leaves/ruruku) of ruruku which runs a full build.
-- **On your local machine:** Ruruku runs on [OSX, Linux and Windows](https://github.com/32leaves/ruruku/releases). To share a ruruku session with others, [Serveo](https://serveo.net) comes in handy, which exposes local servers to the internet. This way you can run ruruku on your local machine and share it with others. To get started download ruruku, run clone this repo and run `ruruku start example-suite.yaml && ssh -R 80:localhost:8080 serveo.net`.
+- **On your local machine:** Ruruku runs on [OSX, Linux and Windows](https://github.com/32leaves/ruruku/releases). To share a ruruku session with others, [Serveo](https://serveo.net) comes in handy, which exposes local servers to the internet. This way you can run ruruku on your local machine and share it with others. To get started download ruruku, run clone this repo and run `ruruku serve & ruruku session start --plan testplan-example.yaml && ssh -R 80:localhost:8080 serveo.net`.
+
+### Hosting ruruku
+Ruruku has a central server which hosts the Web UI (for tests) provides a gRPC based API for the command-line tools.
+To host a ruruku instance, simply run `ruruku serve`. A Dockerfile is in the works.
 
 ### Create a testsuite
-To create your own testsuite run `ruruku init` which will guide you through the process.
-If you want to a converter that takes an existing testcase description and produces a ruruku one, make sure to look at `ruruku init --help` and `ruruku init testcase --help`.
+To create your own testsuite run `ruruku plan` which will guide you through the process.
+If you want to a converter that takes an existing testcase description and produces a ruruku one, make sure to look at `ruruku plan --help` and `ruruku plan add --help`.
 
 ## Development
 [![Open in Gitpod](http://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io#https://github.com/32leaves/ruruku)

@@ -22,12 +22,13 @@ var serveCmd = &cobra.Command{
 			log.Fatalf("Error while loading the configuration: %v", err)
 		}
 
-		store, err := kvsession.NewSession("testdb")
+		srvcfg := cfg.Server
+		store, err := kvsession.NewSession(srvcfg.DB.Filename)
 		if err != nil {
 			log.Fatalf("Error while creating the session store: %v", err)
 		}
+		log.WithField("filename", srvcfg.DB.Filename).Info("Opened database")
 
-		srvcfg := cfg.Server
 		if err := server.Start(&srvcfg, store); err != nil {
 			log.Fatalf("Error while starting the ruruku server: %v", err)
 		}
