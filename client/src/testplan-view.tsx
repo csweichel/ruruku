@@ -38,10 +38,10 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
         return <Table celled={true} sortable={true} fixed={true}>
             <Table.Header>
                 <Table.Row>
-                    <Table.HeaderCell sorted={column === 'actions' ? direction : undefined} onClick={this.handleSort.bind(this, 'actions')} />
                     <Table.HeaderCell sorted={column === 'group' ? direction : undefined} onClick={this.handleSort.bind(this, 'group')}>Group</Table.HeaderCell>
                     <Table.HeaderCell sorted={column === 'name' ? direction : undefined} onClick={this.handleSort.bind(this, 'name')}>Name</Table.HeaderCell>
                     <Table.HeaderCell>Testers</Table.HeaderCell>
+                    <Table.HeaderCell sorted={column === 'actions' ? direction : undefined} onClick={this.handleSort.bind(this, 'actions')} />
                 </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -98,12 +98,12 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
         return sortedCases.map(tcs => {
             const cse = tcs.getCase()!;
             return <Table.Row key={cse.getId()}>
-                <Table.Cell collapsing={true}>
-                    {this.getActions(tcs)}
-                </Table.Cell>
                 <Table.Cell>{cse.getGroup()}</Table.Cell>
                 <Table.Cell><a href="#" onClick={this.showDetails.bind(this, tcs)}>{cse.getName()}</a></Table.Cell>
                 <Table.Cell><TestCaseStatusView case={tcs} /></Table.Cell>
+                <Table.Cell collapsing={true}>
+                    {this.getActions(tcs)}
+                </Table.Cell>
             </Table.Row>
         });
     }
