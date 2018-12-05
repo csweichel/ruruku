@@ -68,7 +68,7 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
                 <div className="main">
                     {error}
                     <Sidebar.Pushable as={Segment} attached="bottom" className="no-border">
-                        <Sidebar width="very wide" animation="overlay" visible={!!this.state.sidebar} icon="labeled" vertical={true} inline={true} inverted={false} direction="left">
+                        <Sidebar width="very wide" animation="overlay" visible={!!this.state.sidebar} icon="labeled" vertical={true} inline={true} inverted={false} direction="right">
                             {this.state.sidebar}
                         </Sidebar>
                         <Sidebar.Pusher>
