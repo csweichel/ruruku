@@ -2,5 +2,6 @@ FROM gitpod/workspace-full
 
 USER gitpod
 COPY build/install-protobuf.sh .
-RUN ./install-protobuf.sh
+RUN ./install-protobuf.sh && \
+    echo export PATH=\$PATH:\$HOME/protoc/bin >> ~/.bash_profile
 USER root

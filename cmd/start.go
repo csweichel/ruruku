@@ -24,6 +24,7 @@ var startCmd = &cobra.Command{
 		}
 
 		srvcfg := cfg.Server
+		srvcfg.UI.Enabled = true
 		store, err := kvsession.NewSession(srvcfg.DB.Filename)
 		if err != nil {
 			log.Fatalf("Error while creating the session store: %v", err)
