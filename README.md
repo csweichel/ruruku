@@ -11,13 +11,30 @@ You can also use `ruruku start testcases.yaml` to spawn a local webserver that a
 **Beware: this is a side project and it's early days. Here be dragons.**
 
 ## Getting started
-At the moment the best way to run ruruku is in a Gitpod workspace, but there are other means, too:
-- **Gitpod:** You can either open use our [demo repository](https://gitpod.io/#github.com/32leaves/ruruku-demo) which also serves a good starter for your own projects, or jump right in with the [development workspace](https://gitpod.io#https://github.com/32leaves/ruruku) of ruruku which runs a full build.
-- **On your local machine:** Ruruku runs on [OSX, Linux and Windows](https://github.com/32leaves/ruruku/releases). To share a ruruku session with others, [Serveo](https://serveo.net) comes in handy, which exposes local servers to the internet. This way you can run ruruku on your local machine and share it with others. To get started download ruruku, run clone this repo and run `ruruku serve & ruruku session start --plan testplan-example.yaml && ssh -R 80:localhost:8080 serveo.net`.
+Ruruku runs on OSX, Linux and Windows. You can either get going on your local machine, in a Gitpod or run this in a Docker container.
+### On your local machine
+To get started [download ruruku](https://github.com/32leaves/ruruku/releases).
+You'll need a set of tests that you want to run through.
+You can either create one yourself (`ruruku plan`) or use an [example](https://raw.githubusercontent.com/32leaves/ruruku/master/testplan-example.yaml).
+Use `ruruku start testplan.yaml` to start the API serer and test session.
 
-### Hosting ruruku
+To share that session with others, [Serveo](https://serveo.net) comes in handy, which exposes local servers to the internet. This way you can run ruruku on your local machine and share it with others.
+
+### Gitpod
+Gitpod is an online IDE that offers instant workspaces in the cloud (full disclosure: this is what I work on during the day).
+It makes trying things like ruruku a breeze. Ruruku itself was/is developed exclusively in Gitpod - I never once had to clone the repo locally.
+
+You can either open use our [demo repository](https://gitpod.io/#github.com/32leaves/ruruku-demo) which also serves a good starter for your own projects, or jump right in with the [development workspace](https://gitpod.io#https://github.com/32leaves/ruruku) of ruruku which runs a full build.
+
+### Hosting ruruku (Docker/Kubernetes)
 Ruruku has a central server which hosts the Web UI (for tests) provides a gRPC based API for the command-line tools.
-To host a ruruku instance, simply run `ruruku serve`. A Dockerfile is in the works.
+The ruruku server starts with `ruruku serve`. There also is a Docker image available for each release.
+
+Note that the ruruku server needs a place where to store the data. By default that's in `/var/ruruku`.
+To run a Docker container that makes this data persistent, you can use a volume:
+```
+docker run -p 8080:8080 -p 1234:1234 -v /path/on/my/machine:/var/ruruku csweichel/ruruku:latest
+```
 
 ### Create a testsuite
 To create your own testsuite run `ruruku plan` which will guide you through the process.

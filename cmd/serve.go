@@ -33,6 +33,10 @@ var serveCmd = &cobra.Command{
 			log.Fatalf("Error while starting the ruruku server: %v", err)
 		}
 
+		if srvcfg.UI.Enabled {
+			log.Infof("Started server at %s", serverUrl(srvcfg.UI.Port))
+		}
+
 		signalChannel := make(chan os.Signal, 1)
 		signal.Notify(signalChannel, os.Interrupt)
 		<-signalChannel
