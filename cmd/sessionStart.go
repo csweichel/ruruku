@@ -15,6 +15,7 @@ import (
 type sessionStartFlags struct {
 	name   string
 	planfn string
+	quiet  bool
 }
 
 var sessionStartFlagValues sessionStartFlags
@@ -51,10 +52,12 @@ func (s *sessionStartFlags) Run() error {
 		return err
 	}
 
-	tpl := `{{ .Id }}`
-	ctnt := remoteCmdValues.GetOutputFormat(resp, tpl)
-	if err := ctnt.Print(); err != nil {
-		log.WithError(err).Fatal()
+	if !s.quiet {
+		tpl := `{{ .Id }}`
+		ctnt := remoteCmdValues.GetOutputFormat(resp, tpl)
+		if err := ctnt.Print(); err != nil {
+			log.WithError(err).Fatal()
+		}
 	}
 
 	log.WithField("id", resp.Id).Info("Session started")
