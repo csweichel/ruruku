@@ -5,8 +5,9 @@ import (
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"github.com/GeertJohan/go.rice"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	"log" // this has to be log for double header reporter
+	stdliblog "log" // this has to be log for double header reporter
 	"net"
 	"net/http"
 	"os"
@@ -38,6 +39,7 @@ func Start(cfg *Config, srv api.SessionServiceServer) error {
 		}
 
 		go func() { log.Fatal(grpcServer.Serve(lis)) }()
+		log.WithField("port", cfg.GRPC.Port).Info("gRPC API server started")
 	}
 
 	if cfg.UI.Enabled {
@@ -50,7 +52,7 @@ func Start(cfg *Config, srv api.SessionServiceServer) error {
 		)
 
 		// Now use the logger with your http.Server:
-		logger := log.New(debugLogger{}, "", 0)
+		logger := stdliblog.New(debugLogger{}, "", 0)
 
 		srv := &http.Server{
 			// These interfere with websocket streams, disable for now
@@ -63,6 +65,7 @@ func Start(cfg *Config, srv api.SessionServiceServer) error {
 			ErrorLog:          logger,
 		}
 		go func() { log.Fatal(srv.ListenAndServe()) }()
+		log.WithField("port", cfg.UI.Port).Info("UI web server started")
 	}
 
 	return nil

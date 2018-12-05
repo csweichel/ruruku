@@ -42,7 +42,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	log.SetLevel(log.WarnLevel)
+	log.SetLevel(log.InfoLevel)
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
@@ -83,7 +83,11 @@ type Config struct {
 }
 
 func GetConfigFromViper() (*Config, error) {
-	viper.SetDefault("server.port", 8080)
+	viper.SetDefault("server.ui.enabled", true)
+	viper.SetDefault("server.ui.port", 8080)
+	viper.SetDefault("server.grpc.enabled", true)
+	viper.SetDefault("server.grpc.port", 1234)
+	viper.SetDefault("server.db.Filename", "ruruku.db")
 
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
