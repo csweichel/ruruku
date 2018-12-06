@@ -1,2 +1,2 @@
 
-export const HOST = "https://" + ["8080"].concat(window.location.host.split("-").slice(1)).join("-");
+export const HOST = `${window.location.protocol}//${window.location.host}`;
