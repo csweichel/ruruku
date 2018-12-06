@@ -114,12 +114,12 @@ func (s *kvsessionStore) List(req *api.ListSessionsRequest, resp api.SessionServ
 }
 
 func (s *kvsessionStore) Register(ctx context.Context, req *api.RegistrationRequest) (*api.RegistrationResponse, error) {
-	exists, err := s.sessionExists(req.SessionID)
+	exists, err := s.isSessionOpen(req.SessionID)
 	if err != nil {
 		return nil, err
 	}
 	if !exists {
-		return nil, fmt.Errorf("Session %s does not exist", req.SessionID)
+		return nil, fmt.Errorf("Session %s is not open", req.SessionID)
 	}
 
 	if req.Name == "" {
@@ -148,12 +148,12 @@ func (s *kvsessionStore) Claim(ctx context.Context, req *api.ClaimRequest) (*api
 	sid := token.SessionID
 	uid := token.ParticipantID
 
-	exists, err := s.sessionExists(sid)
+	exists, err := s.isSessionOpen(sid)
 	if err != nil {
 		return nil, err
 	}
 	if !exists {
-		return nil, fmt.Errorf("Invalid participant token: session %s does not exist", sid)
+		return nil, fmt.Errorf("Session %s is closed", sid)
 	}
 
 	ok, err := s.participantInSession(sid, uid)
@@ -186,12 +186,12 @@ func (s *kvsessionStore) Contribute(ctx context.Context, req *api.ContributionRe
 	sid := token.SessionID
 	uid := token.ParticipantID
 
-	exists, err := s.sessionExists(sid)
+	exists, err := s.isSessionOpen(sid)
 	if err != nil {
 		return nil, err
 	}
 	if !exists {
-		return nil, fmt.Errorf("Invalid participant token: session %s does not exist", sid)
+		return nil, fmt.Errorf("Session %s is closed", sid)
 	}
 
 	ok, err := s.participantInSession(sid, uid)

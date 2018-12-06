@@ -20,3 +20,4 @@ build/deployKey
 **/rice-box.go
 **/*.pb.go
 **/test.db
+**/gen_*_test.go

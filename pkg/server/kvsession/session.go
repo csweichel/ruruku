@@ -16,6 +16,26 @@ const (
 	bucketTestplan = "Testplan"
 )
 
+func (s *kvsessionStore) isSessionOpen(sessionID string) (bool, error) {
+	var open bool
+	err := s.DB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucketSessions))
+		v := b.Get([]byte(sessionID))
+		if v == nil {
+			return fmt.Errorf("Session %s does not exist", sessionID)
+		}
+
+		var meta SessionMetadata
+		if err := proto.Unmarshal(v, &meta); err != nil {
+			return err
+		}
+		open = meta.Open
+
+		return nil
+	})
+	return open, err
+}
+
 func (s *kvsessionStore) sessionExists(sessionID string) (bool, error) {
 	var exists bool
 	err := s.DB.View(func(tx *bolt.Tx) error {
