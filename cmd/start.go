@@ -6,7 +6,6 @@ import (
 	"github.com/32leaves/ruruku/pkg/server/kvsession"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"net/url"
 	"os"
 	"os/signal"
@@ -50,9 +49,6 @@ var startCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(startCmd)
-
-	startCmd.Flags().Int("ui-port", 8080, "Port to run UI the server on")
-	viper.BindPFlag("server.ui.port", startCmd.Flags().Lookup("ui-port"))
 }
 
 func serverUrl(port uint32) string {

@@ -7,9 +7,10 @@ tasks:
 - command: >
     go get -u github.com/golang/protobuf/protoc-gen-go &&
     go get -u google.golang.org/grpc &&
-    cd src/github.com/32leaves/ruruku && go get -v ./... &&
+    cd src/github.com/32leaves/ruruku &&
     cd client && yarn install && cd .. &&
     ./build/protoc.sh &&
-    cd client && yarn build && cd -
+    cd client && yarn build && cd - &&
+    go get -v ./...
 checkoutLocation: src/github.com/32leaves/ruruku
 workspaceLocation: .
