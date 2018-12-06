@@ -1,0 +1,9 @@
+baseURL = "https://32leaves.github.io/ruruku"
+languageCode = "en-us"
+title = "Ruruku"
+theme = "apex"
+pygmentsCodeFences = true
+pygmentsStyle = "dracula"
+
+[params]
+logo = "/logo.svg"
