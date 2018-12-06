@@ -1,6 +1,10 @@
 body {
-  margin: 0;
-  padding: 0;
-  background-color: #211A30;
-  font-family: 'Source Sans Pro', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #211a30;
+    background: -moz-linear-gradient(-45deg, #211a30 0%, #211a30 10%, #39efc0 99%);
+    background: -webkit-linear-gradient(-45deg, #211a30 0%,#211a30 10%,#39efc0 99%);
+    background: linear-gradient(135deg, #211a30 0%,#211a30 10%,#39efc0 99%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#211a30', endColorstr='#39efc0',GradientType=1 );
+    font-family: 'Source Sans Pro', sans-serif;
 }

@@ -63,7 +63,7 @@ export class SessionList extends React.Component<SessionListProps, SessionListSt
                 <Segment>
                     <Form>
                         <Form.Field>
-                            <Dropdown borderless={false} fluid={true} options={options} placeholder="Session" onChange={this.selectSession} />
+                            <Dropdown selection={true} fluid={true} options={options} placeholder="Session" onChange={this.selectSession} />
                         </Form.Field>
                         <Form.Field>
                             <Input type="text" placeholder="Your name" value={this.state.participantName} onChange={this.setParticipantName} />
@@ -137,7 +137,7 @@ export class SessionList extends React.Component<SessionListProps, SessionListSt
                     });
                 },
                 onEnd: res => {
-                    this.setState({sessions})
+                    this.setState({sessions});
                 }
             });
         } catch (err) {
