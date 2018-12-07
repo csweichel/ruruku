@@ -6,4 +6,4 @@ pygmentsCodeFences = true
 pygmentsStyle = "dracula"
 
 [params]
-logo = "/logo.svg"
+logo = "/ruruku/logo.svg"

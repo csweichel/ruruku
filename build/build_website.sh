@@ -34,7 +34,7 @@ echo "Removing existing files"
 rm -rf public/*
 
 echo "Generating site"
-cd www && hugo -d ../public -b ""; cd ..
+cd www && hugo -d ../public -b "/ruruku/"; cd ..
 
 echo "Updating gh-pages branch"
 cd public && git add --all && git commit -m "Publishing to gh-pages (build_website.sh)"

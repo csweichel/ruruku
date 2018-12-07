@@ -36,7 +36,7 @@ func main() {
 	}
 	linkHandler := func(name string) string {
 		base := strings.TrimSuffix(name, path.Ext(name))
-		return "/cli/" + strings.ToLower(base) + "/"
+		return "/ruruku/cli/" + strings.ToLower(base) + "/"
 	}
 
 	err := doc.GenMarkdownTreeCustom(cmd.GetRoot(), "www/content/cli", filePrepender, linkHandler)
