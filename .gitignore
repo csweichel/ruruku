@@ -22,3 +22,4 @@ build/deployKey
 **/test.db
 **/ruruku.db
 **/gen_*_test.go
+public

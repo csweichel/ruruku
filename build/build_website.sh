@@ -1,0 +1,41 @@
+#!/bin/bash
+
+DIR=$(dirname "$0")
+cd $DIR/..
+
+# download hugo
+tmpdir=$(mktemp -d)
+cd $tmpdir
+curl -L https://github.com/gohugoio/hugo/releases/download/v0.52/hugo_0.52_Linux-64bit.tar.gz | tar xvz
+export PATH=$PWD:$PATH
+cd -
+
+go get -v github.com/spf13/cobra/doc
+go run build/generate-cli-docs.go
+
+
+# from https://gohugo.io/hosting-and-deployment/hosting-on-github/
+if [[ $(git status -s) ]]
+then
+    echo "The working directory is dirty. Please commit any pending changes."
+    exit 1;
+fi
+
+echo "Deleting old publication"
+rm -rf public
+mkdir public
+git worktree prune
+rm -rf .git/worktrees/public/
+
+echo "Checking out gh-pages branch into public"
+git worktree add -B gh-pages public origin/gh-pages
+
+echo "Removing existing files"
+rm -rf public/*
+
+echo "Generating site"
+cd www && hugo -d ../public -b ""; cd ..
+
+echo "Updating gh-pages branch"
+cd public && git add --all && git commit -m "Publishing to gh-pages (build_website.sh)"
+
