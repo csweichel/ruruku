@@ -31,7 +31,7 @@ var rootCmd = &cobra.Command{
 }
 
 func GetRoot() *cobra.Command {
-    return rootCmd
+	return rootCmd
 }
 
 func Execute() {
