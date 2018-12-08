@@ -1,0 +1,175 @@
+
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Getting Started &middot; Ruruku</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		
+		<meta http-equiv="content-language" content="en-us" />
+		<meta name="generator" content="Hugo 0.52" />
+		<link rel="stylesheet" href="/ruruku/css/index.css">
+		<link rel="apple-touch-icon" href="/ruruku/apple-touch-icon.png">
+		<link rel="shortcut icon" href="/ruruku/favicon.ico" type="image/x-icon">
+	</head>
+
+	<body>
+		<div class="Wrapper">
+			<div class="Container">
+				<div class="Header">
+  <a href="/ruruku/">
+	<div class="Title center">
+		
+			<img alt="Ruruku Logo" src="/ruruku/logo.svg" height="140" />
+		
+		<span class="text">Ruruku</span>
+		<span class="subtext"></span>
+	</div>
+  </a>
+</div>
+
+				<div class="Content-wrapper">
+					<div class="Sidebar">
+	<div class="Menu">
+		<div class="item">
+			<a href="/ruruku/">Home</a>
+		</div>
+		
+			
+				<div class="item">
+					<a href="/ruruku/introduction/"></a>
+				</div>
+			
+		
+			
+				<div class="item">
+					<a href="/ruruku/getting-started/">Getting Started</a>
+				</div>
+			
+		
+			
+				<div class="item">
+					<a href="/ruruku/cli/ruruku/">Command Line Interface</a>
+				</div>
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+	</div>
+</div>
+
+					<div class="Content">
+						
+	<div class="Page" id="">
+		<h1>Getting Started</h1>
+		
+
+<p>Ruruku ships as a single executable that contains the ruruku server and command-line interface.
+The former stores the data, serves the web-based UI and offers a gRPC API. You can talk to this
+server using the UI or a command-line interface. The latter can also be used to create testplans
+and add testcases.</p>
+
+<h2 id="download-ruruku">Download Ruruku</h2>
+
+<p>Ruruku can be downloaded from the <a href="https://github.com/32leaves/ruruku/releases">release page</a>. It runs on Linux,
+OSX and Windows. For concenience sake, it&rsquo;s best to place the <code>ruruku</code> binary somewhere in your <code>PATH</code> (that&rsquo;s
+not a requirement though).</p>
+
+<p>If you want to run ruruku in Docker, there&rsquo;s also a <a href="https://hub.docker.com/r/csweichel/ruruku/">Docker image</a> available.</p>
+
+<h2 id="create-a-testplan">Create a testplan</h2>
+
+<p>You want to run a series of tests (otherwise you probably would not be here). This series of tests is what
+ruruku calls a <em>testplan</em>. Such a testplan consists of a number <em>testcases</em>. Each testcase has a unique ID,
+a name, description and a series of steps that testers need to execute. You can use Markdown in for the
+description and steps. Testcases can be also be grouped - the web UI allows users to sort by
+groups.</p>
+
+<p>To create a testplan run <a href="../cli/ruruku_plan"><code>ruruku plan</code></a> and the CLI will guide you through the process.
+If you want to convert an existing list of testcase descriptions, have a closer look at the flags
+of <a href="../cli/ruruku_plan"><code>ruruku plan</code></a>, especially <code>-y</code> which disables manual input.</p>
+
+<p>Testplans are meant to live next to your code, i.e. it&rsquo;s best to check them into your repository.</p>
+
+<h2 id="start-a-test-session">Start a test session</h2>
+
+<p>The easiest way to start a test session is <code>ruruku start testplan.yaml</code>. This will launch a new ruruku server
+on your machine and start the session itself. This is great if you want to go through the testplan yourself or
+just share it with others on the same network. Services like <a href="https://serveo.net">Serveo</a> let you share that
+local server across the internet.</p>
+
+<p>More commonly, you&rsquo;ll have a central ruruku instance hosted somewhere (e.g. using the <a href="https://hub.docker.com/r/csweichel/ruruku/">Docker image</a>).
+In that case run <code>ruruku session start --server your-ruruku-server.com:1234 --plan testplan.yaml</code> to start the session.
+If you don&rsquo;t provide a name for the session (using <code>--name</code>), ruruku will come up with one.</p>
+
+<h2 id="participate-in-a-session">Participate in a session</h2>
+
+<p>You can join a test session using the web-based UI ruruku provides. Go to the server where the session was started,
+choose the session you want to join, enter your name and you&rsquo;re good to go.</p>
+
+<p>During a session, participants can <em>claim</em> testcases by which they indicate that they would like to execute
+that particular test. This way all tester can coordinate their efforts. Once you&rsquo;ve claimed a testcase, you
+can also contribute back the result of your test. The UI will automatically update for all participants showing
+the latest state of the test.</p>
+
+<p>The UI is great for human testers. If you have machines joining the session (e.g. automated UI tests), the
+command-line interface makes for an easier integration. You can perform just the same operations that are
+available in the web using the CLI.</p>
+
+<h2 id="when-you-re-done-testing">When you&rsquo;re done testing</h2>
+
+<p>Once you&rsquo;re done testing, you can close the session using the command-line interface with <a href="../cli/ruruku_session_close"><code>ruruku session close</code></a>.
+This marks the end of the test and marks the session as readonly.</p>
+
+<p>To integrate the test result as part of your release or deployment process, <a href="../cli/ruruku_session_status"><code>ruruku session status</code></a> comes in handy.
+Make sure to check out the <code>-o</code> flag with which you download the test result as JSON file.</p>
+</div>
+
+						<div class="Footer">
+	<p></p>
+</div>
+<script src="/ruruku/js/index.js"></script>
+
+					</div>
+				</div>
+		</div>
+	</body>
+</html>
