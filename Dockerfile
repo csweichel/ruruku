@@ -23,6 +23,7 @@ RUN cd client && yarn install && cd - && \
     GOXOS=linux GOXARCH=amd64 ./build/build_release.sh
 
 FROM alpine:latest
+ENV RURUKU_DB=/var/ruruku/db
 COPY --from=build /go/src/github.com/32leaves/ruruku/build/release/ruruku_linux_amd64 /app/ruruku
 ENTRYPOINT [ "/app/ruruku" ]
 CMD ["serve"]

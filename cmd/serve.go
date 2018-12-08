@@ -48,4 +48,7 @@ func init() {
 
 	serveCmd.Flags().Int("ui-port", 8080, "Port to run UI the server on")
 	viper.BindPFlag("server.ui.port", serveCmd.Flags().Lookup("ui-port"))
+    serveCmd.Flags().String("db", "ruruku.db", "Path to the data storage location")
+    viper.BindPFlag("server.DB.Filename", serveCmd.Flags().Lookup("db"))
+    viper.BindEnv("server.DB.Filename", "RURUKU_DB")
 }

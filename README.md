@@ -1,6 +1,6 @@
 ![ruruku](logo.png)
 
-Suppose you and your team have a list of testcases you want to execute prior to a new release.
+You and your team have a list of testcases you want to execute prior to a new release.
 Because things are moving quickly many of those tests aren't yet automated, so testing becomes a team effort.
 Ruruku helps coordinate this team effort by offering a single, low friction contact point where testers can sign up, claim test cases and provide feedback.
 
