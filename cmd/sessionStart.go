@@ -8,7 +8,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/technosophos/moniker"
-	"google.golang.org/grpc"
 	"time"
 )
 
@@ -37,7 +36,7 @@ func (s *sessionStartFlags) Run() error {
 	}
 	req.Plan = api.ConvertTestPlan(plan)
 
-	conn, err := grpc.Dial(remoteCmdValues.server, grpc.WithInsecure())
+	conn, err := remoteCmdValues.Connect()
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
 	}
