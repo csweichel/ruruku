@@ -6,11 +6,14 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"os"
 )
 
 type remoteCmdFlags struct {
 	server          string
+	tlsCert         string
 	timeout         uint32
 	format          string
 	outputChanged   bool
@@ -43,6 +46,7 @@ func registerRemoteCmdValueFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().Uint32VarP(&remoteCmdValues.timeout, "timeout", "", 10, "Request timeout in seconds")
 	cmd.PersistentFlags().StringVarP(&remoteCmdValues.format, "output", "o", "", "Output format. One of: string|json|template")
 	cmd.PersistentFlags().StringVar(&remoteCmdValues.template, "output-template", "", "Output format Go template. Use with -o template")
+	cmd.PersistentFlags().StringVar(&remoteCmdValues.tlsCert, "tls", "", "Path to the server TLS certificate")
 }
 
 func (s *remoteCmdFlags) GetOutputFormat(obj interface{}, template string) *prettyprint.Content {
@@ -68,4 +72,18 @@ func (s *remoteCmdFlags) GetOutputFormat(obj interface{}, template string) *pret
 		Format:   format,
 		Writer:   os.Stdout,
 	}
+}
+
+func (s *remoteCmdFlags) Connect() (*grpc.ClientConn, error) {
+	var opts grpc.DialOption
+	if s.tlsCert == "" {
+		opts = grpc.WithInsecure()
+	} else {
+		creds, err := credentials.NewClientTLSFromFile(s.tlsCert, "")
+		if err != nil {
+			return nil, fmt.Errorf("could not load tls cert: %s", err)
+		}
+		opts = grpc.WithTransportCredentials(creds)
+	}
+	return grpc.Dial(remoteCmdValues.server, opts)
 }

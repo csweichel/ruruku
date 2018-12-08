@@ -7,6 +7,7 @@ import (
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	stdliblog "log" // this has to be log for double header reporter
 	"net"
 	"net/http"
@@ -29,6 +30,17 @@ func (d debugLogger) Write(p []byte) (n int, err error) {
 
 func Start(cfg *Config, srv api.SessionServiceServer) error {
 	var opts []grpc.ServerOption
+
+	if cfg.TLS.Enabled {
+		creds, err := credentials.NewServerTLSFromFile(cfg.TLS.Cert, cfg.TLS.Key)
+		if err != nil {
+			return err
+		}
+		tls := grpc.Creds(creds)
+		opts = append(opts, tls)
+		log.WithField("certFile", cfg.TLS.Cert).WithField("keyFile", cfg.TLS.Key).Info("Enabling transport layer security")
+	}
+
 	grpcServer := grpc.NewServer(opts...)
 	api.RegisterSessionServiceServer(grpcServer, srv)
 
@@ -64,7 +76,12 @@ func Start(cfg *Config, srv api.SessionServiceServer) error {
 			Handler:           handler,
 			ErrorLog:          logger,
 		}
-		go func() { log.Fatal(srv.ListenAndServe()) }()
+		if cfg.UI.TLS {
+			log.WithField("certFile", cfg.UI.Cert).WithField("keyFile", cfg.UI.Key).Info("Serving UI over HTTPS")
+			go func() { log.Fatal(srv.ListenAndServeTLS(cfg.UI.Cert, cfg.UI.Key)) }()
+		} else {
+			go func() { log.Fatal(srv.ListenAndServe()) }()
+		}
 		log.WithField("port", cfg.UI.Port).Info("UI web server started")
 	}
 

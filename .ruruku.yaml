@@ -1,4 +1,3 @@
-
 server:
     ui:
         enabled: true
@@ -6,3 +5,7 @@ server:
     gRPC:
         enabled: true
         port: 1234
+    tls:
+        enabled: true
+        cert: /workspace/server.crt
+        key: /workspace/server.key

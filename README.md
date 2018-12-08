@@ -36,6 +36,31 @@ To run a Docker container that makes this data persistent, you can use a volume:
 docker run -p 8080:8080 -p 1234:1234 -v /path/on/my/machine:/var/ruruku csweichel/ruruku:latest
 ```
 
+### Securing your installation
+By default Ruruku runs without any transport encryption/security. This way getting started is easy, but it's not exactly secure.
+Especially if you intent to expose your Ruruku installation to the internet, it's a good idea to use TLS for the gRPC API server,
+and HTTPS/TLS for the UI server.
+
+To enable TLS for the API server and HTTPS for the UI server, add the following to your config
+```
+server:
+    ui:
+        port: 443
+        https: enabled
+        cert: ui.crt
+        key: ui.key
+    tls:
+        enabled: true
+        cert: server.crt
+        key: server.key
+```
+and use the `--tls` flag to pass the certificate to the client (e.g. `ruruku session --tls server.crt list`).
+
+Hint: to generate a pair of self-signed certificates run:
+```
+openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -subj "/CN=*/" -out server.crt -keyout server.key
+```
+
 ### Create a testsuite
 To create your own testsuite run `ruruku plan` which will guide you through the process.
 If you want to a converter that takes an existing testcase description and produces a ruruku one, make sure to look at `ruruku plan --help` and `ruruku plan add --help`.

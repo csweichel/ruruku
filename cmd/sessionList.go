@@ -5,7 +5,6 @@ import (
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"google.golang.org/grpc"
 	"io"
 	"time"
 )
@@ -15,7 +14,7 @@ var sessionListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Prints a table of the available sessions and their status",
 	Run: func(cmd *cobra.Command, args []string) {
-		conn, err := grpc.Dial(remoteCmdValues.server, grpc.WithInsecure())
+		conn, err := remoteCmdValues.Connect()
 		if err != nil {
 			log.Fatalf("fail to dial: %v", err)
 		}

@@ -5,7 +5,6 @@ import (
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"google.golang.org/grpc"
 	"time"
 )
 
@@ -28,7 +27,7 @@ var sessionDescribeCmd = &cobra.Command{
 	Short: "Prints session details and its testcases",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		conn, err := grpc.Dial(remoteCmdValues.server, grpc.WithInsecure())
+		conn, err := remoteCmdValues.Connect()
 		if err != nil {
 			log.Fatalf("fail to dial: %v", err)
 		}
