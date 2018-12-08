@@ -3,7 +3,7 @@
 
 <html>
 	<head>
-		<title>Tags &middot; Ruruku</title>
+		<title>Securing your installation &middot; Ruruku</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		
@@ -104,8 +104,34 @@
 
 					<div class="Content">
 						
-	
-	
+	<div class="Page" id="">
+		<h1>Securing your installation</h1>
+		<p>By default Ruruku runs without any transport encryption/security. This way getting started is easy, but it&rsquo;s not exactly secure.</p>
+
+<p>Especially if you intent to expose your Ruruku installation to the internet, it&rsquo;s a good idea to use TLS for the gRPC API server,
+and HTTPS/TLS for the UI server.</p>
+
+<p>To enable TLS for the API server and HTTPS for the UI server, add the following to your config</p>
+
+<pre><code>server:
+    ui:
+        port: 443
+        https: enabled
+        cert: ui.crt
+        key: ui.key
+    tls:
+        enabled: true
+        cert: server.crt
+        key: server.key
+</code></pre>
+
+<p>and use the <code>--tls</code> flag to pass the certificate to the client (e.g. <code>ruruku session --tls server.crt list</code>).</p>
+
+<p>Hint: to generate a pair of self-signed certificates run:</p>
+
+<pre><code>openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -subj &quot;/CN=*/&quot; -out server.crt -keyout server.key
+</code></pre>
+</div>
 
 						<div class="Footer">
 	<p></p>
