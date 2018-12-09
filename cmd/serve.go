@@ -3,6 +3,8 @@ package cmd
 import (
 	"github.com/32leaves/ruruku/pkg/server"
 	"github.com/32leaves/ruruku/pkg/server/kvsession"
+	"github.com/32leaves/ruruku/pkg/server/kvuser"
+	bolt "github.com/etcd-io/bbolt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -23,13 +25,23 @@ var serveCmd = &cobra.Command{
 		}
 
 		srvcfg := cfg.Server
-		store, err := kvsession.NewSession(srvcfg.DB.Filename)
+		db, err := bolt.Open(cfg.Server.DB.Filename, 0666, nil)
 		if err != nil {
-			log.Fatalf("Error while creating the session store: %v", err)
+			log.Fatalf("Error while opening database: %v", err)
 		}
 		log.WithField("filename", srvcfg.DB.Filename).Info("Opened database")
 
-		if err := server.Start(&srvcfg, store); err != nil {
+		sessionStore, err := kvsession.NewSession(db)
+		if err != nil {
+			log.Fatalf("Error while creating the session store: %v", err)
+		}
+
+		userStore, err := kvuser.NewUserStore(db)
+		if err != nil {
+			log.Fatalf("Error while creating the user store: %v", err)
+		}
+
+		if err := server.Start(&srvcfg, sessionStore, userStore); err != nil {
 			log.Fatalf("Error while starting the ruruku server: %v", err)
 		}
 

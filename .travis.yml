@@ -10,6 +10,7 @@ before_install:
 - ./build/protoc.sh
 script:
 - cd client && yarn build; cd -
+- go generate ./...
 - go test -v -race ./...
 - if [[ $(diff -u <(echo -n) <(gofmt -d -s .) | wc -l) -ne 0 ]]; then echo "Code was not formated with gofmt"; exit 1; fi
 - '[ ! "${TRAVIS_EVENT_TYPE}" = "cron" ] ||  ./build/trigger_nightly.sh'

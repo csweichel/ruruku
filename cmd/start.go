@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/32leaves/ruruku/pkg/server"
 	"github.com/32leaves/ruruku/pkg/server/kvsession"
+	bolt "github.com/etcd-io/bbolt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"net/url"
@@ -24,13 +25,20 @@ var startCmd = &cobra.Command{
 
 		srvcfg := cfg.Server
 		srvcfg.UI.Enabled = true
-		store, err := kvsession.NewSession(srvcfg.DB.Filename)
+
+		db, err := bolt.Open(srvcfg.DB.Filename, 0666, nil)
+		if err != nil {
+			log.Fatalf("Error while opening database: %v", err)
+		}
+		log.WithField("filename", srvcfg.DB.Filename).Info("Opened database")
+
+		store, err := kvsession.NewSession(db)
 		if err != nil {
 			log.Fatalf("Error while creating the session store: %v", err)
 		}
 		log.WithField("filename", srvcfg.DB.Filename).Info("Opened database")
 
-		if err := server.Start(&srvcfg, store); err != nil {
+		if err := server.Start(&srvcfg, store, nil); err != nil {
 			log.Fatalf("Error while starting the ruruku server: %v", err)
 		}
 
