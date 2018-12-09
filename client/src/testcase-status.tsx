@@ -1,7 +1,7 @@
 import * as React from 'react';
 import './testcase-status.css';
 import { Icon } from 'semantic-ui-react';
-import { TestcaseStatus, TestRunState } from './api/v1/api_pb';
+import { TestcaseStatus, TestRunState } from './api/v1/session_pb';
 
 export interface TestCaseStatusViewProps {
     case: TestcaseStatus

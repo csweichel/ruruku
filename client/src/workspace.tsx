@@ -3,9 +3,9 @@ import logo from './logo.svg';
 // import { TestplanView } from './testplan-view';
 import { Sidebar, Segment, Message } from 'semantic-ui-react';
 import { Participant } from './types/participant';
-import { TestRunStatus, SessionStatusRequest, SessionStatusResponse, Testcase, TestRunState, ClaimRequest, SessionUpdatesRequest, SessionUpdateResponse, ContributionRequest } from './api/v1/api_pb';
+import { TestRunStatus, SessionStatusRequest, SessionStatusResponse, Testcase, TestRunState, ClaimRequest, SessionUpdatesRequest, SessionUpdateResponse, ContributionRequest } from './api/v1/session_pb';
 import { grpc } from 'grpc-web-client';
-import { SessionService } from './api/v1/api_pb_service';
+import { SessionService } from './api/v1/session_pb_service';
 import { HOST } from './api/host';
 import { TestplanView } from './testplan-view';
 

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Card, Button, ButtonOr, Form, Label, Dropdown, TextArea, DropdownProps, TextAreaProps, ButtonGroup } from 'semantic-ui-react';
 import { TestcaseDetailViewBody } from './testcase-detail-view-body';
-import { Testcase, TestRunState, TestcaseStatus, TestcaseRunResult } from './api/v1/api_pb';
+import { Testcase, TestRunState, TestcaseStatus, TestcaseRunResult } from './api/v1/session_pb';
 import { Participant } from './types/participant';
 
 export interface NewTestcaseRunViewProps {
