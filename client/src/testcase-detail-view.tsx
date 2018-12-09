@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Card, Button } from 'semantic-ui-react';
 import { Converter } from 'showdown';
 import { TestcaseDetailViewBody } from './testcase-detail-view-body';
-import { TestcaseStatus } from './api/v1/api_pb';
+import { TestcaseStatus } from './api/v1/session_pb';
 
 export interface TestcaseDetailViewProps {
     testcase: TestcaseStatus

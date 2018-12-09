@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Table, Button, ButtonGroup, ButtonOr } from 'semantic-ui-react';
-import { TestRunStatus, TestcaseStatus, Testcase, TestcaseRunResult, TestRunState } from './api/v1/api_pb';
+import { TestRunStatus, TestcaseStatus, Testcase, TestcaseRunResult, TestRunState } from './api/v1/session_pb';
 import { Participant } from './types/participant';
 import { TestcaseDetailView } from './testcase-detail-view';
 import { TestCaseStatusView } from './testcase-status'

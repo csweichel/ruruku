@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Message, Dropdown, Form, Segment, Input, Button, InputProps, DropdownProps } from 'semantic-ui-react';
 import { grpc } from 'grpc-web-client';
-import { SessionService } from './api/v1/api_pb_service';
-import { ListSessionsRequest, ListSessionsResponse, RegistrationRequest, RegistrationResponse } from './api/v1/api_pb';
+import { SessionService } from './api/v1/session_pb_service';
+import { ListSessionsRequest, ListSessionsResponse, RegistrationRequest, RegistrationResponse } from './api/v1/session_pb';
 import { HOST } from './api/host';
 import "./session-list.css";
 import { Participant } from './types/participant';
