@@ -28,7 +28,7 @@ func (d debugLogger) Write(p []byte) (n int, err error) {
 	return os.Stderr.Write(p)
 }
 
-func Start(cfg *Config, srv api.SessionServiceServer) error {
+func Start(cfg *Config, srv api.SessionServiceServer, usr api.UserServiceServer) error {
 	var opts []grpc.ServerOption
 
 	if cfg.TLS.Enabled {
@@ -43,6 +43,7 @@ func Start(cfg *Config, srv api.SessionServiceServer) error {
 
 	grpcServer := grpc.NewServer(opts...)
 	api.RegisterSessionServiceServer(grpcServer, srv)
+	api.RegisterUserServiceServer(grpcServer, usr)
 
 	if cfg.GRPC.Enabled {
 		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.GRPC.Port))

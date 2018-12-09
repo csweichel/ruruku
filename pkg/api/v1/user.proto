@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package v1;
+
+service UserService {
+    // AuthenticateCredentials authenticates a user based on username/password
+    rpc AuthenticateCredentials(AuthenticationRequest) returns (AuthenticationRespose) {}
+
+    // Add creates a new user with a set of credentials.
+    rpc Add(AddUserRequest) returns (AddUserResponse) {}
+
+    // Delete removes an existing user. This invalidates all tokens of the user.
+    rpc Delete(DeleteUserRequest) returns (DeleteUserResponse) {}
+
+    // Grant adds permissions to a user
+    rpc Grant(GrantPermissionsRequest) returns (GrantPermissionsResponse) {}
+
+    // ChangePassword modifies the password of a user. This invalidates all tokens of the user.
+    rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse) {}
+}
+
+enum Permission {
+    NONE = 0;
+    USER_ADD = 1;
+    USER_DELETE = 2;
+    USER_GRANT = 3;
+    USER_CHPWD = 4;
+
+    SESSION_START = 10;
+    SESSION_CLOSE = 11;
+    SESSION_VIEW = 12; // list, status, updates
+    SESSION_CONTRIBUTE = 13; // register, claim, contribute
+}
+
+message AuthenticationRequest {
+    // Username is the name of the user
+    string username = 1;
+    // Password is the user's password
+    string password = 2;
+}
+
+message AuthenticationRespose {
+    // Token is the user token which other requests require for authentication/authorization
+    string token = 1;
+}
+
+message AddUserRequest {
+    // Username is the name of the user
+    string username = 1;
+    // Password is the users password
+    string password = 2;
+    // EMail is the user's email address
+    string email = 3;
+}
+
+message AddUserResponse {}
+
+message DeleteUserRequest {
+    // Username is the name of the user which to delete
+    string username = 1;
+}
+
+message DeleteUserResponse {}
+
+message GrantPermissionsRequest {
+    // Username is the name of the user to which to add permissions
+    string username = 1;
+    // Permission is the list of permissions to add
+    repeated Permission permission = 2;
+}
+
+message GrantPermissionsResponse {}
+
+message ChangePasswordRequest {
+    // Username is the name of the users who's password to change
+    string username = 1;
+    // NewPassword is the new password of the user
+    string newPassword = 2;
+}
+
+message ChangePasswordResponse {}

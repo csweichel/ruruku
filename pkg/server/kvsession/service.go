@@ -14,12 +14,7 @@ import (
 	"strings"
 )
 
-func NewSession(path string) (*kvsessionStore, error) {
-	db, err := bolt.Open(path, 0666, nil)
-	if err != nil {
-		return nil, err
-	}
-
+func NewSession(db *bolt.DB) (*kvsessionStore, error) {
 	// Start a writable transaction.
 	tx, err := db.Begin(true)
 	if err != nil {

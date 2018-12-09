@@ -21,4 +21,9 @@ protoc -Ipkg/server/kvsession \
        pkg/server/kvsession/*.proto \
        --go_out=plugins=grpc:pkg/server/kvsession
 
+# KV user
+protoc -Ipkg/server/kvuser \
+       pkg/server/kvuser/*.proto \
+       --go_out=plugins=grpc:pkg/server/kvuser
+
 popd  &> /dev/null
