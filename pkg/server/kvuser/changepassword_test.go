@@ -77,7 +77,7 @@ func (srv *kvuserStore) changePasswordAndCheckPositive(t *testing.T, tkn, userna
 		t.Error("ChangePassword did not return a response despite a valid request")
 	}
 
-	if ok, err := srv.validatePassword("foo", "new-password"); err != nil {
+	if ok, err := srv.validatePassword(username, "new-password"); err != nil {
 		t.Errorf("Error while validating password: %v", err)
 	} else if !ok {
 		t.Errorf("ChangePassword did not update password correctly. Could not validate.")
@@ -94,7 +94,7 @@ func TestChangePasswordNoAuthentication(t *testing.T) {
 	}
 
 	resp, err := srv.ChangePassword(context.Background(), &api.ChangePasswordRequest{Username: testuserName, NewPassword: "foobar"})
-	testNegativeResponse(t, "ChangePassword", codes.Unauthenticated, resp, err)
+	testNegativeResponse(t, "ChangePassword", codes.Unauthenticated, resp == nil, err)
 }
 
 func TestChangePasswordNoAuthorization(t *testing.T) {
@@ -111,7 +111,7 @@ func TestChangePasswordNoAuthorization(t *testing.T) {
 	}
 
 	resp, err := srv.ChangePassword(newAuthorizedContext(tkn), &api.ChangePasswordRequest{Username: "foo", NewPassword: "foobar"})
-	testNegativeResponse(t, "ChangePassword", codes.PermissionDenied, resp, err)
+	testNegativeResponse(t, "ChangePassword", codes.PermissionDenied, resp == nil, err)
 }
 
 func TestChangePasswordOnRoot(t *testing.T) {
@@ -124,7 +124,7 @@ func TestChangePasswordOnRoot(t *testing.T) {
 	}
 
 	resp, err := srv.ChangePassword(newAuthorizedContext(tkn), &api.ChangePasswordRequest{Username: "root", NewPassword: "foobar"})
-	testNegativeResponse(t, "ChangePassword", codes.PermissionDenied, resp, err)
+	testNegativeResponse(t, "ChangePassword", codes.PermissionDenied, resp == nil, err)
 }
 
 func TestChangePasswordOnNonExistentUser(t *testing.T) {
@@ -137,5 +137,5 @@ func TestChangePasswordOnNonExistentUser(t *testing.T) {
 	}
 
 	resp, err := srv.ChangePassword(newAuthorizedContext(tkn), &api.ChangePasswordRequest{Username: "does-not-exist", NewPassword: "foobar"})
-	testNegativeResponse(t, "ChangePassword", codes.NotFound, resp, err)
+	testNegativeResponse(t, "ChangePassword", codes.NotFound, resp == nil, err)
 }

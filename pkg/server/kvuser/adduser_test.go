@@ -52,7 +52,7 @@ func TestAddNoAuthorization(t *testing.T) {
 	srv := newTestUserService()
 
 	resp, err := srv.Add(context.Background(), newValidAddUserRequest("test"))
-	testNegativeResponse(t, "Add", codes.Unauthenticated, resp, err)
+	testNegativeResponse(t, "Add", codes.Unauthenticated, resp == nil, err)
 }
 
 func TestAddNotAuthorized(t *testing.T) {
@@ -65,7 +65,7 @@ func TestAddNotAuthorized(t *testing.T) {
 	}
 
 	resp, err := srv.Add(newAuthorizedContext(tkn), newValidAddUserRequest("test"))
-	testNegativeResponse(t, "Add", codes.PermissionDenied, resp, err)
+	testNegativeResponse(t, "Add", codes.PermissionDenied, resp == nil, err)
 }
 
 func TestAddDuplicate(t *testing.T) {
@@ -83,7 +83,7 @@ func TestAddDuplicate(t *testing.T) {
 	}
 
 	resp, err := srv.Add(newAuthorizedContext(tkn), req)
-	testNegativeResponse(t, "Add", codes.AlreadyExists, resp, err)
+	testNegativeResponse(t, "Add", codes.AlreadyExists, resp == nil, err)
 }
 
 func TestAddWithInvalidFields(t *testing.T) {
@@ -97,7 +97,7 @@ func TestAddWithInvalidFields(t *testing.T) {
 
 	testReq := func(req *api.AddUserRequest, field string) {
 		resp, err := srv.Add(newAuthorizedContext(tkn), req)
-		testNegativeResponse(t, "Add", codes.InvalidArgument, resp, err)
+		testNegativeResponse(t, "Add", codes.InvalidArgument, resp == nil, err)
 	}
 
 	testReq(&api.AddUserRequest{Username: "", Password: "bla", Email: "foo@bar.com"}, "username")

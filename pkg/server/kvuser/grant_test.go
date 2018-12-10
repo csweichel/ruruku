@@ -93,7 +93,7 @@ func TestGrantNoAuthorization(t *testing.T) {
 	srv := newTestUserService()
 
 	resp, err := srv.Grant(context.Background(), newValidGrantRequest(testuserName))
-	testNegativeResponse(t, "Grant", codes.Unauthenticated, resp, err)
+	testNegativeResponse(t, "Grant", codes.Unauthenticated, resp == nil, err)
 }
 
 func TestGrantNotAuthorized(t *testing.T) {
@@ -106,20 +106,22 @@ func TestGrantNotAuthorized(t *testing.T) {
 	}
 
 	resp, err := srv.Grant(newAuthorizedContext(tkn), newValidGrantRequest(testuserName))
-	testNegativeResponse(t, "Grant", codes.PermissionDenied, resp, err)
+	testNegativeResponse(t, "Grant", codes.PermissionDenied, resp == nil, err)
 }
 
 func TestGrantInvalidRequest(t *testing.T) {
 	srv := newTestUserService()
 
-	tkn, err := srv.newTestUserWithPermission(types.PermissionUserAdd)
+	tkn, err := srv.newTestUserWithPermission(types.PermissionUserGrant)
 	if err != nil {
 		t.Errorf("Cannot get test user: %v", err)
 		return
 	}
 
 	resp, err := srv.Grant(newAuthorizedContext(tkn), newValidGrantRequest(""))
-	testNegativeResponse(t, "Grant", codes.InvalidArgument, resp, err)
+	testNegativeResponse(t, "Grant", codes.NotFound, resp == nil, err)
 	resp, err = srv.Grant(newAuthorizedContext(tkn), newValidGrantRequest("does-not-exist"))
-	testNegativeResponse(t, "Grant", codes.NotFound, resp, err)
+	testNegativeResponse(t, "Grant", codes.NotFound, resp == nil, err)
+    resp, err = srv.Grant(newAuthorizedContext(tkn), newValidGrantRequest("root"))
+	testNegativeResponse(t, "Grant", codes.PermissionDenied, resp == nil, err)
 }
