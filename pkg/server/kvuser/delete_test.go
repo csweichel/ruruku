@@ -62,6 +62,12 @@ func TestDeleteYourself(t *testing.T) {
 	}
 
 	srv.deleteUserAndCheck(t, tkn, testuserName)
+
+    if usr, err := srv.getUserFromToken(tkn); err != nil {
+        t.Errorf("Cannot check if token is still valid: %v", err)
+    } else if usr != "" {
+        t.Errorf("Token resolved to valid user (%s) despite user being deleted", usr)
+    }
 }
 
 func TestDeleteWithoutAuthentication(t *testing.T) {
@@ -97,9 +103,9 @@ func TestDeleteInvalidUser(t *testing.T) {
 		return
 	}
 
-	srv.deleteUserAndCheckNegative(t, newAuthorizedContext(tkn), "root", codes.FailedPrecondition)
+	srv.deleteUserAndCheckNegative(t, newAuthorizedContext(tkn), "root", codes.PermissionDenied)
 	srv.deleteUserAndCheckNegative(t, newAuthorizedContext(tkn), "", codes.NotFound)
-	srv.deleteUserAndCheckNegative(t, newAuthorizedContext(tkn), "foobar", codes.NotFound)
+	srv.deleteUserAndCheckNegative(t, newAuthorizedContext(tkn), "does-not-exist", codes.NotFound)
 }
 
 func (srv *kvuserStore) deleteUserAndCheck(t *testing.T, tkn, username string) {
@@ -124,7 +130,7 @@ func (srv *kvuserStore) deleteUserAndCheck(t *testing.T, tkn, username string) {
 
 func (srv *kvuserStore) deleteUserAndCheckNegative(t *testing.T, ctx context.Context, username string, expectedCode codes.Code) {
 	resp, err := srv.Delete(ctx, &api.DeleteUserRequest{
-		Username: testuserName,
+		Username: username,
 	})
-	testNegativeResponse(t, "Delete", expectedCode, resp, err)
+	testNegativeResponse(t, "Delete", expectedCode, resp == nil, err)
 }

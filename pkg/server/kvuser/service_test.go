@@ -6,6 +6,7 @@ import (
 	bolt "github.com/etcd-io/bbolt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+    "google.golang.org/grpc/metadata"
 	"os"
 	"testing"
 )
@@ -39,7 +40,7 @@ func (s *kvuserStore) newTestUserWithPermission(permission types.Permission) (st
 		return "", err
 	}
 	if permission != types.PermissionNone {
-		if err := s.addPermission(testuserName, permission); err != nil {
+		if err := s.addPermissions(testuserName, []types.Permission{permission}); err != nil {
 			return "", err
 		}
 	}
@@ -51,22 +52,20 @@ func (s *kvuserStore) newTestUserWithPermission(permission types.Permission) (st
 }
 
 func newAuthorizedContext(tkn string) context.Context {
-	ctx := context.Background()
-
-	return ctx
+    md := metadata.New(map[string]string{ "authorization": tkn })
+	return metadata.NewIncomingContext(context.Background(), md)
 }
 
-func testNegativeResponse(t *testing.T, operation string, expectedCode codes.Code, resp interface{}, err error) {
+func testNegativeResponse(t *testing.T, operation string, expectedCode codes.Code, respNil bool, err error) {
 	if err == nil {
-		t.Errorf("%s returned did not return an despite invalid request", operation)
+		t.Errorf("%s did not return an error despite invalid request", operation)
 	} else {
 		stat, _ := status.FromError(err)
 		if stat.Code() != expectedCode {
 			t.Errorf("%s did not return an %v code, but %v", operation, expectedCode, stat.Code())
 		}
 	}
-	if resp != nil {
+	if !respNil {
 		t.Errorf("%s returned a response despite invalid request", operation)
-		return
 	}
 }

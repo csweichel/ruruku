@@ -42,10 +42,11 @@ func (s *kvuserStore) GetUserToken(user string) (string, error) {
 
 func (s *kvuserStore) getUserFromToken(token string) (string, error) {
 	var username string
-	err := s.db.View(func(tx *bolt.Tx) error {
+	err := s.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketUsers))
 
-		v := b.Get([]byte(pathUserToken(token)))
+        key := pathUserToken(token)
+		v := b.Get([]byte(key))
 		if v == nil {
 			return nil
 		}
@@ -57,8 +58,16 @@ func (s *kvuserStore) getUserFromToken(token string) (string, error) {
 
 		age := time.Now().Sub(time.Unix(td.Timestamp, 0))
 		if age > s.tokenLifetime {
+            b.Delete(key)
 			return nil
 		}
+
+        uk := pathUser(td.Username)
+        if b.Get(uk) == nil {
+            // user no longer exists
+            b.Delete(key)
+            return nil
+        }
 
 		username = td.Username
 		return nil

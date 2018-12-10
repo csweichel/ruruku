@@ -61,7 +61,7 @@ func TestAuthenticateWrongPassword(t *testing.T) {
 		Username: testuserName,
 		Password: testuserPassword + "isWrong",
 	})
-	testNegativeResponse(t, "AuthenticateCredentials", codes.Unauthenticated, resp, err)
+	testNegativeResponse(t, "AuthenticateCredentials", codes.Unauthenticated, resp == nil, err)
 }
 
 func TestAuthenticateNonExistentUser(t *testing.T) {
@@ -76,7 +76,7 @@ func TestAuthenticateNonExistentUser(t *testing.T) {
 		Username: testuserName + "isWrong",
 		Password: testuserPassword,
 	})
-	testNegativeResponse(t, "AuthenticateCredentials", codes.Unauthenticated, resp, err)
+	testNegativeResponse(t, "AuthenticateCredentials", codes.NotFound, resp == nil, err)
 }
 
 func TestAuthenticateRootUser(t *testing.T) {
@@ -86,5 +86,5 @@ func TestAuthenticateRootUser(t *testing.T) {
 		Username: "root",
 		Password: "",
 	})
-	testNegativeResponse(t, "AuthenticateCredentials", codes.Unauthenticated, resp, err)
+	testNegativeResponse(t, "AuthenticateCredentials", codes.Unauthenticated, resp == nil, err)
 }

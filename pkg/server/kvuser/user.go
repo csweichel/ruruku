@@ -4,6 +4,9 @@ import (
 	"github.com/32leaves/ruruku/pkg/types"
 	bolt "github.com/etcd-io/bbolt"
 	"github.com/golang/protobuf/proto"
+    "golang.org/x/crypto/bcrypt"
+    "fmt"
+    "bytes"
 )
 
 func (s *kvuserStore) userExists(user string) (bool, error) {
@@ -36,9 +39,7 @@ func (s *kvuserStore) validatePassword(user, password string) (bool, error) {
 			return err
 		}
 
-		valid = usr.Password == password
-		// TODO: introduce password hashing
-		valid = false
+        valid = bcrypt.CompareHashAndPassword(usr.Password, []byte(password)) == nil
 
 		return nil
 	})
@@ -49,8 +50,53 @@ func (s *kvuserStore) validatePassword(user, password string) (bool, error) {
 	return valid, nil
 }
 
+func (s *kvuserStore) changePassword(username, password string) error {
+    pwdhash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+    if err != nil {
+        return err
+    }
+
+	err = s.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucketUsers))
+
+		root := pathUser(username)
+		v := b.Get(root)
+		if v != nil {
+            var usr UserData
+            if err := proto.Unmarshal(v, &usr); err != nil {
+                return err
+            }
+
+			content, err := proto.Marshal(&UserData{
+				Username: username,
+				Password: pwdhash,
+                Email: usr.Email,
+			})
+			if err != nil {
+				return err
+			}
+
+			if err := b.Put(root, content); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *kvuserStore) addUser(username, password, email string) error {
-	err := s.db.Update(func(tx *bolt.Tx) error {
+    pwdhash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+    if err != nil {
+        return err
+    }
+
+	err = s.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketUsers))
 
 		root := pathUser(username)
@@ -58,7 +104,7 @@ func (s *kvuserStore) addUser(username, password, email string) error {
 		if v == nil {
 			content, err := proto.Marshal(&UserData{
 				Username: username,
-				Password: password,
+				Password: pwdhash,
 				Email:    email,
 			})
 			if err != nil {
@@ -79,13 +125,51 @@ func (s *kvuserStore) addUser(username, password, email string) error {
 	return nil
 }
 
-func (s *kvuserStore) addPermission(username string, permission types.Permission) error {
+func (s *kvuserStore) addPermissions(username string, permission []types.Permission) error {
 	return s.db.Update(func(tx *bolt.Tx) error {
-		return tx.Bucket([]byte(bucketUsers)).Put(pathUserPermission(username, permission), []byte{1})
+		b := tx.Bucket([]byte(bucketUsers))
+        for _, perm := range permission {
+            if err := b.Put(pathUserPermission(username, perm), []byte{1}); err != nil {
+                return err
+            }
+        }
+        return nil
 	})
 }
 
+func (s *kvuserStore) deleteUser(username string) error {
+    if username == "root" {
+        return fmt.Errorf("cannot delete root")
+    }
+
+    err := s.db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucketUsers))
+
+		if err := b.Delete(pathUser(username)); err != nil {
+            return err
+        }
+        prefix := pathUserPermissions(username)
+		c := b.Cursor()
+		for k, _ := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, _ = c.Next() {
+			if err := b.Delete(k); err != nil {
+                return err
+            }
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *kvuserStore) hasPermission(username string, permission types.Permission) (bool, error) {
+    if username == "root" {
+        return true, nil
+    }
+
 	var exists bool
 	err := s.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketUsers))
