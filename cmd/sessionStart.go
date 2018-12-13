@@ -20,6 +20,11 @@ type sessionStartFlags struct {
 var sessionStartFlagValues sessionStartFlags
 
 func (s *sessionStartFlags) Run() error {
+	cfg, err := GetConfigFromViper()
+	if err != nil {
+		log.Fatalf("Error while loading the configuration: %v", err)
+	}
+
 	req := &api.StartSessionRequest{
 		Name: moniker.New().Name(),
 	}
@@ -36,14 +41,14 @@ func (s *sessionStartFlags) Run() error {
 	}
 	req.Plan = api.ConvertTestPlan(plan)
 
-	conn, err := remoteCmdValues.Connect()
+	conn, err := cfg.Connect()
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
 	}
 	defer conn.Close()
 	client := api.NewSessionServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(remoteCmdValues.timeout)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.CLI.Timeout)*time.Second)
 	defer cancel()
 
 	resp, err := client.Start(ctx, req)

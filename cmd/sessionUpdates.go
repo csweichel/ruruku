@@ -16,7 +16,12 @@ var sessionUpdatesCmd = &cobra.Command{
 	Short: "Listens for changes in the session",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		conn, err := remoteCmdValues.Connect()
+		cfg, err := GetConfigFromViper()
+		if err != nil {
+			log.Fatalf("Error while loading the configuration: %v", err)
+		}
+
+		conn, err := cfg.Connect()
 		if err != nil {
 			log.Fatalf("fail to dial: %v", err)
 		}

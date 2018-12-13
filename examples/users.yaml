@@ -1,0 +1,23 @@
+username: admin
+password: admin
+email: admin-user@ruruku.sh
+permissions:
+- user.add
+- user.grant
+- user.delete
+- user.chpwd
+---
+username: test-manager
+password: test-manager
+email: testmanager-user@ruruku.sh
+permissions:
+- session.start
+- session.view
+- session.close
+---
+username: tester
+password: tester
+email: tester-user@ruruku.sh
+permissions:
+- session.view
+- session.contribute

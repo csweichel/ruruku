@@ -1,6 +1,7 @@
 package v1
 
 import "github.com/32leaves/ruruku/pkg/types"
+
 func (s *Participant) Convert() types.Participant {
 	return types.Participant{
 		Name: s.Name,
@@ -132,57 +133,57 @@ func ConvertTestRunState(s types.TestRunState) TestRunState {
 }
 
 func (s Permission) Convert() types.Permission {
-    if s == Permission_USER_ADD {
-        return types.PermissionUserAdd
-    }
-    if s == Permission_USER_DELETE {
-        return types.PermissionUserDelete
-    }
-    if s == Permission_USER_GRANT {
-        return types.PermissionUserGrant
-    }
-    if s == Permission_USER_CHPWD {
-        return types.PermissionUserChpwd
-    }
-    if s == Permission_SESSION_START {
-        return types.PermissionSessionStart
-    }
-    if s == Permission_SESSION_CLOSE {
-        return types.PermissionSessionClose
-    }
-    if s == Permission_SESSION_VIEW {
-        return types.PermissionSessionView
-    }
-    if s == Permission_SESSION_CONTRIBUTE {
-        return types.PermissionSessionContribute
-    }
-    return types.PermissionNone
+	if s == Permission_USER_ADD {
+		return types.PermissionUserAdd
+	}
+	if s == Permission_USER_DELETE {
+		return types.PermissionUserDelete
+	}
+	if s == Permission_USER_GRANT {
+		return types.PermissionUserGrant
+	}
+	if s == Permission_USER_CHPWD {
+		return types.PermissionUserChpwd
+	}
+	if s == Permission_SESSION_START {
+		return types.PermissionSessionStart
+	}
+	if s == Permission_SESSION_CLOSE {
+		return types.PermissionSessionClose
+	}
+	if s == Permission_SESSION_VIEW {
+		return types.PermissionSessionView
+	}
+	if s == Permission_SESSION_CONTRIBUTE {
+		return types.PermissionSessionContribute
+	}
+	return types.PermissionNone
 }
 
 func ConvertPermission(s types.Permission) Permission {
-    if s == types.PermissionUserAdd {
-        return Permission_USER_ADD
-    }
-    if s == types.PermissionUserDelete {
-        return Permission_USER_DELETE
-    }
-    if s == types.PermissionUserGrant {
-        return Permission_USER_GRANT
-    }
-    if s == types.PermissionUserChpwd {
-        return Permission_USER_CHPWD
-    }
-    if s == types.PermissionSessionStart {
-        return Permission_SESSION_START
-    }
-    if s == types.PermissionSessionClose {
-        return Permission_SESSION_CLOSE
-    }
-    if s == types.PermissionSessionView {
-        return Permission_SESSION_VIEW
-    }
-    if s == types.PermissionSessionContribute {
-        return Permission_SESSION_CONTRIBUTE
-    }
-    return Permission_NONE
+	if s == types.PermissionUserAdd {
+		return Permission_USER_ADD
+	}
+	if s == types.PermissionUserDelete {
+		return Permission_USER_DELETE
+	}
+	if s == types.PermissionUserGrant {
+		return Permission_USER_GRANT
+	}
+	if s == types.PermissionUserChpwd {
+		return Permission_USER_CHPWD
+	}
+	if s == types.PermissionSessionStart {
+		return Permission_SESSION_START
+	}
+	if s == types.PermissionSessionClose {
+		return Permission_SESSION_CLOSE
+	}
+	if s == types.PermissionSessionView {
+		return Permission_SESSION_VIEW
+	}
+	if s == types.PermissionSessionContribute {
+		return Permission_SESSION_CONTRIBUTE
+	}
+	return Permission_NONE
 }

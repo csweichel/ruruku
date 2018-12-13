@@ -122,6 +122,6 @@ func TestGrantInvalidRequest(t *testing.T) {
 	testNegativeResponse(t, "Grant", codes.NotFound, resp == nil, err)
 	resp, err = srv.Grant(newAuthorizedContext(tkn), newValidGrantRequest("does-not-exist"))
 	testNegativeResponse(t, "Grant", codes.NotFound, resp == nil, err)
-    resp, err = srv.Grant(newAuthorizedContext(tkn), newValidGrantRequest("root"))
+	resp, err = srv.Grant(newAuthorizedContext(tkn), newValidGrantRequest("root"))
 	testNegativeResponse(t, "Grant", codes.PermissionDenied, resp == nil, err)
 }

@@ -8,11 +8,13 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"io/ioutil"
 	"os"
 	"os/signal"
+	"time"
 )
 
-var sessionName string
+var rootTokenFile string
 
 // serveCmd represents the start command
 var serveCmd = &cobra.Command{
@@ -41,6 +43,19 @@ var serveCmd = &cobra.Command{
 			log.Fatalf("Error while creating the user store: %v", err)
 		}
 
+		rootTkn, err := userStore.GetUserToken("root")
+		if err != nil {
+			log.Fatalf("Cannot get root user token: %v", err)
+		}
+		if rootTokenFile == "" {
+			log.WithTime(time.Now()).WithField("token", rootTkn).WithField("lifetime", userStore.TokenLifetime).Infof("Root user token ... keep this token safe!")
+		} else {
+			if err := ioutil.WriteFile(rootTokenFile, []byte(rootTkn), 0600); err != nil {
+				log.Fatalf("Unable to write root token file: %v", err)
+			}
+			log.WithField("filename", rootTokenFile).Info("Wrote root token to file")
+		}
+
 		if err := server.Start(&srvcfg, sessionStore, userStore); err != nil {
 			log.Fatalf("Error while starting the ruruku server: %v", err)
 		}
@@ -57,6 +72,8 @@ var serveCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(serveCmd)
+
+	serveCmd.Flags().StringVar(&rootTokenFile, "root-token-file", "", "Write the root token to a file rather than stdout")
 
 	serveCmd.Flags().Int("ui-port", 8080, "Port to run UI the server on")
 	viper.BindPFlag("server.ui.port", serveCmd.Flags().Lookup("ui-port"))

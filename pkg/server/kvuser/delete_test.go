@@ -63,11 +63,11 @@ func TestDeleteYourself(t *testing.T) {
 
 	srv.deleteUserAndCheck(t, tkn, testuserName)
 
-    if usr, err := srv.getUserFromToken(tkn); err != nil {
-        t.Errorf("Cannot check if token is still valid: %v", err)
-    } else if usr != "" {
-        t.Errorf("Token resolved to valid user (%s) despite user being deleted", usr)
-    }
+	if usr, err := srv.getUserFromToken(tkn); err != nil {
+		t.Errorf("Cannot check if token is still valid: %v", err)
+	} else if usr != "" {
+		t.Errorf("Token resolved to valid user (%s) despite user being deleted", usr)
+	}
 }
 
 func TestDeleteWithoutAuthentication(t *testing.T) {

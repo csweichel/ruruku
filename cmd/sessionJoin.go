@@ -14,14 +14,19 @@ var sessionJoinCmd = &cobra.Command{
 	Short: "Joins a testing session",
 	Args:  cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		conn, err := remoteCmdValues.Connect()
+		cfg, err := GetConfigFromViper()
+		if err != nil {
+			log.Fatalf("Error while loading the configuration: %v", err)
+		}
+
+		conn, err := cfg.Connect()
 		if err != nil {
 			log.Fatalf("fail to dial: %v", err)
 		}
 		defer conn.Close()
 		client := api.NewSessionServiceClient(conn)
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(remoteCmdValues.timeout)*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.CLI.Timeout)*time.Second)
 		defer cancel()
 
 		resp, err := client.Register(ctx, &api.RegistrationRequest{SessionID: args[0], Name: args[1]})

@@ -1,43 +1,43 @@
 package kvuser
 
 import (
-    "context"
-    "github.com/32leaves/ruruku/pkg/types"
-    "google.golang.org/grpc/metadata"
-    "google.golang.org/grpc/codes"
+	"context"
+	"github.com/32leaves/ruruku/pkg/types"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
 func (s *kvuserStore) getUserFromRequest(ctx context.Context) (string, error) {
-    md, ok := metadata.FromIncomingContext(ctx)
+	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return "", status.Error(codes.Unauthenticated, "Retrieving metadata is failed")
 	}
 
-    authHeader, ok := md["authorization"]
+	authHeader, ok := md["authorization"]
 	if !ok || len(authHeader) < 1 {
 		return "", status.Error(codes.Unauthenticated, "Authorization token is not supplied")
 	}
 
-    token := authHeader[0]
-    if usr, err := s.getUserFromToken(token); err != nil {
-        return "", status.Error(codes.Internal, err.Error())
-    } else if usr == "" {
-        return "", status.Error(codes.Unauthenticated, "Authorization token is not valid")
-    } else {
-        return usr, nil
-    }
+	token := authHeader[0]
+	if usr, err := s.getUserFromToken(token); err != nil {
+		return "", status.Error(codes.Internal, err.Error())
+	} else if usr == "" {
+		return "", status.Error(codes.Unauthenticated, "Authorization token is not valid")
+	} else {
+		return usr, nil
+	}
 }
 
 func (s *kvuserStore) ValidUserFromRequest(ctx context.Context, reqperm types.Permission) error {
-    usr, err := s.getUserFromRequest(ctx)
-    if err != nil {
-        return err
-    }
+	usr, err := s.getUserFromRequest(ctx)
+	if err != nil {
+		return err
+	}
 
-    if ok, err := s.hasPermission(usr, reqperm); err != nil || !ok {
-        return status.Errorf(codes.PermissionDenied, "User does not have %v permission", reqperm)
-    }
+	if ok, err := s.hasPermission(usr, reqperm); err != nil || !ok {
+		return status.Errorf(codes.PermissionDenied, "%s does not have %v permission", usr, reqperm)
+	}
 
-    return nil
+	return nil
 }

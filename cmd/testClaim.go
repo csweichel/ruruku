@@ -14,14 +14,19 @@ var testClaimCmd = &cobra.Command{
 	Short: "Claim a test for a participant",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		conn, err := remoteCmdValues.Connect()
+		cfg, err := GetConfigFromViper()
+		if err != nil {
+			log.Fatalf("Error while loading the configuration: %v", err)
+		}
+
+		conn, err := cfg.Connect()
 		if err != nil {
 			log.Fatalf("fail to dial: %v", err)
 		}
 		defer conn.Close()
 		client := api.NewSessionServiceClient(conn)
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(remoteCmdValues.timeout)*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.CLI.Timeout)*time.Second)
 		defer cancel()
 
 		_, err = client.Claim(ctx, &api.ClaimRequest{

@@ -1,3 +1,5 @@
+cli:
+    tlsCert: /workspace/server.crt
 server:
     ui:
         enabled: true

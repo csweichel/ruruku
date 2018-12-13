@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/32leaves/ruruku/pkg/cli"
 	"github.com/32leaves/ruruku/pkg/server"
 )
 
@@ -20,10 +21,11 @@ var rootCmd = &cobra.Command{
 	Use:   "ruruku",
 	Short: "A simple manual test coordinator",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		if verbose {
-			log.SetLevel(log.DebugLevel)
-			log.Debug("Set log level to debug")
-		}
+		log.SetLevel(log.InfoLevel)
+		// if verbose {
+		log.SetLevel(log.DebugLevel)
+		log.Debug("Set log level to debug")
+		// }
 	},
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
@@ -43,8 +45,6 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-
-	log.SetLevel(log.InfoLevel)
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
@@ -82,6 +82,7 @@ func initConfig() {
 
 type Config struct {
 	Server server.Config
+	CLI    cli.Config
 }
 
 func GetConfigFromViper() (*Config, error) {
@@ -90,6 +91,9 @@ func GetConfigFromViper() (*Config, error) {
 	viper.SetDefault("server.grpc.enabled", true)
 	viper.SetDefault("server.grpc.port", 1234)
 	viper.SetDefault("server.db.Filename", "ruruku.db")
+
+	viper.SetDefault("cli.host", "localhost:1234")
+	viper.SetDefault("cli.timeout", 10)
 
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {

@@ -30,5 +30,5 @@ var testCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(testCmd)
 	registerRemoteCmdValueFlags(testCmd)
-	testCmd.PersistentFlags().StringVarP(&testCmdToken, "token", "t", "", "Session participant token (use session join to get one)")
+	testCmd.PersistentFlags().StringVarP(&testCmdToken, "ptoken", "t", "", "Session participant token (use session join to get one)")
 }
