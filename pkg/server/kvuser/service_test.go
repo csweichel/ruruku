@@ -5,8 +5,8 @@ import (
 	"github.com/32leaves/ruruku/pkg/types"
 	bolt "github.com/etcd-io/bbolt"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-    "google.golang.org/grpc/metadata"
 	"os"
 	"testing"
 )
@@ -52,7 +52,7 @@ func (s *kvuserStore) newTestUserWithPermission(permission types.Permission) (st
 }
 
 func newAuthorizedContext(tkn string) context.Context {
-    md := metadata.New(map[string]string{ "authorization": tkn })
+	md := metadata.New(map[string]string{"authorization": tkn})
 	return metadata.NewIncomingContext(context.Background(), md)
 }
 

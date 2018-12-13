@@ -16,7 +16,7 @@ func pathUserToken(token string) []byte {
 }
 
 func pathUserPermissions(name string) []byte {
-    return []byte(strings.Join([]string{"r", name}, pathSeparator))
+	return []byte(strings.Join([]string{"r", name}, pathSeparator))
 }
 func pathUserPermission(name string, permission types.Permission) []byte {
 	return []byte(strings.Join([]string{"r", name, string(permission)}, pathSeparator))

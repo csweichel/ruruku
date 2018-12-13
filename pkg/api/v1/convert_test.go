@@ -121,23 +121,23 @@ func TestConvertTestRunState(t *testing.T) {
 }
 
 func TestConvertPermission(t *testing.T) {
-    allPermissions := []Permission{
-        Permission_USER_ADD,
-        Permission_USER_DELETE,
-        Permission_USER_GRANT,
-        Permission_USER_CHPWD,
-        Permission_SESSION_START,
-        Permission_SESSION_CLOSE,
-        Permission_SESSION_VIEW,
-        Permission_SESSION_CONTRIBUTE,
-    }
+	allPermissions := []Permission{
+		Permission_USER_ADD,
+		Permission_USER_DELETE,
+		Permission_USER_GRANT,
+		Permission_USER_CHPWD,
+		Permission_SESSION_START,
+		Permission_SESSION_CLOSE,
+		Permission_SESSION_VIEW,
+		Permission_SESSION_CONTRIBUTE,
+	}
 
-    for _, p := range allPermissions {
-        r := ConvertPermission(p.Convert())
-        if r != p {
-            t.Errorf("Converting %v maps to wrong permission %v", p, r)
-        }
-    }
+	for _, p := range allPermissions {
+		r := ConvertPermission(p.Convert())
+		if r != p {
+			t.Errorf("Converting %v maps to wrong permission %v", p, r)
+		}
+	}
 }
 
 func assertEqual(t *testing.T, expected interface{}, actual interface{}) {
