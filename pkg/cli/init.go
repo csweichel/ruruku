@@ -2,11 +2,12 @@ package cli
 
 import (
 	"fmt"
-	"github.com/32leaves/ruruku/pkg/types"
-	"github.com/manifoldco/promptui"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"strings"
+
+	"github.com/32leaves/ruruku/pkg/types"
+	"github.com/manifoldco/promptui"
+	yaml "gopkg.in/yaml.v2"
 )
 
 type Init struct {

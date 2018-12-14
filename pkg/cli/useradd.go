@@ -2,15 +2,16 @@ package cli
 
 import (
 	"context"
+	"io"
+	"os"
+
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"github.com/32leaves/ruruku/pkg/types"
 	"github.com/howeyc/gopass"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
-	"io"
-	"os"
+	yaml "gopkg.in/yaml.v2"
 )
 
 type userFromFile struct {

@@ -2,12 +2,13 @@ package cli
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+
 	"github.com/32leaves/ruruku/pkg/types"
 	"github.com/manifoldco/promptui"
 	"github.com/technosophos/moniker"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"os"
+	yaml "gopkg.in/yaml.v2"
 )
 
 type InitPlan struct {

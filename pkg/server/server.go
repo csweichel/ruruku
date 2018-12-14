@@ -2,12 +2,6 @@ package server
 
 import (
 	"fmt"
-	api "github.com/32leaves/ruruku/pkg/api/v1"
-	"github.com/GeertJohan/go.rice"
-	"github.com/improbable-eng/grpc-web/go/grpcweb"
-	log "github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	stdliblog "log" // this has to be log for double header reporter
 	"net"
 	"net/http"
@@ -15,6 +9,13 @@ import (
 	"runtime/debug"
 	"strings"
 	"time"
+
+	api "github.com/32leaves/ruruku/pkg/api/v1"
+	rice "github.com/GeertJohan/go.rice"
+	"github.com/improbable-eng/grpc-web/go/grpcweb"
+	log "github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 // debugLogger is from https://rocketeer.be/blog/2018/01/multiple-response-writeheader-calls/

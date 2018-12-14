@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"context"
+	"time"
+
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"github.com/32leaves/ruruku/pkg/cli"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"time"
 )
 
 // userAuthCmd represents the sessionClose command

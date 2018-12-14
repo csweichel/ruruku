@@ -1,8 +1,9 @@
 package notifier
 
 import (
-	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"sync"
+
+	api "github.com/32leaves/ruruku/pkg/api/v1"
 )
 
 type Notifier struct {

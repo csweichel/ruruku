@@ -4,12 +4,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/32leaves/ruruku/cmd"
-	"github.com/spf13/cobra/doc"
 	"path"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/32leaves/ruruku/cmd"
+	"github.com/spf13/cobra/doc"
 )
 
 const fmTemplate = `---

@@ -1,6 +1,11 @@
 package cmd
 
 import (
+	"io/ioutil"
+	"os"
+	"os/signal"
+	"time"
+
 	"github.com/32leaves/ruruku/pkg/server"
 	"github.com/32leaves/ruruku/pkg/server/kvsession"
 	"github.com/32leaves/ruruku/pkg/server/kvuser"
@@ -8,10 +13,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"io/ioutil"
-	"os"
-	"os/signal"
-	"time"
 )
 
 var rootTokenFile string

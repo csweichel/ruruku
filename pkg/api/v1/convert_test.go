@@ -1,8 +1,9 @@
 package v1
 
 import (
-	"github.com/32leaves/ruruku/pkg/types"
 	"testing"
+
+	"github.com/32leaves/ruruku/pkg/types"
 )
 
 func TestConvertParticipant(t *testing.T) {

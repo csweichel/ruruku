@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"github.com/32leaves/ruruku/pkg/cli"
 	log "github.com/sirupsen/logrus"

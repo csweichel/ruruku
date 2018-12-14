@@ -2,14 +2,15 @@ package kvuser
 
 import (
 	"context"
+	"net/mail"
+	"time"
+
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"github.com/32leaves/ruruku/pkg/types"
 	bolt "github.com/etcd-io/bbolt"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"net/mail"
-	"time"
 )
 
 const (

@@ -3,6 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/32leaves/ruruku/pkg/prettyprint"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -11,8 +14,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
-	"os"
-	"time"
 )
 
 type remoteCmdFlags struct {
@@ -104,11 +105,11 @@ func (cfg *Config) Connect() (*grpc.ClientConn, error) {
 }
 
 func (cfg *Config) GetContext(withTimeout bool) (context.Context, context.CancelFunc) {
-    ctx := context.Background()
-    cancelFunc := func() {}
-    if withTimeout {
-	    ctx, cancelFunc = context.WithTimeout(ctx, time.Duration(cfg.CLI.Timeout)*time.Second)
-    }
+	ctx := context.Background()
+	cancelFunc := func() {}
+	if withTimeout {
+		ctx, cancelFunc = context.WithTimeout(ctx, time.Duration(cfg.CLI.Timeout)*time.Second)
+	}
 	if cfg.CLI.Token != "" {
 		ctx = metadata.AppendToOutgoingContext(ctx, "authorization", cfg.CLI.Token)
 	}

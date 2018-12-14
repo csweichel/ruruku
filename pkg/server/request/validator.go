@@ -2,6 +2,7 @@ package request
 
 import (
 	"context"
+
 	"github.com/32leaves/ruruku/pkg/types"
 )
 
