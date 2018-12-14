@@ -2,15 +2,16 @@ package cmd
 
 import (
 	"fmt"
+	"net/url"
+	"os"
+	"os/signal"
+
 	"github.com/32leaves/ruruku/pkg/server"
 	"github.com/32leaves/ruruku/pkg/server/kvsession"
 	"github.com/32leaves/ruruku/pkg/server/kvuser"
 	bolt "github.com/etcd-io/bbolt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"net/url"
-	"os"
-	"os/signal"
 )
 
 // serveCmd represents the start command

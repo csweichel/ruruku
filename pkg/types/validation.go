@@ -1,6 +1,6 @@
 package types
 
-import "gopkg.in/go-playground/validator.v9"
+import validator "gopkg.in/go-playground/validator.v9"
 
 // caches struct info
 var validate *validator.Validate

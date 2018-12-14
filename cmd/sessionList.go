@@ -1,10 +1,11 @@
 package cmd
 
 import (
+	"io"
+
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"io"
 )
 
 // sessionListCmd represents the sessionList command

@@ -2,11 +2,12 @@ package cli
 
 import (
 	"fmt"
-	"github.com/32leaves/ruruku/pkg/types"
-	"github.com/manifoldco/promptui"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/32leaves/ruruku/pkg/types"
+	"github.com/manifoldco/promptui"
 )
 
 type InitTestcase struct {

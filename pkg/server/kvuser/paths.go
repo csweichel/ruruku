@@ -1,8 +1,9 @@
 package kvuser
 
 import (
-	"github.com/32leaves/ruruku/pkg/types"
 	"strings"
+
+	"github.com/32leaves/ruruku/pkg/types"
 )
 
 const pathSeparator = "/"

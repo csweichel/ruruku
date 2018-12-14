@@ -2,10 +2,11 @@ package kvuser
 
 import (
 	"fmt"
+	"time"
+
 	bolt "github.com/etcd-io/bbolt"
 	"github.com/golang/protobuf/proto"
-	"github.com/satori/go.uuid"
-	"time"
+	uuid "github.com/satori/go.uuid"
 )
 
 // GetUserToken returns a fresh token for a user
