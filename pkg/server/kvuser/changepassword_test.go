@@ -28,7 +28,7 @@ func TestChangePasswordYourself(t *testing.T) {
 		return
 	}
 
-	srv.changePasswordAndCheckPositive(t, tkn, testuserName)
+	srv.changePasswordAndCheckPositive(t, tkn, "", testuserName)
 }
 
 func TestChangePasswordRoot(t *testing.T) {
@@ -46,7 +46,7 @@ func TestChangePasswordRoot(t *testing.T) {
 		return
 	}
 
-	srv.changePasswordAndCheckPositive(t, tkn, testuserName)
+	srv.changePasswordAndCheckPositive(t, tkn, testuserName, testuserName)
 }
 
 func TestChangePasswordOthers(t *testing.T) {
@@ -62,12 +62,12 @@ func TestChangePasswordOthers(t *testing.T) {
 		t.Errorf("Cannot add another test user: %v", err)
 	}
 
-	srv.changePasswordAndCheckPositive(t, tkn, "foo")
+	srv.changePasswordAndCheckPositive(t, tkn, "foo", "foo")
 }
 
-func (srv *kvuserStore) changePasswordAndCheckPositive(t *testing.T, tkn, username string) {
+func (srv *kvuserStore) changePasswordAndCheckPositive(t *testing.T, tkn, reqtarget, valtarget string) {
 	resp, err := srv.ChangePassword(newAuthorizedContext(tkn), &api.ChangePasswordRequest{
-		Username:    username,
+		Username:    reqtarget,
 		NewPassword: "new-password",
 	})
 	if err != nil {
@@ -77,7 +77,7 @@ func (srv *kvuserStore) changePasswordAndCheckPositive(t *testing.T, tkn, userna
 		t.Error("ChangePassword did not return a response despite a valid request")
 	}
 
-	if ok, err := srv.validatePassword(username, "new-password"); err != nil {
+	if ok, err := srv.validatePassword(valtarget, "new-password"); err != nil {
 		t.Errorf("Error while validating password: %v", err)
 	} else if !ok {
 		t.Errorf("ChangePassword did not update password correctly. Could not validate.")
@@ -124,6 +124,8 @@ func TestChangePasswordOnRoot(t *testing.T) {
 	}
 
 	resp, err := srv.ChangePassword(newAuthorizedContext(tkn), &api.ChangePasswordRequest{Username: "root", NewPassword: "foobar"})
+	testNegativeResponse(t, "ChangePassword", codes.PermissionDenied, resp == nil, err)
+    resp, err = srv.ChangePassword(newAuthorizedContext(tkn), &api.ChangePasswordRequest{Username: "", NewPassword: "foobar"})
 	testNegativeResponse(t, "ChangePassword", codes.PermissionDenied, resp == nil, err)
 }
 

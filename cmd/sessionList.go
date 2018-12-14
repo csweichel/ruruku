@@ -35,7 +35,6 @@ var sessionListCmd = &cobra.Command{
 		}
 
 		resp := make([]*api.ListSessionsResponse, 0)
-		mxidlen := 0
 		for {
 			session, err := stream.Recv()
 			if err == io.EOF {
@@ -44,9 +43,6 @@ var sessionListCmd = &cobra.Command{
 				log.WithError(err).Fatal()
 			}
 			resp = append(resp, session)
-			if len(session.Id) > mxidlen {
-				mxidlen = len(session.Id)
-			}
 		}
 
 		tpl := `ID	IS OPEN	NAME

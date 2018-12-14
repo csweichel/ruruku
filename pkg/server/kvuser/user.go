@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/32leaves/ruruku/pkg/types"
+    api "github.com/32leaves/ruruku/pkg/api/v1"
 	bolt "github.com/etcd-io/bbolt"
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/crypto/bcrypt"
@@ -129,7 +130,7 @@ func (s *kvuserStore) addPermissions(username string, permission []types.Permiss
 	return s.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketUsers))
 		for _, perm := range permission {
-			if err := b.Put(pathUserPermission(username, perm), []byte{1}); err != nil {
+			if err := b.Put(pathUserPermission(username, perm), []byte(string(perm))); err != nil {
 				return err
 			}
 		}
@@ -183,4 +184,67 @@ func (s *kvuserStore) hasPermission(username string, permission types.Permission
 	}
 
 	return exists, nil
+}
+
+func (s *kvuserStore) listUsers() ([]*api.User, error) {
+    result := make([]*api.User, 0)
+    err := s.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucketUsers))
+
+        prefix := []byte("u")
+        c := b.Cursor()
+		for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
+            var usr UserData
+			if err := proto.Unmarshal(v, &usr); err != nil {
+				return err
+			}
+
+            permissions, err := s.listPermissions(usr.Username)
+            if err != nil {
+                return err
+            }
+
+            user := api.User{
+                Name: usr.Username,
+                Email: usr.Email,
+                Permission: permissions,
+            }
+            result = append(result, &user)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+    return result, nil
+}
+
+func (s *kvuserStore) listPermissions(user string) ([]api.Permission, error) {
+    if user == "root" {
+        r := make([]api.Permission, len(types.AllPermissions))
+        for idx, p := range types.AllPermissions {
+            r[idx] = api.ConvertPermission(p)
+        }
+        return r, nil
+    }
+
+    result := make([]api.Permission, 0)
+    err := s.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucketUsers))
+
+        prefix := pathUserPermissions(user)
+        c := b.Cursor()
+		for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
+            result = append(result, api.ConvertPermission(types.Permission(v)))
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+    return result, nil
 }

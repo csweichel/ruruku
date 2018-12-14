@@ -5,7 +5,6 @@ import (
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"github.com/32leaves/ruruku/pkg/types"
 	bolt "github.com/etcd-io/bbolt"
-	"github.com/golang/protobuf/proto"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -24,35 +23,26 @@ type kvuserStore struct {
 
 func NewUserStore(db *bolt.DB) (*kvuserStore, error) {
 	err := db.Update(func(tx *bolt.Tx) error {
-		bucket, err := tx.CreateBucketIfNotExists([]byte(bucketUsers))
+		_, err := tx.CreateBucketIfNotExists([]byte(bucketUsers))
 		if err != nil {
 			return err
 		}
-
-		root := pathUser("root")
-		v := bucket.Get(root)
-		if v == nil {
-			content, err := proto.Marshal(&UserData{
-				Username: "root",
-				Password: []byte{},
-				Email:    "",
-			})
-			if err != nil {
-				return err
-			}
-
-			if err := bucket.Put(root, content); err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
-	if err != nil {
+        return nil
+    })
+    if err != nil {
 		return nil, err
 	}
 
-	return &kvuserStore{db: db, TokenLifetime: 30 * time.Minute}, nil
+    s := &kvuserStore{db: db, TokenLifetime: 30 * time.Minute}
+    if exists, err := s.userExists("root"); err != nil {
+        return nil, err
+    } else if !exists {
+        if err := s.addUser("root", "", ""); err != nil {
+            return nil, err
+        }
+    }
+
+	return s, nil
 }
 
 // AuthenticateCredentials authenticates a user based on username/password
@@ -165,23 +155,51 @@ func (s *kvuserStore) ChangePassword(ctx context.Context, req *api.ChangePasswor
 		return nil, err
 	}
 
-	if ok, err := s.hasPermission(usr, types.PermissionUserChpwd); (err != nil || !ok) && usr != req.Username {
-		return nil, status.Errorf(codes.PermissionDenied, "User does not have %v permission", types.PermissionUserChpwd)
-	}
+    target := req.Username
+    if target == "" {
+        // change your own password
+        target = usr
+    } else if target != usr {
+        // change password for someone else
+        if ok, err := s.hasPermission(usr, types.PermissionUserChpwd); (err != nil || !ok) && usr != req.Username {
+            return nil, status.Errorf(codes.PermissionDenied, "User does not have %v permission", types.PermissionUserChpwd)
+        }
+    }
 
-	if req.Username == "root" {
+	if target == "root" {
 		return nil, status.Error(codes.PermissionDenied, "Cannot change password of root")
 	}
 
-	if exists, err := s.userExists(req.Username); err != nil {
+	if exists, err := s.userExists(target); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	} else if !exists {
-		return nil, status.Errorf(codes.NotFound, "user %s does not exist", req.Username)
+		return nil, status.Errorf(codes.NotFound, "user %s does not exist", target)
 	}
 
-	if err := s.changePassword(req.Username, req.NewPassword); err != nil {
+	if err := s.changePassword(target, req.NewPassword); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return &api.ChangePasswordResponse{}, nil
+}
+
+// List returns a list of all users in the system
+func (s *kvuserStore) List(ctx context.Context, req *api.ListUsersRequest) (*api.ListUsersResponse, error) {
+	usr, err := s.getUserFromRequest(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if ok, err := s.hasPermission(usr, types.PermissionUserList); (err != nil || !ok) {
+		return nil, status.Errorf(codes.PermissionDenied, "User does not have %v permission", types.PermissionUserChpwd)
+	}
+
+    users, err := s.listUsers()
+    if err != nil {
+        return nil, status.Error(codes.Internal, err.Error())
+    }
+
+    return &api.ListUsersResponse{
+        User: users,
+    }, err
 }
