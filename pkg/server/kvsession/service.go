@@ -5,16 +5,18 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"io"
+	"strings"
+
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"github.com/32leaves/ruruku/pkg/server/notifier"
+	"github.com/32leaves/ruruku/pkg/server/request"
 	"github.com/32leaves/ruruku/pkg/types"
 	bolt "github.com/etcd-io/bbolt"
 	log "github.com/sirupsen/logrus"
-	"io"
-	"strings"
 )
 
-func NewSession(db *bolt.DB) (*kvsessionStore, error) {
+func NewSession(db *bolt.DB, reqvalidator request.Validator) (*kvsessionStore, error) {
 	// Start a writable transaction.
 	tx, err := db.Begin(true)
 	if err != nil {
@@ -32,22 +34,20 @@ func NewSession(db *bolt.DB) (*kvsessionStore, error) {
 	}
 
 	notifier := make(map[string]*notifier.Notifier)
-	return &kvsessionStore{DB: db, Notifier: notifier}, nil
+	return &kvsessionStore{DB: db, Notifier: notifier, ReqValidator: reqvalidator}, nil
 }
 
 type kvsessionStore struct {
-	DB       *bolt.DB
-	Notifier map[string]*notifier.Notifier
-}
-
-func (s *kvsessionStore) Version(ctx context.Context, req *api.VersionRequest) (*api.VersionResponse, error) {
-	return &api.VersionResponse{
-		Version:     "implement_me",
-		ReleaseName: "bloated octopus",
-	}, nil
+	DB           *bolt.DB
+	Notifier     map[string]*notifier.Notifier
+	ReqValidator request.Validator
 }
 
 func (s *kvsessionStore) Start(ctx context.Context, req *api.StartSessionRequest) (*api.StartSessionResponse, error) {
+	if _, err := s.ReqValidator.ValidUserFromRequest(ctx, types.PermissionSessionStart); err != nil {
+		return nil, err
+	}
+
 	if req.Name == "" {
 		return nil, fmt.Errorf("Cannot start a session with an empty name")
 	}
@@ -88,6 +88,10 @@ func (s *kvsessionStore) Start(ctx context.Context, req *api.StartSessionRequest
 }
 
 func (s *kvsessionStore) Close(ctx context.Context, req *api.CloseSessionRequest) (*api.CloseSessionResponse, error) {
+	if _, err := s.ReqValidator.ValidUserFromRequest(ctx, types.PermissionSessionClose); err != nil {
+		return nil, err
+	}
+
 	exists, err := s.sessionExists(req.Id)
 	if err != nil {
 		return nil, err
@@ -109,39 +113,40 @@ func (s *kvsessionStore) List(req *api.ListSessionsRequest, resp api.SessionServ
 }
 
 func (s *kvsessionStore) Register(ctx context.Context, req *api.RegistrationRequest) (*api.RegistrationResponse, error) {
-	exists, err := s.isSessionOpen(req.SessionID)
+	user, err := s.ReqValidator.ValidUserFromRequest(ctx, types.PermissionSessionContribute)
+	if err != nil {
+		return nil, err
+	}
+
+	exists, err := s.isSessionOpen(req.Session)
 	if err != nil {
 		return nil, err
 	}
 	if !exists {
-		return nil, fmt.Errorf("Session %s is not open", req.SessionID)
+		return nil, fmt.Errorf("Session %s is not open", req.Session)
 	}
 
-	if req.Name == "" {
-		return nil, fmt.Errorf("Cannot register with an empty name")
+	if err := s.registerParticipant(req.Session, user); err != nil {
+		return nil, err
 	}
 
-	token, err := s.registerParticipant(req.SessionID, req.Name)
+	defer s.broadcastChange(req.Session)
+	return &api.RegistrationResponse{}, nil
+}
+
+func (s *kvsessionStore) Claim(ctx context.Context, req *api.ClaimRequest) (*api.ClaimResponse, error) {
+	user, err := s.ReqValidator.ValidUserFromRequest(ctx, types.PermissionSessionContribute)
 	if err != nil {
 		return nil, err
 	}
 
-	defer s.broadcastChange(req.SessionID)
-	return &api.RegistrationResponse{Token: token}, nil
-}
-
-func (s *kvsessionStore) Claim(ctx context.Context, req *api.ClaimRequest) (*api.ClaimResponse, error) {
 	if req.TestcaseID == "" {
 		return nil, fmt.Errorf("Testcase does not exist in session")
 	}
 
 	// parse token
-	token, err := types.ParseParticipantToken(req.ParticipantToken)
-	if err != nil {
-		return nil, err
-	}
-	sid := token.SessionID
-	uid := token.ParticipantID
+	sid := req.Session
+	uid := user
 
 	exists, err := s.isSessionOpen(sid)
 	if err != nil {
@@ -156,7 +161,7 @@ func (s *kvsessionStore) Claim(ctx context.Context, req *api.ClaimRequest) (*api
 		return nil, err
 	}
 	if !ok {
-		return nil, fmt.Errorf("Invalid participant token %s: does not exist in session", uid)
+		return nil, fmt.Errorf("Invalid participant %s: does not exist in session", uid)
 	}
 
 	err = s.claimTestcase(sid, req.TestcaseID, uid, req.Claim)
@@ -169,17 +174,18 @@ func (s *kvsessionStore) Claim(ctx context.Context, req *api.ClaimRequest) (*api
 }
 
 func (s *kvsessionStore) Contribute(ctx context.Context, req *api.ContributionRequest) (*api.ContributionResponse, error) {
+	user, err := s.ReqValidator.ValidUserFromRequest(ctx, types.PermissionSessionContribute)
+	if err != nil {
+		return nil, err
+	}
+
 	if req.TestcaseID == "" {
 		return nil, fmt.Errorf("Testcase does not exist in session")
 	}
 
 	// parse token
-	token, err := types.ParseParticipantToken(req.ParticipantToken)
-	if err != nil {
-		return nil, err
-	}
-	sid := token.SessionID
-	uid := token.ParticipantID
+	sid := req.Session
+	uid := user
 
 	exists, err := s.isSessionOpen(sid)
 	if err != nil {
@@ -229,6 +235,10 @@ func (s *kvsessionStore) Contribute(ctx context.Context, req *api.ContributionRe
 }
 
 func (s *kvsessionStore) Status(ctx context.Context, req *api.SessionStatusRequest) (*api.SessionStatusResponse, error) {
+	if _, err := s.ReqValidator.ValidUserFromRequest(ctx, types.PermissionSessionView); err != nil {
+		return nil, err
+	}
+
 	sid := req.Id
 	exists, err := s.sessionExists(sid)
 	if err != nil {

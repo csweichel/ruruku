@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -28,7 +27,8 @@ var sessionUpdatesCmd = &cobra.Command{
 		defer conn.Close()
 		client := api.NewSessionServiceClient(conn)
 
-		clnt, err := client.Updates(context.Background(), &api.SessionUpdatesRequest{Id: args[0]})
+        ctx, _ := cfg.GetContext(false)
+		clnt, err := client.Updates(ctx, &api.SessionUpdatesRequest{Id: args[0]})
 		if err != nil {
 			log.WithError(err).Fatal()
 		}

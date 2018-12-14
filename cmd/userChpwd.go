@@ -19,9 +19,9 @@ var userChpwdCmd = &cobra.Command{
 		}
 
 		username := ""
-        if len(args) > 0 {
-            username = args[0]
-        }
+		if len(args) > 0 {
+			username = args[0]
+		}
 		password, err := cli.GetPassword(cmd)
 		if err != nil {
 			log.WithError(err).Fatal()
@@ -34,7 +34,7 @@ var userChpwdCmd = &cobra.Command{
 		defer conn.Close()
 		client := api.NewUserServiceClient(conn)
 
-		ctx, cancel := cfg.GetContext()
+		ctx, cancel := cfg.GetContext(true)
 		defer cancel()
 
 		if _, err := client.ChangePassword(ctx, &api.ChangePasswordRequest{Username: username, NewPassword: password}); err != nil {

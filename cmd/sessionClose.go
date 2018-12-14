@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"context"
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"time"
 )
 
 // sessionCloseCmd represents the sessionClose command
@@ -26,7 +24,7 @@ var sessionCloseCmd = &cobra.Command{
 		defer conn.Close()
 		client := api.NewSessionServiceClient(conn)
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.CLI.Timeout)*time.Second)
+		ctx, cancel := cfg.GetContext(true)
 		defer cancel()
 
 		_, err = client.Close(ctx, &api.CloseSessionRequest{Id: args[0]})

@@ -2,10 +2,11 @@ package kvsession
 
 import (
 	"fmt"
+	"path"
+
 	"github.com/32leaves/ruruku/pkg/types"
 	bolt "github.com/etcd-io/bbolt"
 	"github.com/golang/protobuf/proto"
-	"path"
 )
 
 func (s *kvsessionStore) claimTestcase(sessionID string, testcaseID string, userID string, claim bool) error {

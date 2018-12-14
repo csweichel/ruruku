@@ -3,11 +3,12 @@ package kvsession
 import (
 	"bytes"
 	"fmt"
+	"path"
+
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"github.com/32leaves/ruruku/pkg/types"
 	bolt "github.com/etcd-io/bbolt"
 	"github.com/golang/protobuf/proto"
-	"path"
 )
 
 func (s *kvsessionStore) storePlan(sessionID string, plan *api.TestPlan) error {

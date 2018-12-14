@@ -1,86 +1,68 @@
 package kvsession
 
 import (
-	"context"
-	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"testing"
+
+	api "github.com/32leaves/ruruku/pkg/api/v1"
+	"github.com/32leaves/ruruku/pkg/types"
+	"github.com/golang/mock/gomock"
 )
 
 var validRegistrationRequest = func(sessionID string) *api.RegistrationRequest {
 	return &api.RegistrationRequest{
-		Name:      "tester",
-		SessionID: sessionID,
+		Session: sessionID,
 	}
 }
 
 func TestValidRegistration(t *testing.T) {
-    s, _ := newTestServer()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	s, reqval := newTestServer(ctrl)
 
-	sresp, err := s.Start(context.Background(), validStartSessionRequest())
+	user := "user"
+	sresp, err := s.Start(reqval.GetContext(user, types.PermissionSessionStart), validStartSessionRequest())
 	if err != nil {
 		t.Errorf("Cannot start session: %v", err)
 		return
 	}
 
 	sid := sresp.Id
-	resp, err := s.Register(context.Background(), validRegistrationRequest(sid))
+	req := validRegistrationRequest(sid)
+	resp, err := s.Register(reqval.GetContext(user, types.PermissionSessionContribute), req)
 	if err != nil {
 		t.Errorf("Register returned error despite valid request: %v", err)
 	}
 	if resp == nil {
 		t.Error("Register returned nil response")
 	}
-	if resp.Token == "" {
-		t.Error("Register returned empty user token")
-	}
 }
 
 func TestDuplicateRegistration(t *testing.T) {
-    s, _ := newTestServer()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	s, reqval := newTestServer(ctrl)
 
-	sresp, err := s.Start(context.Background(), validStartSessionRequest())
+	user := "user"
+	sresp, err := s.Start(reqval.GetContext(user, types.PermissionSessionStart), validStartSessionRequest())
 	if err != nil {
 		t.Errorf("Cannot start session: %v", err)
 		return
 	}
 
 	sid := sresp.Id
-	resp00, err := s.Register(context.Background(), validRegistrationRequest(sid))
+	req := validRegistrationRequest(sid)
+	resp00, err := s.Register(reqval.GetContext(user, types.PermissionSessionContribute), req)
 	if err != nil {
 		t.Errorf("Register returned error despite valid request: %v", err)
 	}
-	resp01, err := s.Register(context.Background(), validRegistrationRequest(sid))
+	if resp00 == nil {
+		t.Errorf("Register returned nil response despite valid requesst")
+	}
+	resp01, err := s.Register(reqval.GetContext(user, types.PermissionSessionContribute), validRegistrationRequest(sid))
 	if err != nil {
 		t.Errorf("Register did not return an error despite invalid request")
 	}
-
-	if resp00.Token != resp01.Token {
-		t.Errorf("Register returned different tokens for the same user: %s != %s", resp00.Token, resp01.Token)
-	}
-}
-
-func TestInvalidRegistration(t *testing.T) {
-    s, _ := newTestServer()
-
-	_, err := s.Register(context.Background(), &api.RegistrationRequest{
-		Name:      "foobar",
-		SessionID: "doesNotExist",
-	})
-	if err == nil {
-		t.Errorf("Register did not return an error despite non-existent session")
-	}
-
-	resp, err := s.Start(context.Background(), validStartSessionRequest())
-	if err != nil {
-		t.Errorf("Cannot start session: %v", err)
-		return
-	}
-
-	_, err = s.Register(context.Background(), &api.RegistrationRequest{
-		Name:      "",
-		SessionID: resp.Id,
-	})
-	if err == nil {
-		t.Errorf("Register did not return an error empty user name")
+	if resp01 == nil {
+		t.Errorf("Register returned nil response despite valid requesst")
 	}
 }

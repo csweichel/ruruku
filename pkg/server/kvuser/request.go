@@ -29,15 +29,15 @@ func (s *kvuserStore) getUserFromRequest(ctx context.Context) (string, error) {
 	}
 }
 
-func (s *kvuserStore) ValidUserFromRequest(ctx context.Context, reqperm types.Permission) error {
+func (s *kvuserStore) ValidUserFromRequest(ctx context.Context, reqperm types.Permission) (string, error) {
 	usr, err := s.getUserFromRequest(ctx)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if ok, err := s.hasPermission(usr, reqperm); err != nil || !ok {
-		return status.Errorf(codes.PermissionDenied, "%s does not have %v permission", usr, reqperm)
+		return "", status.Errorf(codes.PermissionDenied, "%s does not have %v permission", usr, reqperm)
 	}
 
-	return nil
+	return usr, nil
 }

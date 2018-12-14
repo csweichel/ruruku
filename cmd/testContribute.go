@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"context"
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"time"
 )
 
 type testContributionFlags struct {
@@ -33,7 +31,7 @@ var testContributeCmd = &cobra.Command{
 		defer conn.Close()
 		client := api.NewSessionServiceClient(conn)
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.CLI.Timeout)*time.Second)
+		ctx, cancel := cfg.GetContext(true)
 		defer cancel()
 
 		result := api.TestRunState_FAILED
@@ -48,10 +46,10 @@ var testContributeCmd = &cobra.Command{
 		}
 
 		_, err = client.Contribute(ctx, &api.ContributionRequest{
-			ParticipantToken: testCmdToken,
-			TestcaseID:       args[0],
-			Comment:          testContributionFlagValues.comment,
-			Result:           result,
+			Session:    testCmdSession,
+			TestcaseID: args[0],
+			Comment:    testContributionFlagValues.comment,
+			Result:     result,
 		})
 		if err != nil {
 			log.WithError(err).Fatal()

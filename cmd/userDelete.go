@@ -26,7 +26,7 @@ var userDeleteCmd = &cobra.Command{
 		defer conn.Close()
 		client := api.NewUserServiceClient(conn)
 
-		ctx, cancel := cfg.GetContext()
+		ctx, cancel := cfg.GetContext(true)
 		defer cancel()
 
 		if _, err := client.Delete(ctx, &api.DeleteUserRequest{Username: username}); err != nil {

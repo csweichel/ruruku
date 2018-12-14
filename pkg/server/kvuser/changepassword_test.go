@@ -125,7 +125,7 @@ func TestChangePasswordOnRoot(t *testing.T) {
 
 	resp, err := srv.ChangePassword(newAuthorizedContext(tkn), &api.ChangePasswordRequest{Username: "root", NewPassword: "foobar"})
 	testNegativeResponse(t, "ChangePassword", codes.PermissionDenied, resp == nil, err)
-    resp, err = srv.ChangePassword(newAuthorizedContext(tkn), &api.ChangePasswordRequest{Username: "", NewPassword: "foobar"})
+	resp, err = srv.ChangePassword(newAuthorizedContext(tkn), &api.ChangePasswordRequest{Username: "", NewPassword: "foobar"})
 	testNegativeResponse(t, "ChangePassword", codes.PermissionDenied, resp == nil, err)
 }
 

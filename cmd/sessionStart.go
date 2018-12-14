@@ -1,14 +1,12 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"github.com/32leaves/ruruku/pkg/cli"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/technosophos/moniker"
-	"time"
 )
 
 type sessionStartFlags struct {
@@ -48,7 +46,7 @@ func (s *sessionStartFlags) Run() error {
 	defer conn.Close()
 	client := api.NewSessionServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.CLI.Timeout)*time.Second)
+	ctx, cancel := cfg.GetContext(true)
 	defer cancel()
 
 	resp, err := client.Start(ctx, req)

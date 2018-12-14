@@ -16,14 +16,14 @@ const (
 )
 
 var AllPermissions = []Permission{
-    PermissionNone,
-    PermissionUserAdd,
-    PermissionUserDelete,
-    PermissionUserGrant,
-    PermissionUserChpwd,
-    PermissionUserList,
-    PermissionSessionStart,
-    PermissionSessionClose,
-    PermissionSessionView,
-    PermissionSessionContribute,
+	PermissionNone,
+	PermissionUserAdd,
+	PermissionUserDelete,
+	PermissionUserGrant,
+	PermissionUserChpwd,
+	PermissionUserList,
+	PermissionSessionStart,
+	PermissionSessionClose,
+	PermissionSessionView,
+	PermissionSessionContribute,
 }
