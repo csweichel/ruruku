@@ -1,4 +1,4 @@
-package test
+package kvsession
 
 import (
 	"context"
@@ -13,7 +13,9 @@ var validStatusRequest = func(sessionID string) *api.SessionStatusRequest {
 	}
 }
 
-func RunTestBasicStatus(t *testing.T, s api.SessionServiceServer) {
+func TestBasicStatus(t *testing.T) {
+    s, _ := newTestServer()
+
 	sreq := validStartSessionRequest()
 	sresp, err := s.Start(context.Background(), sreq)
 	if err != nil {
