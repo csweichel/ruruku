@@ -17,6 +17,9 @@ service UserService {
 
     // ChangePassword modifies the password of a user. This invalidates all tokens of the user.
     rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse) {}
+
+    // List returns a list of all users in the system
+    rpc List(ListUsersRequest) returns (ListUsersResponse) {}
 }
 
 enum Permission {
@@ -25,6 +28,7 @@ enum Permission {
     USER_DELETE = 2;
     USER_GRANT = 3;
     USER_CHPWD = 4;
+    USER_LIST = 5;
 
     SESSION_START = 10;
     SESSION_CLOSE = 11;
@@ -72,10 +76,22 @@ message GrantPermissionsRequest {
 message GrantPermissionsResponse {}
 
 message ChangePasswordRequest {
-    // Username is the name of the users who's password to change
+    // Username is the name of the users who's password to change. An empty string changes the authorized user's password.
     string username = 1;
     // NewPassword is the new password of the user
     string newPassword = 2;
 }
 
 message ChangePasswordResponse {}
+
+message ListUsersRequest {}
+
+message ListUsersResponse {
+    repeated User user = 1;
+}
+
+message User {
+    string name = 1;
+    string email = 2;
+    repeated Permission permission = 3;
+}

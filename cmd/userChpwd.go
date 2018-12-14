@@ -5,7 +5,6 @@ import (
 	"github.com/32leaves/ruruku/pkg/cli"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 // userAuthCmd represents the sessionClose command
@@ -19,14 +18,10 @@ var userChpwdCmd = &cobra.Command{
 			log.Fatalf("Error while loading the configuration: %v", err)
 		}
 
-		username := os.Getenv("RURUKU_USER")
-		if len(args) > 0 {
-			username = args[0]
-		}
-		if username == "" {
-			log.Fatal("no username")
-		}
-
+		username := ""
+        if len(args) > 0 {
+            username = args[0]
+        }
 		password, err := cli.GetPassword(cmd)
 		if err != nil {
 			log.WithError(err).Fatal()
