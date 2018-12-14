@@ -1,39 +1,42 @@
 package kvsession
 
 import (
-	"context"
-	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"sort"
 	"testing"
+
+	api "github.com/32leaves/ruruku/pkg/api/v1"
+	"github.com/32leaves/ruruku/pkg/types"
+	"github.com/golang/mock/gomock"
 )
 
 func TestValidClaim(t *testing.T) {
-    s, _ := newTestServer()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	s, reqval := newTestServer(ctrl)
 
 	sreq := validStartSessionRequest()
-	sresp, err := s.Start(context.Background(), sreq)
+	sresp, err := s.Start(reqval.GetContext("user", types.PermissionSessionStart), sreq)
 	if err != nil {
 		t.Errorf("Cannot start session: %v", err)
 		return
 	}
 
 	rreq0 := validRegistrationRequest(sresp.Id)
-	rresp0, err := s.Register(context.Background(), rreq0)
-	if err != nil {
-		t.Errorf("Cannot join session: %v", err)
-		return
-	}
-	rreq1 := &api.RegistrationRequest{Name: "ZZlast-tester", SessionID: sresp.Id}
-	rresp1, err := s.Register(context.Background(), rreq1)
-	if err != nil {
+	if _, err := s.Register(reqval.GetContext("user00", types.PermissionSessionContribute), rreq0); err != nil {
 		t.Errorf("Cannot join session: %v", err)
 		return
 	}
 
-	resp, err := s.Claim(context.Background(), &api.ClaimRequest{
-		Claim:            true,
-		ParticipantToken: rresp0.Token,
-		TestcaseID:       sreq.Plan.Case[0].Id,
+	rreq1 := &api.RegistrationRequest{Session: sresp.Id}
+	if _, err := s.Register(reqval.GetContext("user01", types.PermissionSessionContribute), rreq1); err != nil {
+		t.Errorf("Cannot join session: %v", err)
+		return
+	}
+
+	resp, err := s.Claim(reqval.GetContext("user00", types.PermissionSessionContribute), &api.ClaimRequest{
+		Session:    sresp.Id,
+		Claim:      true,
+		TestcaseID: sreq.Plan.Case[0].Id,
 	})
 	if err != nil {
 		t.Errorf("Claim return an error despite a valid request: %v", err)
@@ -42,10 +45,10 @@ func TestValidClaim(t *testing.T) {
 		t.Errorf("Claim did not return a response despite a valid request")
 	}
 
-	resp, err = s.Claim(context.Background(), &api.ClaimRequest{
-		Claim:            true,
-		ParticipantToken: rresp1.Token,
-		TestcaseID:       sreq.Plan.Case[0].Id,
+	resp, err = s.Claim(reqval.GetContext("user01", types.PermissionSessionContribute), &api.ClaimRequest{
+		Session:    sresp.Id,
+		Claim:      true,
+		TestcaseID: sreq.Plan.Case[0].Id,
 	})
 	if err != nil {
 		t.Errorf("Claim return an error despite a valid request: %v", err)
@@ -54,7 +57,7 @@ func TestValidClaim(t *testing.T) {
 		t.Errorf("Claim did not return a response despite a valid request")
 	}
 
-	statusResp, err := s.Status(context.Background(), validStatusRequest(sresp.Id))
+	statusResp, err := s.Status(reqval.GetContext("user", types.PermissionSessionView), validStatusRequest(sresp.Id))
 	if err != nil {
 		t.Errorf("Cannot get status: %v", err)
 		return
@@ -66,18 +69,22 @@ func TestValidClaim(t *testing.T) {
 		t.Errorf("Claim did not register test case claim")
 	}
 	claims := status[0].Claim
-	sort.Slice(claims, func(i, j int) bool { return claims[i].Name > claims[j].Name })
-	if claims[0].Name != rreq0.Name {
-		t.Errorf("Claim returned wrong participant claim name: expected %s, actual %s", rreq0.Name, claims[0].Name)
-	}
-	if claims[1].Name != rreq1.Name {
-		t.Errorf("Claim returned wrong participant claim name: expected %s, actual %s", rreq1.Name, claims[1].Name)
+	sort.Slice(claims, func(i, j int) bool { return claims[i].Name < claims[j].Name })
+	if len(claims) < 2 {
+		t.Errorf("Claim returned wrong number of claims: %d instead of 2", len(claims))
+	} else {
+		if claims[0].Name != "user00" {
+			t.Errorf("Claim returned wrong participant claim name: expected %s, actual %s", "user00", claims[0].Name)
+		}
+		if claims[1].Name != "user01" {
+			t.Errorf("Claim returned wrong participant claim name: expected %s, actual %s", "user01", claims[1].Name)
+		}
 	}
 
-	resp, err = s.Claim(context.Background(), &api.ClaimRequest{
-		Claim:            false,
-		ParticipantToken: rresp0.Token,
-		TestcaseID:       sreq.Plan.Case[0].Id,
+	resp, err = s.Claim(reqval.GetContext("user00", types.PermissionSessionContribute), &api.ClaimRequest{
+		Session:    sresp.Id,
+		Claim:      false,
+		TestcaseID: sreq.Plan.Case[0].Id,
 	})
 	if err != nil {
 		t.Errorf("Claim return an error despite a valid request: %v", err)
@@ -86,54 +93,61 @@ func TestValidClaim(t *testing.T) {
 		t.Errorf("Claim did not return a response despite a valid request")
 	}
 
-	statusResp, err = s.Status(context.Background(), validStatusRequest(sresp.Id))
+	statusResp, err = s.Status(reqval.GetContext("user", types.PermissionSessionView), validStatusRequest(sresp.Id))
 	if err != nil {
 		t.Errorf("Cannot get status: %v", err)
 		return
 	}
 	status = statusResp.Status.Status
 	sort.Slice(status, func(i, j int) bool { return status[i].Case.Id < status[j].Case.Id })
-	if len(status[0].Claim) != 1 {
-		t.Errorf("Claim did not unregister previous claim")
-	}
-	if status[0].Claim[0].Name != rreq1.Name {
-		t.Errorf("Claim unregistered the wrong claim")
+	if len(status) < 2 {
+		t.Errorf("Status returned wrong number of testcases: %d instead of 2", len(status))
+	} else {
+		if len(status[0].Claim) != 1 {
+			t.Errorf("Claim did not unregister previous claim")
+		} else {
+			if status[0].Claim[0].Name != "user01" {
+				t.Errorf("Claim unregistered the wrong claim")
+			}
+		}
 	}
 }
 
 func TestInvalidClaim(t *testing.T) {
-    s, _ := newTestServer()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	s, reqval := newTestServer(ctrl)
 
 	sreq := validStartSessionRequest()
-	sresp, err := s.Start(context.Background(), sreq)
+	sresp, err := s.Start(reqval.GetContext("user", types.PermissionSessionStart), sreq)
 	if err != nil {
 		t.Errorf("Cannot start session: %v", err)
 		return
 	}
 
-	resp, err := s.Claim(context.Background(), &api.ClaimRequest{
-		Claim:            true,
-		ParticipantToken: "",
-		TestcaseID:       sreq.Plan.Case[0].Id,
+	resp, err := s.Claim(reqval.GetContext("user", types.PermissionSessionContribute), &api.ClaimRequest{
+		Session:    "",
+		Claim:      true,
+		TestcaseID: sreq.Plan.Case[0].Id,
 	})
 	if err == nil {
-		t.Errorf("Claim did not return an error despite missing participant token: %v", err)
+		t.Errorf("Claim did not return an error despite missing session name: %v", err)
 	}
 	if resp != nil {
 		t.Errorf("Claim returned a response despite an invalid request")
 	}
 
+	user00 := "user00"
 	rreq := validRegistrationRequest(sresp.Id)
-	rresp, err := s.Register(context.Background(), rreq)
-	if err != nil {
+	if _, err := s.Register(reqval.GetContext(user00, types.PermissionSessionContribute), rreq); err != nil {
 		t.Errorf("Cannot join session: %v", err)
 		return
 	}
 
-	resp, err = s.Claim(context.Background(), &api.ClaimRequest{
-		Claim:            true,
-		ParticipantToken: rresp.Token,
-		TestcaseID:       "",
+	resp, err = s.Claim(reqval.GetContext(user00, types.PermissionSessionContribute), &api.ClaimRequest{
+		Session:    sresp.Id,
+		Claim:      true,
+		TestcaseID: "",
 	})
 	if err == nil {
 		t.Errorf("Claim did not return an error despite missing testcase ID: %v", err)
@@ -142,10 +156,10 @@ func TestInvalidClaim(t *testing.T) {
 		t.Errorf("Claim returned a response despite an invalid request")
 	}
 
-	resp, err = s.Claim(context.Background(), &api.ClaimRequest{
-		Claim:            true,
-		ParticipantToken: rresp.Token,
-		TestcaseID:       "does-not-exist",
+	resp, err = s.Claim(reqval.GetContext(user00, types.PermissionSessionContribute), &api.ClaimRequest{
+		Session:    sresp.Id,
+		Claim:      true,
+		TestcaseID: "does-not-exist",
 	})
 	if err == nil {
 		t.Errorf("Claim did not return an error despite non-existent testcase ID")

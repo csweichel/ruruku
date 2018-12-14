@@ -33,14 +33,14 @@ var serveCmd = &cobra.Command{
 		}
 		log.WithField("filename", srvcfg.DB.Filename).Info("Opened database")
 
-		sessionStore, err := kvsession.NewSession(db)
-		if err != nil {
-			log.Fatalf("Error while creating the session store: %v", err)
-		}
-
 		userStore, err := kvuser.NewUserStore(db)
 		if err != nil {
 			log.Fatalf("Error while creating the user store: %v", err)
+		}
+
+		sessionStore, err := kvsession.NewSession(db, userStore)
+		if err != nil {
+			log.Fatalf("Error while creating the session store: %v", err)
 		}
 
 		rootTkn, err := userStore.GetUserToken("root")

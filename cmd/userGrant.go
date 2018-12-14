@@ -27,7 +27,7 @@ var userGrantCmd = &cobra.Command{
 		defer conn.Close()
 		client := api.NewUserServiceClient(conn)
 
-		ctx, cancel := cfg.GetContext()
+		ctx, cancel := cfg.GetContext(true)
 		defer cancel()
 
 		permissions := make([]api.Permission, len(userGrantPermissions))

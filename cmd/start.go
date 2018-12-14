@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/32leaves/ruruku/pkg/server"
 	"github.com/32leaves/ruruku/pkg/server/kvsession"
+	"github.com/32leaves/ruruku/pkg/server/kvuser"
 	bolt "github.com/etcd-io/bbolt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -32,7 +33,12 @@ var startCmd = &cobra.Command{
 		}
 		log.WithField("filename", srvcfg.DB.Filename).Info("Opened database")
 
-		store, err := kvsession.NewSession(db)
+		userStore, err := kvuser.NewUserStore(db)
+		if err != nil {
+			log.Fatalf("Error while creating the user store: %v", err)
+		}
+
+		store, err := kvsession.NewSession(db, userStore)
 		if err != nil {
 			log.Fatalf("Error while creating the session store: %v", err)
 		}

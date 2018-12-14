@@ -1,18 +1,16 @@
 package cmd
 
 import (
-	"context"
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"time"
 )
 
 // sessionJoinCmd represents the sessionJoin command
 var sessionJoinCmd = &cobra.Command{
-	Use:   "join <session-id> <participant-name>",
+	Use:   "join <session-id>",
 	Short: "Joins a testing session",
-	Args:  cobra.ExactArgs(2),
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg, err := GetConfigFromViper()
 		if err != nil {
@@ -26,17 +24,11 @@ var sessionJoinCmd = &cobra.Command{
 		defer conn.Close()
 		client := api.NewSessionServiceClient(conn)
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.CLI.Timeout)*time.Second)
+		ctx, cancel := cfg.GetContext(true)
 		defer cancel()
 
-		resp, err := client.Register(ctx, &api.RegistrationRequest{SessionID: args[0], Name: args[1]})
+		_, err = client.Register(ctx, &api.RegistrationRequest{Session: args[0]})
 		if err != nil {
-			log.WithError(err).Fatal()
-		}
-
-		tpl := `{{ .Token }}`
-		ctnt := remoteCmdValues.GetOutputFormat(resp, tpl)
-		if err := ctnt.Print(); err != nil {
 			log.WithError(err).Fatal()
 		}
 	},

@@ -145,9 +145,9 @@ func (s Permission) Convert() types.Permission {
 	if s == Permission_USER_CHPWD {
 		return types.PermissionUserChpwd
 	}
-    if s == Permission_USER_LIST {
-        return types.PermissionUserList
-    }
+	if s == Permission_USER_LIST {
+		return types.PermissionUserList
+	}
 	if s == Permission_SESSION_START {
 		return types.PermissionSessionStart
 	}
@@ -176,9 +176,9 @@ func ConvertPermission(s types.Permission) Permission {
 	if s == types.PermissionUserChpwd {
 		return Permission_USER_CHPWD
 	}
-    if s == types.PermissionUserList {
-        return Permission_USER_LIST
-    }
+	if s == types.PermissionUserList {
+		return Permission_USER_LIST
+	}
 	if s == types.PermissionSessionStart {
 		return Permission_SESSION_START
 	}

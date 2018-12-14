@@ -21,5 +21,5 @@ build/deployKey
 **/*.pb.go
 **/test.db
 **/ruruku.db
-**/gen_*_test.go
+**/mock_*.go
 public

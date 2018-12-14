@@ -2,72 +2,79 @@ package kvsession
 
 import (
 	"context"
-	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"sort"
 	"testing"
+
+	api "github.com/32leaves/ruruku/pkg/api/v1"
+	"github.com/32leaves/ruruku/pkg/types"
+	"github.com/golang/mock/gomock"
 )
 
-func validContributionRequest(token string, tcid string) *api.ContributionRequest {
+func validContributionRequest(session string, tcid string) *api.ContributionRequest {
 	return &api.ContributionRequest{
-		ParticipantToken: token,
-		TestcaseID:       tcid,
-		Comment:          "my comment",
-		Result:           api.TestRunState_UNDECIDED,
+		Session:    session,
+		TestcaseID: tcid,
+		Comment:    "my comment",
+		Result:     api.TestRunState_UNDECIDED,
 	}
 }
 
 func TestValidContribution(t *testing.T) {
-    s, _ := newTestServer()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	s, reqval := newTestServer(ctrl)
 
+	user := "user"
 	sreq := validStartSessionRequest()
-	sresp, err := s.Start(context.Background(), sreq)
+	sresp, err := s.Start(reqval.GetContext(user, types.PermissionSessionStart), sreq)
 	if err != nil {
 		t.Errorf("Cannot start session: %v", err)
 		return
 	}
 
+	user00 := "user00"
 	rreq0 := validRegistrationRequest(sresp.Id)
-	rresp0, err := s.Register(context.Background(), rreq0)
-	if err != nil {
-		t.Errorf("Cannot join session: %v", err)
-		return
-	}
-	rreq1 := &api.RegistrationRequest{Name: "ZZlast-tester", SessionID: sresp.Id}
-	rresp1, err := s.Register(context.Background(), rreq1)
-	if err != nil {
+	if _, err := s.Register(reqval.GetContext(user00, types.PermissionSessionContribute), rreq0); err != nil {
 		t.Errorf("Cannot join session: %v", err)
 		return
 	}
 
-	_, err = s.Claim(context.Background(), &api.ClaimRequest{
-		Claim:            true,
-		ParticipantToken: rresp0.Token,
-		TestcaseID:       sreq.Plan.Case[0].Id,
+	user01 := "user01"
+	rreq1 := validRegistrationRequest(sresp.Id)
+	if _, err := s.Register(reqval.GetContext(user01, types.PermissionSessionContribute), rreq1); err != nil {
+		t.Errorf("Cannot join session: %v", err)
+		return
+	}
+
+	_, err = s.Claim(reqval.GetContext(user00, types.PermissionSessionContribute), &api.ClaimRequest{
+		Session:    sresp.Id,
+		Claim:      true,
+		TestcaseID: sreq.Plan.Case[0].Id,
 	})
 	if err != nil {
 		t.Errorf("Cannot claim testcase: %v", err)
 	}
-	_, err = s.Claim(context.Background(), &api.ClaimRequest{
-		Claim:            true,
-		ParticipantToken: rresp1.Token,
-		TestcaseID:       sreq.Plan.Case[0].Id,
+	_, err = s.Claim(reqval.GetContext(user01, types.PermissionSessionContribute), &api.ClaimRequest{
+		Session:    sresp.Id,
+		Claim:      true,
+		TestcaseID: sreq.Plan.Case[0].Id,
 	})
 	if err != nil {
 		t.Errorf("Cannot claim testcase: %v", err)
 	}
 
-	req0 := validContributionRequest(rresp0.Token, sreq.Plan.Case[0].Id)
-	_, err = s.Contribute(context.Background(), req0)
+	req0 := validContributionRequest(sresp.Id, sreq.Plan.Case[0].Id)
+	_, err = s.Contribute(reqval.GetContext(user00, types.PermissionSessionContribute), req0)
 	if err != nil {
 		t.Errorf("Contribute returned an error despite a valid request: %v", err)
 	}
-	req1 := validContributionRequest(rresp1.Token, sreq.Plan.Case[0].Id)
-	_, err = s.Contribute(context.Background(), req1)
+	req1 := validContributionRequest(sresp.Id, sreq.Plan.Case[0].Id)
+	_, err = s.Contribute(reqval.GetContext(user01, types.PermissionSessionContribute), req1)
 	if err != nil {
 		t.Errorf("Contribute returned an error despite a valid request: %v", err)
 	}
 
-	statusResp, err := s.Status(context.Background(), validStatusRequest(sresp.Id))
+	statusResp, err := s.Status(reqval.GetContext(user, types.PermissionSessionView), validStatusRequest(sresp.Id))
 	if err != nil {
 		t.Errorf("Cannot get status: %v", err)
 		return
@@ -79,10 +86,10 @@ func TestValidContribution(t *testing.T) {
 		t.Errorf("Contribute did not record contribution")
 		return
 	}
-	sort.Slice(contributions, func(i, j int) bool { return contributions[i].Participant.Name > contributions[j].Participant.Name })
+	sort.Slice(contributions, func(i, j int) bool { return contributions[i].Participant.Name < contributions[j].Participant.Name })
 
-	if contributions[0].Participant.Name != rreq0.Name {
-		t.Errorf("Contribute did not record participant correctly. %v expect, %v actual", rreq0.Name, contributions[0].Participant.Name)
+	if contributions[0].Participant.Name != user00 {
+		t.Errorf("Contribute did not record participant correctly. %v expect, %v actual", user00, contributions[0].Participant.Name)
 	}
 	if contributions[0].Comment != req0.Comment {
 		t.Errorf("Contribute did not record comment correctly. %v expected, %v actual", req0.Comment, contributions[0].Comment)
@@ -93,11 +100,11 @@ func TestValidContribution(t *testing.T) {
 
 	newcomment := "this is a new comment"
 	req0.Comment = newcomment
-	_, err = s.Contribute(context.Background(), req0)
+	_, err = s.Contribute(reqval.GetContext(user00, types.PermissionSessionContribute), req0)
 	if err != nil {
 		t.Errorf("Contribute returned an error despite a valid request: %v", err)
 	}
-	statusResp, err = s.Status(context.Background(), validStatusRequest(sresp.Id))
+	statusResp, err = s.Status(reqval.GetContext(user, types.PermissionSessionView), validStatusRequest(sresp.Id))
 	if err != nil {
 		t.Errorf("Cannot get status: %v", err)
 		return
@@ -109,40 +116,43 @@ func TestValidContribution(t *testing.T) {
 		t.Errorf("Contribute did not record contribution")
 		return
 	}
-	sort.Slice(contributions, func(i, j int) bool { return contributions[i].Participant.Name > contributions[j].Participant.Name })
+	sort.Slice(contributions, func(i, j int) bool { return contributions[i].Participant.Name < contributions[j].Participant.Name })
 	if contributions[0].Comment != req0.Comment {
 		t.Errorf("Contribute did not record comment correctly. %v expected, %v actual", req0.Comment, contributions[0].Comment)
 	}
 }
 
 func TestInvalidContribution(t *testing.T) {
-    s, _ := newTestServer()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	s, reqval := newTestServer(ctrl)
 
+	user := "user"
 	sreq := validStartSessionRequest()
-	sresp, err := s.Start(context.Background(), sreq)
+	sresp, err := s.Start(reqval.GetContext(user, types.PermissionSessionStart), sreq)
 	if err != nil {
 		t.Errorf("Cannot start session: %v", err)
 		return
 	}
 
+	reqval.EXPECT().ValidUserFromRequest(gomock.Any(), types.PermissionSessionContribute).Return("user", nil)
 	_, err = s.Contribute(context.Background(), validContributionRequest("does-not-exist", sreq.Plan.Case[0].Id))
 	if err == nil {
 		t.Errorf("Contribute did not return an error despite invalid request")
 	}
 
 	rreq := validRegistrationRequest(sresp.Id)
-	rresp, err := s.Register(context.Background(), rreq)
-	if err != nil {
+	if _, err := s.Register(reqval.GetContext(user, types.PermissionSessionContribute), rreq); err != nil {
 		t.Errorf("Cannot join session: %v", err)
 		return
 	}
 
-	_, err = s.Contribute(context.Background(), validContributionRequest(rresp.Token, sreq.Plan.Case[0].Id))
+	_, err = s.Contribute(reqval.GetContext(user, types.PermissionSessionContribute), validContributionRequest(sresp.Id, sreq.Plan.Case[0].Id))
 	if err == nil {
 		t.Errorf("Contribute did not return an error even though participant did not claim the testcase")
 	}
 
-	_, err = s.Contribute(context.Background(), validContributionRequest(rresp.Token, "does-not-exist"))
+	_, err = s.Contribute(reqval.GetContext(user, types.PermissionSessionContribute), validContributionRequest(sresp.Id, "does-not-exist"))
 	if err == nil {
 		t.Errorf("Contribute did not return an error despite contributing to non-existent testcase")
 	}

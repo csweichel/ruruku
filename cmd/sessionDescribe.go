@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"context"
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"time"
 )
 
 const sessionDescribeTpl = `ID:	{{ .Id }}
@@ -39,7 +37,7 @@ var sessionDescribeCmd = &cobra.Command{
 		defer conn.Close()
 		client := api.NewSessionServiceClient(conn)
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.CLI.Timeout)*time.Second)
+		ctx, cancel := cfg.GetContext(true)
 		defer cancel()
 
 		resp, err := client.Status(ctx, &api.SessionStatusRequest{Id: args[0]})

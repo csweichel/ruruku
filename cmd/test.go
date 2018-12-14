@@ -4,9 +4,10 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"os"
 )
 
-var testCmdToken string
+var testCmdSession string
 
 // testCmd represents the test command
 var testCmd = &cobra.Command{
@@ -17,8 +18,11 @@ var testCmd = &cobra.Command{
 		if err := remoteCmdValuesPreRun(cmd, args); err != nil {
 			return err
 		}
-		if testCmdToken == "" {
-			return fmt.Errorf("--token is required")
+		if testCmdSession == "" {
+			testCmdSession = os.Getenv("RURUKU_SESSION")
+		}
+		if testCmdSession == "" {
+			return fmt.Errorf("--session is required")
 		}
 		return nil
 	},
@@ -30,5 +34,5 @@ var testCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(testCmd)
 	registerRemoteCmdValueFlags(testCmd)
-	testCmd.PersistentFlags().StringVarP(&testCmdToken, "ptoken", "t", "", "Session participant token (use session join to get one)")
+	testCmd.PersistentFlags().StringVarP(&testCmdSession, "session", "s", "", "ID of the target test session - can also be RURUKU_SESSION env var")
 }

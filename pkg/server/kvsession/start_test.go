@@ -2,8 +2,11 @@ package kvsession
 
 import (
 	"context"
-	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"testing"
+
+	api "github.com/32leaves/ruruku/pkg/api/v1"
+	"github.com/32leaves/ruruku/pkg/types"
+	"github.com/golang/mock/gomock"
 )
 
 var validStartSessionRequest = func() *api.StartSessionRequest {
@@ -38,8 +41,11 @@ var validStartSessionRequest = func() *api.StartSessionRequest {
 }
 
 func TestStartValidSession(t *testing.T) {
-    s, _ := newTestServer()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	s, reqval := newTestServer(ctrl)
 
+	reqval.EXPECT().ValidUserFromRequest(gomock.Any(), types.PermissionSessionStart).Return("user", nil)
 	resp, err := s.Start(context.Background(), validStartSessionRequest())
 
 	if err != nil {
@@ -55,8 +61,11 @@ func TestStartValidSession(t *testing.T) {
 }
 
 func TestStartInvalidSession(t *testing.T) {
-    s, _ := newTestServer()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	s, reqval := newTestServer(ctrl)
 
+	reqval.EXPECT().ValidUserFromRequest(gomock.Any(), types.PermissionSessionStart).Return("user", nil)
 	req := &api.StartSessionRequest{
 		Name: "",
 	}
@@ -70,6 +79,7 @@ func TestStartInvalidSession(t *testing.T) {
 
 	req = validStartSessionRequest()
 	req.Plan.Case[0].Name = ""
+	reqval.EXPECT().ValidUserFromRequest(gomock.Any(), types.PermissionSessionStart).Return("user", nil)
 	resp, err = s.Start(context.Background(), req)
 	if err == nil {
 		t.Errorf("Start accepted invalid testcase (name == \"\")")
@@ -80,6 +90,7 @@ func TestStartInvalidSession(t *testing.T) {
 
 	req = validStartSessionRequest()
 	req.Plan.Case[0].Id = req.Plan.Case[1].Id
+	reqval.EXPECT().ValidUserFromRequest(gomock.Any(), types.PermissionSessionStart).Return("user", nil)
 	resp, err = s.Start(context.Background(), req)
 	if err == nil {
 		t.Errorf("Start accepted invalid testcases (two cases with ID \"%s\")", req.Plan.Case[0].Id)

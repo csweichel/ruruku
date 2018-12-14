@@ -27,20 +27,20 @@ func NewUserStore(db *bolt.DB) (*kvuserStore, error) {
 		if err != nil {
 			return err
 		}
-        return nil
-    })
-    if err != nil {
+		return nil
+	})
+	if err != nil {
 		return nil, err
 	}
 
-    s := &kvuserStore{db: db, TokenLifetime: 30 * time.Minute}
-    if exists, err := s.userExists("root"); err != nil {
-        return nil, err
-    } else if !exists {
-        if err := s.addUser("root", "", ""); err != nil {
-            return nil, err
-        }
-    }
+	s := &kvuserStore{db: db, TokenLifetime: 30 * time.Minute}
+	if exists, err := s.userExists("root"); err != nil {
+		return nil, err
+	} else if !exists {
+		if err := s.addUser("root", "", ""); err != nil {
+			return nil, err
+		}
+	}
 
 	return s, nil
 }
@@ -75,7 +75,7 @@ func (s *kvuserStore) AuthenticateCredentials(ctx context.Context, req *api.Auth
 
 // Add creates a new user with a set of credentials.
 func (s *kvuserStore) Add(ctx context.Context, req *api.AddUserRequest) (*api.AddUserResponse, error) {
-	if err := s.ValidUserFromRequest(ctx, types.PermissionUserAdd); err != nil {
+	if _, err := s.ValidUserFromRequest(ctx, types.PermissionUserAdd); err != nil {
 		return nil, err
 	}
 
@@ -98,7 +98,7 @@ func (s *kvuserStore) Add(ctx context.Context, req *api.AddUserRequest) (*api.Ad
 
 // Delete removes an existing user. This invalidates all tokens of the user.
 func (s *kvuserStore) Delete(ctx context.Context, req *api.DeleteUserRequest) (*api.DeleteUserResponse, error) {
-	if err := s.ValidUserFromRequest(ctx, types.PermissionUserDelete); err != nil {
+	if _, err := s.ValidUserFromRequest(ctx, types.PermissionUserDelete); err != nil {
 		return nil, err
 	}
 
@@ -121,7 +121,7 @@ func (s *kvuserStore) Delete(ctx context.Context, req *api.DeleteUserRequest) (*
 
 // Grant adds permissions to a user
 func (s *kvuserStore) Grant(ctx context.Context, req *api.GrantPermissionsRequest) (*api.GrantPermissionsResponse, error) {
-	if err := s.ValidUserFromRequest(ctx, types.PermissionUserGrant); err != nil {
+	if _, err := s.ValidUserFromRequest(ctx, types.PermissionUserGrant); err != nil {
 		return nil, err
 	}
 
@@ -155,16 +155,16 @@ func (s *kvuserStore) ChangePassword(ctx context.Context, req *api.ChangePasswor
 		return nil, err
 	}
 
-    target := req.Username
-    if target == "" {
-        // change your own password
-        target = usr
-    } else if target != usr {
-        // change password for someone else
-        if ok, err := s.hasPermission(usr, types.PermissionUserChpwd); (err != nil || !ok) && usr != req.Username {
-            return nil, status.Errorf(codes.PermissionDenied, "User does not have %v permission", types.PermissionUserChpwd)
-        }
-    }
+	target := req.Username
+	if target == "" {
+		// change your own password
+		target = usr
+	} else if target != usr {
+		// change password for someone else
+		if ok, err := s.hasPermission(usr, types.PermissionUserChpwd); (err != nil || !ok) && usr != req.Username {
+			return nil, status.Errorf(codes.PermissionDenied, "User does not have %v permission", types.PermissionUserChpwd)
+		}
+	}
 
 	if target == "root" {
 		return nil, status.Error(codes.PermissionDenied, "Cannot change password of root")
@@ -190,16 +190,16 @@ func (s *kvuserStore) List(ctx context.Context, req *api.ListUsersRequest) (*api
 		return nil, err
 	}
 
-	if ok, err := s.hasPermission(usr, types.PermissionUserList); (err != nil || !ok) {
-		return nil, status.Errorf(codes.PermissionDenied, "User does not have %v permission", types.PermissionUserChpwd)
+	if ok, err := s.hasPermission(usr, types.PermissionUserList); err != nil || !ok {
+		return nil, status.Errorf(codes.PermissionDenied, "User does not have %v permission", types.PermissionUserList)
 	}
 
-    users, err := s.listUsers()
-    if err != nil {
-        return nil, status.Error(codes.Internal, err.Error())
-    }
+	users, err := s.listUsers()
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-    return &api.ListUsersResponse{
-        User: users,
-    }, err
+	return &api.ListUsersResponse{
+		User: users,
+	}, err
 }

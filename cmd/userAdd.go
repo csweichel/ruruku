@@ -40,7 +40,7 @@ You can add multiple users in one go by using the YAML file separater ---.`,
 		defer conn.Close()
 		client := api.NewUserServiceClient(conn)
 
-		ctx, cancel := cfg.GetContext()
+		ctx, cancel := cfg.GetContext(true)
 		defer cancel()
 
 		if userAddCmdFile != "" {

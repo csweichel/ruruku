@@ -1,12 +1,10 @@
 package cmd
 
 import (
-	"context"
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"io"
-	"time"
 )
 
 // sessionListCmd represents the sessionList command
@@ -26,7 +24,7 @@ var sessionListCmd = &cobra.Command{
 		defer conn.Close()
 		client := api.NewSessionServiceClient(conn)
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.CLI.Timeout)*time.Second)
+		ctx, cancel := cfg.GetContext(true)
 		defer cancel()
 
 		stream, err := client.List(ctx, &api.ListSessionsRequest{})

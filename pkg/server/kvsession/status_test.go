@@ -2,9 +2,12 @@ package kvsession
 
 import (
 	"context"
-	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"sort"
 	"testing"
+
+	api "github.com/32leaves/ruruku/pkg/api/v1"
+	"github.com/32leaves/ruruku/pkg/types"
+	"github.com/golang/mock/gomock"
 )
 
 var validStatusRequest = func(sessionID string) *api.SessionStatusRequest {
@@ -14,8 +17,11 @@ var validStatusRequest = func(sessionID string) *api.SessionStatusRequest {
 }
 
 func TestBasicStatus(t *testing.T) {
-    s, _ := newTestServer()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	s, reqval := newTestServer(ctrl)
 
+	reqval.EXPECT().ValidUserFromRequest(gomock.Any(), types.PermissionSessionStart).Return("user", nil)
 	sreq := validStartSessionRequest()
 	sresp, err := s.Start(context.Background(), sreq)
 	if err != nil {
@@ -23,6 +29,7 @@ func TestBasicStatus(t *testing.T) {
 		return
 	}
 
+	reqval.EXPECT().ValidUserFromRequest(gomock.Any(), types.PermissionSessionView).Return("user", nil)
 	resp, err := s.Status(context.Background(), validStatusRequest(sresp.Id))
 	if err != nil {
 		t.Errorf("Status returned an error despite valid request: %v", err)

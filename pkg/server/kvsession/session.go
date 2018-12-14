@@ -1,14 +1,12 @@
 package kvsession
 
 import (
-	"bytes"
 	"fmt"
+	"path"
+
 	api "github.com/32leaves/ruruku/pkg/api/v1"
-	"github.com/32leaves/ruruku/pkg/types"
 	bolt "github.com/etcd-io/bbolt"
 	"github.com/golang/protobuf/proto"
-	"github.com/satori/go.uuid"
-	"path"
 )
 
 const (
@@ -122,34 +120,13 @@ func (s *kvsessionStore) listSessions(cb func(session *api.ListSessionsResponse)
 	})
 }
 
-func (s *kvsessionStore) registerParticipant(sessionID string, name string) (string, error) {
-	id, err := uuid.NewV4()
-	if err != nil {
-		return "", fmt.Errorf("Cannot create participant ID: %v", err)
-	}
-	uid := id.String()
-
-	err = s.DB.Update(func(tx *bolt.Tx) error {
+func (s *kvsessionStore) registerParticipant(sessionID string, name string) error {
+	return s.DB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketSessions))
 
-		prefix := []byte(path.Join(sessionID, "p"))
-		c := b.Cursor()
-		for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
-			if string(v) == name {
-				_, uid = path.Split(string(k))
-				return nil
-			}
-		}
-
-		key := []byte(path.Join(sessionID, "p", uid))
+		key := []byte(path.Join(sessionID, "p", name))
 		return b.Put(key, []byte(name))
 	})
-	if err != nil {
-		return "", err
-	}
-
-	token := types.ParticipantToken{SessionID: sessionID, ParticipantID: uid}
-	return token.String(), nil
 }
 
 func (s *kvsessionStore) getParticipant(sessionID string, participantID string) (*api.Participant, error) {

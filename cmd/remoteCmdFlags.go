@@ -20,6 +20,8 @@ type remoteCmdFlags struct {
 	outputChanged   bool
 	template        string
 	templateChanged bool
+
+	outputFlagset *flag.FlagSet
 }
 
 var remoteCmdValues remoteCmdFlags
@@ -37,6 +39,7 @@ func remoteCmdValuesPreRun(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("Did not find remote command flags. Did you call registerRemoteCmdValueFlags?")
 	}
 
+	remoteCmdValues.outputFlagset = flags
 	viper.BindPFlag("cli.host", flags.Lookup("host"))
 	viper.BindPFlag("cli.token", flags.Lookup("token"))
 	viper.BindPFlag("cli.timeout", flags.Lookup("timeout"))
@@ -63,7 +66,7 @@ func registerRemoteCmdValueFlags(cmd *cobra.Command) {
 
 func (s *remoteCmdFlags) GetOutputFormat(obj interface{}, template string) *prettyprint.Content {
 	format := prettyprint.TemplateFormat
-	if sessionCmd.PersistentFlags().Lookup("output").Changed {
+	if remoteCmdValues.outputFlagset.Lookup("output").Changed {
 		if s.format == "json" {
 			format = prettyprint.JSONFormat
 		} else if s.format == "string" {
@@ -74,7 +77,7 @@ func (s *remoteCmdFlags) GetOutputFormat(obj interface{}, template string) *pret
 			log.WithField("format", s.format).Warn("Unknown format, falling back to template")
 		}
 	}
-	if sessionCmd.PersistentFlags().Lookup("output-template").Changed {
+	if remoteCmdValues.outputFlagset.Lookup("output-template").Changed {
 		template = s.template
 	}
 
@@ -100,8 +103,12 @@ func (cfg *Config) Connect() (*grpc.ClientConn, error) {
 	return grpc.Dial(cfg.CLI.Host, opts)
 }
 
-func (cfg *Config) GetContext() (context.Context, context.CancelFunc) {
-	ctx, cancelFunc := context.WithTimeout(context.Background(), time.Duration(cfg.CLI.Timeout)*time.Second)
+func (cfg *Config) GetContext(withTimeout bool) (context.Context, context.CancelFunc) {
+    ctx := context.Background()
+    cancelFunc := func() {}
+    if withTimeout {
+	    ctx, cancelFunc = context.WithTimeout(ctx, time.Duration(cfg.CLI.Timeout)*time.Second)
+    }
 	if cfg.CLI.Token != "" {
 		ctx = metadata.AppendToOutgoingContext(ctx, "authorization", cfg.CLI.Token)
 	}
