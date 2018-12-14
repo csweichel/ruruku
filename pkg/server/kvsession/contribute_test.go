@@ -1,4 +1,4 @@
-package test
+package kvsession
 
 import (
 	"context"
@@ -16,7 +16,9 @@ func validContributionRequest(token string, tcid string) *api.ContributionReques
 	}
 }
 
-func RunTestValidContribution(t *testing.T, s api.SessionServiceServer) {
+func TestValidContribution(t *testing.T) {
+    s, _ := newTestServer()
+
 	sreq := validStartSessionRequest()
 	sresp, err := s.Start(context.Background(), sreq)
 	if err != nil {
@@ -113,7 +115,9 @@ func RunTestValidContribution(t *testing.T, s api.SessionServiceServer) {
 	}
 }
 
-func RunTestInvalidContribution(t *testing.T, s api.SessionServiceServer) {
+func TestInvalidContribution(t *testing.T) {
+    s, _ := newTestServer()
+
 	sreq := validStartSessionRequest()
 	sresp, err := s.Start(context.Background(), sreq)
 	if err != nil {

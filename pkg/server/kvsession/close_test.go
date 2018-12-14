@@ -1,4 +1,4 @@
-package test
+package kvsession
 
 import (
 	"context"
@@ -6,7 +6,9 @@ import (
 	"testing"
 )
 
-func RunTestValidClose(t *testing.T, s api.SessionServiceServer) {
+func TestValidClose(t *testing.T) {
+    s, _ := newTestServer()
+
 	sreq := validStartSessionRequest()
 	sresp, err := s.Start(context.Background(), sreq)
 	if err != nil {
@@ -54,7 +56,9 @@ func RunTestValidClose(t *testing.T, s api.SessionServiceServer) {
 	}
 }
 
-func RunTestInvalidClose(t *testing.T, s api.SessionServiceServer) {
+func TestInvalidClose(t *testing.T) {
+    s, _ := newTestServer()
+
 	resp, err := s.Close(context.Background(), &api.CloseSessionRequest{Id: "does-not-exist"})
 	if err == nil {
 		t.Errorf("Close returned did not return an error despite sending an invalid request")

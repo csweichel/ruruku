@@ -1,4 +1,4 @@
-package test
+package kvsession
 
 import (
 	"context"
@@ -13,7 +13,9 @@ var validRegistrationRequest = func(sessionID string) *api.RegistrationRequest {
 	}
 }
 
-func RunTestValidRegistration(t *testing.T, s api.SessionServiceServer) {
+func TestValidRegistration(t *testing.T) {
+    s, _ := newTestServer()
+
 	sresp, err := s.Start(context.Background(), validStartSessionRequest())
 	if err != nil {
 		t.Errorf("Cannot start session: %v", err)
@@ -33,7 +35,9 @@ func RunTestValidRegistration(t *testing.T, s api.SessionServiceServer) {
 	}
 }
 
-func RunTestDuplicateRegistration(t *testing.T, s api.SessionServiceServer) {
+func TestDuplicateRegistration(t *testing.T) {
+    s, _ := newTestServer()
+
 	sresp, err := s.Start(context.Background(), validStartSessionRequest())
 	if err != nil {
 		t.Errorf("Cannot start session: %v", err)
@@ -55,7 +59,9 @@ func RunTestDuplicateRegistration(t *testing.T, s api.SessionServiceServer) {
 	}
 }
 
-func RunTestInvalidRegistration(t *testing.T, s api.SessionServiceServer) {
+func TestInvalidRegistration(t *testing.T) {
+    s, _ := newTestServer()
+
 	_, err := s.Register(context.Background(), &api.RegistrationRequest{
 		Name:      "foobar",
 		SessionID: "doesNotExist",

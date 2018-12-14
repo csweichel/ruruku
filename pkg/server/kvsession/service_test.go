@@ -1,14 +1,15 @@
 package kvsession
 
-//go:generate go run ../../../build/generate-api-tests.go kvsession $GOFILE
-
 import (
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	bolt "github.com/etcd-io/bbolt"
+    log "github.com/sirupsen/logrus"
 	"os"
 )
 
-func newTestServer() api.SessionServiceServer {
+func newTestServer() (api.SessionServiceServer, api.UserServiceServer) {
+    log.SetLevel(log.WarnLevel)
+
 	if _, err := os.Stat("test.db"); err == nil {
 		os.Remove("test.db")
 	}
@@ -23,5 +24,5 @@ func newTestServer() api.SessionServiceServer {
 		panic(err)
 	}
 
-	return store
+	return store, nil
 }

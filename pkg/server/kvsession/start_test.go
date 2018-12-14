@@ -1,4 +1,4 @@
-package test
+package kvsession
 
 import (
 	"context"
@@ -37,7 +37,9 @@ var validStartSessionRequest = func() *api.StartSessionRequest {
 	}
 }
 
-func RunTestStartValidSession(t *testing.T, s api.SessionServiceServer) {
+func TestStartValidSession(t *testing.T) {
+    s, _ := newTestServer()
+
 	resp, err := s.Start(context.Background(), validStartSessionRequest())
 
 	if err != nil {
@@ -52,7 +54,9 @@ func RunTestStartValidSession(t *testing.T, s api.SessionServiceServer) {
 	}
 }
 
-func RunTestStartInvalidSession(t *testing.T, s api.SessionServiceServer) {
+func TestStartInvalidSession(t *testing.T) {
+    s, _ := newTestServer()
+
 	req := &api.StartSessionRequest{
 		Name: "",
 	}
