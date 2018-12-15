@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Converter } from 'showdown';
 import { Card, Icon, Feed } from 'semantic-ui-react';
-import { TestcaseStatus, TestRunState } from './api/v1/session_pb';
+import { TestcaseStatus, TestRunState } from '../api/v1/session_pb';
 
 export class TestcaseDetailViewBody extends React.Component<{ tcs: TestcaseStatus }, {}> {
 

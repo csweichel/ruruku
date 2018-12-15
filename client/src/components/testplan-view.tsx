@@ -1,17 +1,14 @@
 import * as React from 'react';
 import { Table, Button, ButtonGroup, ButtonOr } from 'semantic-ui-react';
-import { TestRunStatus, TestcaseStatus, Testcase, TestcaseRunResult, TestRunState } from './api/v1/session_pb';
-import { Participant } from './types/participant';
+import { TestRunStatus, TestcaseStatus, TestcaseRunResult, TestRunState } from '../api/v1/session_pb';
 import { TestcaseDetailView } from './testcase-detail-view';
 import { TestCaseStatusView } from './testcase-status'
 import { NewTestcaseRunView } from './new-testcase-run-view';
+import { AppStateContent, getClient } from 'src/types/app-state';
+import { Disposable } from 'src/types/service-client';
 
 export interface TestplanViewProps {
-    status: TestRunStatus
-    participant: Participant
-
-    claimTestCase(testcaseId: string, participantToken: string, claim: boolean): void
-    submitTestCaseRun(testCase: Testcase, participant: Participant, result: TestRunState, comment: string): void
+    appState: AppStateContent
     showDetails(content?: any): void
 }
 
@@ -19,9 +16,11 @@ type SortableColumns = "group" | "name" | "actions";
 interface TestplanViewState {
     column: SortableColumns
     direction: 'ascending' | 'descending'
+    status?: TestRunStatus
 }
 
 export class TestplanView extends React.Component<TestplanViewProps, TestplanViewState> {
+    protected updateListener: Disposable;
 
     public constructor(props: TestplanViewProps) {
         super(props);
@@ -29,6 +28,21 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
             column: 'name',
             direction: 'ascending'
         };
+    }
+
+    public async componentWillMount() {
+        this.fetchStatus();
+        try {
+            this.updateListener = await getClient(this.props.appState).listenForUpdates((s, err) => {
+                if (err) {
+                    this.props.appState.setError(`${err}`);
+                } else {
+                    this.setState({ status: s });
+                }
+            });
+        } catch (err) {
+            this.props.appState.setError(err);
+        }
     }
 
     public render() {
@@ -50,6 +64,14 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
         </Table>
     }
 
+    protected async fetchStatus() {
+        try {
+            this.setState({ status: await getClient(this.props.appState).getStatus() });
+        } catch (err) {
+            this.props.appState.setError(err);
+        }
+    }
+
     protected handleSort(column: SortableColumns) {
         if (this.state.column === column) {
             this.setState({direction: this.state.direction === 'ascending' ? 'descending' : 'ascending'});
@@ -62,11 +84,11 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
     }
 
     protected buildRows() {
-        if (!this.props.status) {
+        if (!this.state.status) {
             return [];
         }
 
-        const cases = this.props.status.getStatusList();
+        const cases = this.state.status.getStatusList();
         if (!cases) {
             console.warn("Session has empty case list");
             return [];
@@ -137,27 +159,30 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
 
     protected showNewRunForm(cse: TestcaseStatus, result?: TestRunState) {
         this.props.showDetails(<NewTestcaseRunView
+            appState={this.props.appState}
             testcase={cse}
-            participant={this.props.participant}
             result={result}
-            onSubmit={this.props.submitTestCaseRun}
             onClose={this.props.showDetails} />)
     }
 
     protected isClaimed(cse: TestcaseStatus): boolean {
-        return !!cse.getClaimList().find(c => c.getName() === this.props.participant.name);
+        return !!cse.getClaimList().find(c => c.getName() === this.props.appState.user!.name);
     }
 
     protected getPreviousRun(cse: TestcaseStatus): TestcaseRunResult | undefined {
         return cse.getResultList().find(r => {
             const p = r.getParticipant();
-            return !!(p && p.getName() === this.props.participant.name);
+            return !!(p && p.getName() === this.props.appState.user!.name);
         });
     }
 
-    protected claim(cse: TestcaseStatus, claim: boolean, evt: React.SyntheticEvent): void {
+    protected async claim(cse: TestcaseStatus, claim: boolean, evt: React.SyntheticEvent): Promise<void> {
         evt.preventDefault();
-        this.props.claimTestCase(cse.getCase()!.getId(), this.props.participant.token, claim);
+        try {
+            await getClient(this.props.appState).claim(cse.getCase()!.getId(), claim);
+        } catch (err) {
+            this.props.appState.setError(err);
+        }
     }
 
 }

@@ -33,8 +33,13 @@ func NewSession(db *bolt.DB, reqvalidator request.Validator) (*kvsessionStore, e
 		return nil, err
 	}
 
-	notifier := make(map[string]*notifier.Notifier)
-	return &kvsessionStore{DB: db, Notifier: notifier, ReqValidator: reqvalidator}, nil
+	n := make(map[string]*notifier.Notifier)
+	r := &kvsessionStore{DB: db, Notifier: n, ReqValidator: reqvalidator}
+	r.listSessions(func(s *api.ListSessionsResponse) error {
+		r.Notifier[s.Id] = notifier.NewNotifier()
+		return nil
+	})
+	return r, nil
 }
 
 type kvsessionStore struct {
@@ -109,6 +114,10 @@ func (s *kvsessionStore) Close(ctx context.Context, req *api.CloseSessionRequest
 }
 
 func (s *kvsessionStore) List(req *api.ListSessionsRequest, resp api.SessionService_ListServer) error {
+	if _, err := s.ReqValidator.ValidUserFromRequest(resp.Context(), types.PermissionSessionView); err != nil {
+		return err
+	}
+
 	return s.listSessions(resp.Send)
 }
 
@@ -168,6 +177,12 @@ func (s *kvsessionStore) Claim(ctx context.Context, req *api.ClaimRequest) (*api
 	if err != nil {
 		return nil, err
 	}
+
+	log.WithField("session", sid).
+		WithField("testcase", req.TestcaseID).
+		WithField("user", uid).
+		WithField("claim", req.Claim).
+		Debug("Testcase claim recorded")
 
 	defer s.broadcastChange(sid)
 	return &api.ClaimResponse{}, nil
@@ -257,6 +272,10 @@ func (s *kvsessionStore) Status(ctx context.Context, req *api.SessionStatusReque
 }
 
 func (s *kvsessionStore) Updates(req *api.SessionUpdatesRequest, update api.SessionService_UpdatesServer) error {
+	if _, err := s.ReqValidator.ValidUserFromRequest(update.Context(), types.PermissionSessionView); err != nil {
+		return err
+	}
+
 	sid := req.Id
 	exists, err := s.sessionExists(sid)
 	if err != nil {
@@ -268,7 +287,7 @@ func (s *kvsessionStore) Updates(req *api.SessionUpdatesRequest, update api.Sess
 
 	notifier, exists := s.Notifier[sid]
 	if !exists {
-		return fmt.Errorf("Session %s does not exist", sid)
+		return fmt.Errorf("Session notifier %s does not exist", sid)
 	}
 
 	for {

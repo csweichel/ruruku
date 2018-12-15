@@ -16,6 +16,7 @@ import (
 )
 
 var rootTokenFile string
+var rootTokenStdout bool
 
 // serveCmd represents the start command
 var serveCmd = &cobra.Command{
@@ -48,13 +49,13 @@ var serveCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Cannot get root user token: %v", err)
 		}
-		if rootTokenFile == "" {
-			log.WithTime(time.Now()).WithField("token", rootTkn).WithField("lifetime", userStore.TokenLifetime).Infof("Root user token ... keep this token safe!")
-		} else {
+		if rootTokenFile != "" {
 			if err := ioutil.WriteFile(rootTokenFile, []byte(rootTkn), 0600); err != nil {
 				log.Fatalf("Unable to write root token file: %v", err)
 			}
 			log.WithField("filename", rootTokenFile).Info("Wrote root token to file")
+		} else if rootTokenStdout {
+			log.WithTime(time.Now()).WithField("token", rootTkn).WithField("lifetime", userStore.TokenLifetime).Infof("Root user token ... keep this token safe!")
 		}
 
 		if err := server.Start(&srvcfg, sessionStore, userStore); err != nil {
@@ -74,7 +75,8 @@ var serveCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(serveCmd)
 
-	serveCmd.Flags().StringVar(&rootTokenFile, "root-token-file", "", "Write the root token to a file rather than stdout")
+	serveCmd.Flags().StringVar(&rootTokenFile, "root-token-file", "", "Write a root token to a file")
+	serveCmd.Flags().BoolVar(&rootTokenStdout, "root-token-stdout", false, "Print a root token to stdout")
 
 	serveCmd.Flags().Int("ui-port", 8080, "Port to run UI the server on")
 	viper.BindPFlag("server.ui.port", serveCmd.Flags().Lookup("ui-port"))
