@@ -1,14 +1,13 @@
 import * as React from 'react';
 import { Card, Button, ButtonOr, Form, Label, Dropdown, TextArea, DropdownProps, TextAreaProps, ButtonGroup } from 'semantic-ui-react';
 import { TestcaseDetailViewBody } from './testcase-detail-view-body';
-import { Testcase, TestRunState, TestcaseStatus, TestcaseRunResult } from './api/v1/session_pb';
-import { Participant } from './types/participant';
+import { TestRunState, TestcaseStatus, TestcaseRunResult } from '../api/v1/session_pb';
+import { AppStateContent, getClient } from 'src/types/app-state';
 
 export interface NewTestcaseRunViewProps {
+    appState: AppStateContent;
     testcase: TestcaseStatus;
-    participant: Participant;
     result?: TestRunState;
-    onSubmit: (testCase: Testcase, participant: Participant, result: TestRunState, comment: string) => void;
     onClose: () => void;
 }
 
@@ -35,7 +34,7 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
     constructor(props: NewTestcaseRunViewProps) {
         super(props);
 
-        const ourContribution = findContributionByParticipant(props.testcase, props.participant.name);
+        const ourContribution = findContributionByParticipant(props.testcase, props.appState.user!.name);
         if (ourContribution !== undefined) {
             this.state = {
                 result: this.props.result !== undefined ? this.props.result : ourContribution.getState(),
@@ -105,8 +104,8 @@ export class NewTestcaseRunView extends React.Component<NewTestcaseRunViewProps,
         this.focusElement = element;
     }
 
-    protected onSubmit() {
-        this.props.onSubmit(this.props.testcase.getCase()!, this.props.participant, this.state.result, this.state.comment);
+    protected async onSubmit() {
+        await getClient(this.props.appState).contribute(this.props.testcase.getCase()!.getId(), this.state.result, this.state.comment);
         this.props.onClose();
     }
 

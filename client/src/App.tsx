@@ -3,49 +3,50 @@ import './App.css';
 import 'semantic-ui-css/semantic.min.css';
 
 import logo from './logo.svg';
-// import { LoginForm } from './login-form';
-// import { Workspace } from './workspace';
-import { SessionList } from './session-list';
-import { Participant } from './types/participant';
-import { Workspace } from './workspace';
+import { AppStateContent } from './types/app-state';
+import { LoginForm } from './components/login-form';
+import { SessionSelector } from './components/session-selector';
+import { Workspace } from './components/workspace';
 
-type AppMode = "select-session" | "in-session";
-
-interface AppState {
-    mode: AppMode
-    sessionID?: string
-    participant?: Participant
-    error?: string
-}
-
-class App extends React.Component<{}, AppState> {
+class App extends React.Component<{}, AppStateContent> {
 
     constructor(props: {}) {
         super(props);
 
-        this.joinedSession = this.joinedSession.bind(this);
-        this.state = { mode: "select-session" };
+        this.state = {
+            setError: error => this.setState({ error })
+        };
+
+        this.onLogin = this.onLogin.bind(this);
     }
 
     public render() {
-        const body = this.state.participant && this.state.mode === "in-session"
-            ? <Workspace participant={this.state.participant} />
-            : <SessionList onJoin={this.joinedSession} />;
+        let className = "login";
+        let content: JSX.Element | undefined;
+        if (!this.state.token) {
+            content = <LoginForm onLogin={this.onLogin} appState={this.state} />;
+        } else if (!this.state.session) {
+            const selectSession = (session: string) => this.setState({ session });
+            content = <SessionSelector onSelect={selectSession} appState={this.state} />;
+        } else {
+            className = "workspace";
+            content = <Workspace appState={this.state} />
+        }
 
         return (
-            <div className={"app " + this.state.mode}>
+            <div className={`app ${className}`}>
                 <header id="header">
                     <img src={logo} className="app-logo" alt="logo" />
                 </header>
                 <div className="body">
-                    {body}
+                    {content}
                 </div>
             </div>
         );
     }
 
-    protected joinedSession(participant: Participant) {
-        this.setState({ participant, mode: "in-session" });
+    protected onLogin(token: string) {
+        this.setState({ token });
     }
 
 }

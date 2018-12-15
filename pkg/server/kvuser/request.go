@@ -17,7 +17,7 @@ func (s *kvuserStore) getUserFromRequest(ctx context.Context) (string, error) {
 
 	authHeader, ok := md["authorization"]
 	if !ok || len(authHeader) < 1 {
-		return "", status.Error(codes.Unauthenticated, "Authorization token is not supplied")
+		return "", status.Error(codes.Unauthenticated, "No authorization token supplied")
 	}
 
 	token := authHeader[0]
