@@ -11,7 +11,7 @@ import (
 
 // GetUserToken returns a fresh token for a user
 func (s *kvuserStore) GetUserToken(user string) (string, error) {
-	if exists, err := s.userExists(user); err != nil {
+	if exists, err := s.UserExists(user); err != nil {
 		return "", err
 	} else if !exists {
 		return "", fmt.Errorf("User %s does not exist", user)

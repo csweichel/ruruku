@@ -35,10 +35,10 @@ func NewUserStore(db *bolt.DB) (*kvuserStore, error) {
 	}
 
 	s := &kvuserStore{db: db, TokenLifetime: 30 * time.Minute}
-	if exists, err := s.userExists("root"); err != nil {
+	if exists, err := s.UserExists("root"); err != nil {
 		return nil, err
 	} else if !exists {
-		if err := s.addUser("root", "", ""); err != nil {
+		if err := s.AddUser("root", "", ""); err != nil {
 			return nil, err
 		}
 	}
@@ -52,7 +52,7 @@ func (s *kvuserStore) AuthenticateCredentials(ctx context.Context, req *api.Auth
 		return nil, status.Error(codes.Unauthenticated, "cannot authenticate as root")
 	}
 
-	if exists, err := s.userExists(req.Username); err != nil {
+	if exists, err := s.UserExists(req.Username); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	} else if !exists {
 		return nil, status.Errorf(codes.NotFound, "unknown user %s", req.Username)
@@ -80,17 +80,23 @@ func (s *kvuserStore) Add(ctx context.Context, req *api.AddUserRequest) (*api.Ad
 		return nil, err
 	}
 
-	if exists, err := s.userExists(req.Username); err != nil {
+	if exists, err := s.UserExists(req.Username); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	} else if exists {
 		return nil, status.Errorf(codes.AlreadyExists, "user %s exists already", req.Username)
 	}
 
-	if _, err := mail.ParseAddress(req.Email); req.Username == "" || len(req.Password) < 4 || err != nil {
+	if _, err := mail.ParseAddress(req.Email); err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "user data is invalid: %v", err)
 	}
+	if req.Username == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "username is empty")
+	}
+	if len(req.Password) < 4 {
+		return nil, status.Errorf(codes.InvalidArgument, "password must be at least 4 characters")
+	}
 
-	if err := s.addUser(req.Username, req.Password, req.Email); err != nil {
+	if err := s.AddUser(req.Username, req.Password, req.Email); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -107,7 +113,7 @@ func (s *kvuserStore) Delete(ctx context.Context, req *api.DeleteUserRequest) (*
 		return nil, status.Error(codes.PermissionDenied, "Cannot delete root")
 	}
 
-	if exists, err := s.userExists(req.Username); err != nil {
+	if exists, err := s.UserExists(req.Username); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	} else if !exists {
 		return nil, status.Errorf(codes.NotFound, "user %s does not exist", req.Username)
@@ -130,7 +136,7 @@ func (s *kvuserStore) Grant(ctx context.Context, req *api.GrantPermissionsReques
 		return nil, status.Error(codes.PermissionDenied, "Cannot grant permissions to root")
 	}
 
-	if exists, err := s.userExists(req.Username); err != nil {
+	if exists, err := s.UserExists(req.Username); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	} else if !exists {
 		return nil, status.Errorf(codes.NotFound, "user %s does not exist", req.Username)
@@ -140,7 +146,7 @@ func (s *kvuserStore) Grant(ctx context.Context, req *api.GrantPermissionsReques
 	for idx, p := range req.Permission {
 		permissions[idx] = p.Convert()
 	}
-	if err := s.addPermissions(req.Username, permissions); err != nil {
+	if err := s.AddPermissions(req.Username, permissions); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -171,7 +177,7 @@ func (s *kvuserStore) ChangePassword(ctx context.Context, req *api.ChangePasswor
 		return nil, status.Error(codes.PermissionDenied, "Cannot change password of root")
 	}
 
-	if exists, err := s.userExists(target); err != nil {
+	if exists, err := s.UserExists(target); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	} else if !exists {
 		return nil, status.Errorf(codes.NotFound, "user %s does not exist", target)

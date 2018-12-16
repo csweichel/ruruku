@@ -55,6 +55,13 @@ You can add multiple users in one go by using the YAML file separater ---.`,
 				log.WithError(err).Fatal()
 			}
 
+			if username == "" {
+				log.Fatal("--username is required")
+			}
+			if email == "" {
+				log.Fatal("--email is required")
+			}
+
 			if _, err := client.Add(ctx, &api.AddUserRequest{Username: username, Password: password, Email: email}); err != nil {
 				log.WithError(err).Fatal()
 			}

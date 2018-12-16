@@ -59,7 +59,7 @@ func TestChangePasswordOthers(t *testing.T) {
 		return
 	}
 
-	if err := srv.addUser("foo", "bar", "foo@bar.com"); err != nil {
+	if err := srv.AddUser("foo", "bar", "foo@bar.com"); err != nil {
 		t.Errorf("Cannot add another test user: %v", err)
 	}
 
@@ -107,7 +107,7 @@ func TestChangePasswordNoAuthorization(t *testing.T) {
 		return
 	}
 
-	if err := srv.addUser("foo", "bar", "foo@bar.com"); err != nil {
+	if err := srv.AddUser("foo", "bar", "foo@bar.com"); err != nil {
 		t.Errorf("Cannot create test user foo")
 	}
 

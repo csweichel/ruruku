@@ -52,7 +52,7 @@ func TestGrantAsUser(t *testing.T) {
 		return
 	}
 
-	if err := srv.addUser("foo", "bar", "foo@bar.com"); err != nil {
+	if err := srv.AddUser("foo", "bar", "foo@bar.com"); err != nil {
 		t.Errorf("Cannot add test user: %v", err)
 	}
 

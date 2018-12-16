@@ -48,7 +48,7 @@ func TestDeleteAsUser(t *testing.T) {
 	}
 
 	const testuser = "foo"
-	srv.addUser(testuser, "bar", "foo@bar.com")
+	srv.AddUser(testuser, "bar", "foo@bar.com")
 
 	srv.deleteUserAndCheck(t, tkn, testuser)
 }
@@ -122,7 +122,7 @@ func (srv *kvuserStore) deleteUserAndCheck(t *testing.T, tkn, username string) {
 		return
 	}
 
-	if exists, err := srv.userExists(testuserName); err != nil {
+	if exists, err := srv.UserExists(testuserName); err != nil {
 		t.Errorf("Cannot check if testuser still exists")
 	} else if exists {
 		t.Errorf("Testuser still exists despite successful call to delete")

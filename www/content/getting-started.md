@@ -34,7 +34,8 @@ Testplans are meant to live next to your code, i.e. it's best to check them into
 The easiest way to start a test session is `ruruku start testplan.yaml`. This will launch a new ruruku server
 on your machine and start the session itself. This is great if you want to go through the testplan yourself or
 just share it with others on the same network. Services like [Serveo](https://serveo.net) let you share that
-local server across the internet.
+local server across the internet. `ruruku start` will also create a user called `admin` (password: `admin`),
+which has all permissions; use that one to get started quickly.
 
 More commonly, you'll have a central ruruku instance hosted somewhere (e.g. using the [Docker image](https://hub.docker.com/r/csweichel/ruruku/)).
 In that case run `ruruku session start --server your-ruruku-server.com:1234 --plan testplan.yaml` to start the session.

@@ -13,8 +13,17 @@ class App extends React.Component<{}, AppStateContent> {
     constructor(props: {}) {
         super(props);
 
+        let errorTimeout: NodeJS.Timeout | undefined;
         this.state = {
-            setError: error => this.setState({ error })
+            setError: error => {
+                this.setState({ error });
+                if (error) {
+                    if (errorTimeout) {
+                        clearTimeout(errorTimeout);
+                    }
+                    errorTimeout = setTimeout(() => this.setState({ error: undefined }), 5000);
+                }
+            }
         };
 
         this.onLogin = this.onLogin.bind(this);
