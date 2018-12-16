@@ -132,7 +132,7 @@
 Users are created using the CLI and are given permissions in the sytem.
 When a Ruruku server starts, it can emit a <em>root token</em> which is used to create the first users in the system.</p>
 
-<h1 id="starting-a-server-and-adding-users">Starting a server and adding users</h1>
+<h2 id="starting-a-server-and-adding-users">Starting a server and adding users</h2>
 
 <p>The <code>ruruku serve</code> command has two flags which emit a root token: <code>--root-token-file &lt;filename&gt;</code> and <code>--root-token-stdout</code>.
 The former stores the root token in a file, the later prints it to the stdout.</p>
@@ -152,7 +152,7 @@ an example of how such a YAML file looks like. Let&rsquo;s use this file to crea
 <pre><code>ruruku user add -f examples/users.yaml
 </code></pre>
 
-<h1 id="logging-in-on-the-command-line">Logging in on the command line</h1>
+<h2 id="logging-in-on-the-command-line">Logging in on the command line</h2>
 
 <p>To login as a user on the command line, use <a href="../cli/ruruku_user_login"><code>ruruku user login &lt;username&gt;</code></a>. After entering the correct password,
 ruruku is going to print the token as an environment variable (can be changed using <code>-o</code>). This way, the login
@@ -163,7 +163,7 @@ command can be used as</p>
 
 <p>Notice: tokens have a limited lifespan, you may need to reauthenticate every now and then.</p>
 
-<h1 id="granting-permissions">Granting permissions</h1>
+<h2 id="granting-permissions">Granting permissions</h2>
 
 <p>Ruruku has a set of permissions users can have. Each permission gives the user a particular ability, e.g. participating
 in a test session, or creating other users. See below for a list of permissions:</p>
@@ -226,7 +226,7 @@ in a test session, or creating other users. See below for a list of permissions:
 
 <p>To grant permissions use <a href="../cli/ruruku_user_grant"><code>ruruku user grant</code></a>. You must have the <code>user.grant</code> permission yourself to be able to do that.</p>
 
-<h1 id="change-password">Change password</h1>
+<h2 id="change-password">Change password</h2>
 
 <p>All users can change their own password using <a href="../cli/ruruku_user_chpwd"><code>ruruku user chpwd</code></a>. To change the password of another user, you need the
 <code>user.chpwd</code> permission, but can use just the same command.</p>
