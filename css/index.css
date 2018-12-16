@@ -359,10 +359,12 @@ details > p {
   display: block;
   width: 100%;
   overflow: auto;
+  color: black;
 }
 
 .Content table th {
   font-weight: 600;
+  color: #a1a1a1;
 }
 
 .Content table th,.Content table td {
