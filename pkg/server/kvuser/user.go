@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (s *kvuserStore) userExists(user string) (bool, error) {
+func (s *kvuserStore) UserExists(user string) (bool, error) {
 	var exists bool
 	err := s.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketUsers))
@@ -92,7 +92,7 @@ func (s *kvuserStore) changePassword(username, password string) error {
 	return nil
 }
 
-func (s *kvuserStore) addUser(username, password, email string) error {
+func (s *kvuserStore) AddUser(username, password, email string) error {
 	pwdhash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -127,7 +127,7 @@ func (s *kvuserStore) addUser(username, password, email string) error {
 	return nil
 }
 
-func (s *kvuserStore) addPermissions(username string, permission []types.Permission) error {
+func (s *kvuserStore) AddPermissions(username string, permission []types.Permission) error {
 	return s.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketUsers))
 		for _, perm := range permission {

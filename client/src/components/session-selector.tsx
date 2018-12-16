@@ -1,6 +1,6 @@
 import { AppStateContent, getAuthentication, getClient } from '../types/app-state';
 import * as React from 'react';
-import { Segment, Form, Dropdown, Button, DropdownProps } from 'semantic-ui-react';
+import { Segment, Form, Dropdown, Button, DropdownProps, Message } from 'semantic-ui-react';
 import { grpc } from 'grpc-web-client';
 import { SessionService } from '../api/v1/session_pb_service';
 import { ListSessionsRequest, ListSessionsResponse } from '../api/v1/session_pb';
@@ -50,10 +50,15 @@ export class SessionSelector extends React.Component<SessionSelectorProps, Sessi
         const options = (this.state.sessions || []).filter(s => s.isOpen).map(s => { return {
             value: s.id,
             text: s.name
-        }})
+        }});
+        let error: JSX.Element | undefined;
+        if (this.props.appState.error) {
+            error = <Message error={true}>{this.props.appState.error}</Message>
+        };
 
         return (
             <Segment id="login-form">
+                {error}
                 <Form onSubmit={this.onSubmit}>
                     <Form.Field>
                         <Dropdown selection={true} fluid={true} options={options} placeholder="Session" onChange={this.selectSession} />

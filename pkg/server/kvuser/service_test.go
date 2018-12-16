@@ -37,11 +37,11 @@ func newTestUserService() *kvuserStore {
 }
 
 func (s *kvuserStore) newTestUserWithPermission(permission types.Permission) (string, error) {
-	if err := s.addUser(testuserName, testuserPassword, testuserEmail); err != nil {
+	if err := s.AddUser(testuserName, testuserPassword, testuserEmail); err != nil {
 		return "", err
 	}
 	if permission != types.PermissionNone {
-		if err := s.addPermissions(testuserName, []types.Permission{permission}); err != nil {
+		if err := s.AddPermissions(testuserName, []types.Permission{permission}); err != nil {
 			return "", err
 		}
 	}

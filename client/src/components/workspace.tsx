@@ -1,16 +1,10 @@
 import * as React from 'react';
 import logo from '../logo.svg';
-// import { TestplanView } from './testplan-view';
-import { Sidebar, Segment, Message } from 'semantic-ui-react';
-// import { Participant } from '../types/participant';
-// import { TestRunStatus, SessionStatusRequest, SessionStatusResponse, Testcase, TestRunState, ClaimRequest, SessionUpdatesRequest, SessionUpdateResponse, ContributionRequest } from '../api/v1/session_pb';
-// import { grpc } from 'grpc-web-client';
-// import { SessionService } from '../api/v1/session_pb_service';
-// import { HOST } from '../api/host';
-// import { TestplanView } from './testplan-view';
+import { Sidebar, Segment, Message, TransitionGroup } from 'semantic-ui-react';
 import { AppStateContent } from 'src/types/app-state';
 import { TestplanView } from './testplan-view';
 
+import './workspace.css';
 
 export interface WorkspaceProps {
     appState: AppStateContent
@@ -18,7 +12,6 @@ export interface WorkspaceProps {
 
 interface WorkspaceState {
     sidebar?: any
-    error?: string
 }
 
 export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
@@ -31,8 +24,8 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
     }
 
     public render() {
-        const error = this.state.error
-            ? <Message error={true}>{this.state.error}</Message>
+        const error = this.props.appState.error
+            ? <Message error={true}>{this.props.appState.error}</Message>
             : undefined;
 
         return (
@@ -46,7 +39,9 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
                 </div>
 
                 <div className="main">
-                    {error}
+                    <TransitionGroup animation="drop">
+                        {error}
+                    </TransitionGroup>
                     <Sidebar.Pushable as={Segment} attached="bottom" className="no-border">
                         <Sidebar width="very wide" animation="overlay" visible={!!this.state.sidebar} icon="labeled" vertical={true} inline={true} inverted={false} direction="right">
                             {this.state.sidebar}

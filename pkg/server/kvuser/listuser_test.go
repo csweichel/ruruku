@@ -78,7 +78,7 @@ func TestListAsUser(t *testing.T) {
 		t.Errorf("Cannot add test user")
 		return
 	}
-	if err := srv.addPermissions(testuserName, []types.Permission{types.PermissionUserAdd}); err != nil {
+	if err := srv.AddPermissions(testuserName, []types.Permission{types.PermissionUserAdd}); err != nil {
 		t.Errorf("Cannot add permission to testuser: %v", err)
 		return
 	}

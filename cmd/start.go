@@ -6,9 +6,12 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/spf13/viper"
+
 	"github.com/32leaves/ruruku/pkg/server"
 	"github.com/32leaves/ruruku/pkg/server/kvsession"
 	"github.com/32leaves/ruruku/pkg/server/kvuser"
+	"github.com/32leaves/ruruku/pkg/types"
 	bolt "github.com/etcd-io/bbolt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -22,7 +25,7 @@ var startCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg, err := GetConfigFromViper()
 		if err != nil {
-			log.Fatalf("Error while loading the configuration: %v", err)
+			log.WithError(err).Fatalf("Error while loading the configuration")
 		}
 
 		srvcfg := cfg.Server
@@ -30,25 +33,43 @@ var startCmd = &cobra.Command{
 
 		db, err := bolt.Open(srvcfg.DB.Filename, 0666, nil)
 		if err != nil {
-			log.Fatalf("Error while opening database: %v", err)
+			log.WithError(err).Fatalf("Error while opening database")
 		}
 		log.WithField("filename", srvcfg.DB.Filename).Info("Opened database")
 
 		userStore, err := kvuser.NewUserStore(db)
 		if err != nil {
-			log.Fatalf("Error while creating the user store: %v", err)
+			log.WithError(err).Fatalf("Error while creating the user store")
+		}
+
+		if exists, err := userStore.UserExists("admin"); err != nil {
+			log.WithError(err).Fatalf("Cannot check if admin already exists")
+		} else if !exists {
+			if err := userStore.AddUser("admin", "admin", "admin@admin.com"); err != nil {
+				log.WithError(err).Fatalf("Cannot create admin user")
+			}
+			if err := userStore.AddPermissions("admin", types.AllPermissions); err != nil {
+				log.WithError(err).Fatalf("Cannot add permissions to admin user")
+			}
+			log.WithField("username", "admin").WithField("password", "admin").Info("User created")
 		}
 
 		store, err := kvsession.NewSession(db, userStore)
 		if err != nil {
-			log.Fatalf("Error while creating the session store: %v", err)
+			log.WithError(err).Fatalf("Error while creating the session store")
 		}
 		log.WithField("filename", srvcfg.DB.Filename).Info("Opened database")
 
-		if err := server.Start(&srvcfg, store, nil); err != nil {
-			log.Fatalf("Error while starting the ruruku server: %v", err)
+		if err := server.Start(&srvcfg, store, userStore); err != nil {
+			log.WithError(err).Fatalf("Error while starting the ruruku server")
 		}
 
+		token, err := userStore.GetUserToken("admin")
+		if err != nil {
+			log.WithError(err).Fatal("Cannot get token for admin user")
+		}
+
+		viper.Set("cli.token", token)
 		sessionStart := sessionStartFlags{planfn: args[0], quiet: true}
 		if err := sessionStart.Run(); err != nil {
 			log.WithError(err).Fatal("Cannot start session")
