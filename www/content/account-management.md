@@ -9,7 +9,7 @@ Ruruku comes with built-in user management.
 Users are created using the CLI and are given permissions in the sytem.
 When a Ruruku server starts, it can emit a _root token_ which is used to create the first users in the system.
 
-# Starting a server and adding users
+## Starting a server and adding users
 The `ruruku serve` command has two flags which emit a root token: `--root-token-file <filename>` and `--root-token-stdout`.
 The former stores the root token in a file, the later prints it to the stdout.
 
@@ -28,7 +28,7 @@ an example of how such a YAML file looks like. Let's use this file to create a b
 ruruku user add -f examples/users.yaml
 ```
 
-# Logging in on the command line
+## Logging in on the command line
 To login as a user on the command line, use [`ruruku user login <username>`](../cli/ruruku_user_login). After entering the correct password,
 ruruku is going to print the token as an environment variable (can be changed using `-o`). This way, the login
 command can be used as
@@ -37,7 +37,7 @@ eval $(ruruku login user <username>)
 ```
 Notice: tokens have a limited lifespan, you may need to reauthenticate every now and then.
 
-# Granting permissions
+## Granting permissions
 Ruruku has a set of permissions users can have. Each permission gives the user a particular ability, e.g. participating
 in a test session, or creating other users. See below for a list of permissions:
 
@@ -53,8 +53,8 @@ in a test session, or creating other users. See below for a list of permissions:
 | session.view       | Allows a user to view a test session, including all test case details and current results.    |
 | session.contribute | Allows a user to join a session, claim test cases and to contribute test results.             |
 
-To grant permissions use ]`ruruku user grant`](../cli/ruruku_user_grant). You must have the `user.grant` permission yourself to be able to do that.
+To grant permissions use [`ruruku user grant`](../cli/ruruku_user_grant). You must have the `user.grant` permission yourself to be able to do that.
 
-# Change password
+## Change password
 All users can change their own password using [`ruruku user chpwd`](../cli/ruruku_user_chpwd). To change the password of another user, you need the
 `user.chpwd` permission, but can use just the same command.
