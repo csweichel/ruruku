@@ -57,8 +57,28 @@
 		
 			
 				<div class="item">
+					<a href="/ruruku/account-management/">Managing user accounts</a>
+				</div>
+			
+		
+			
+				<div class="item">
 					<a href="/ruruku/cli/ruruku/">Command Line Interface</a>
 				</div>
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
 			
 		
 			
@@ -140,7 +160,8 @@ of <a href="../cli/ruruku_plan"><code>ruruku plan</code></a>, especially <code>-
 <p>The easiest way to start a test session is <code>ruruku start testplan.yaml</code>. This will launch a new ruruku server
 on your machine and start the session itself. This is great if you want to go through the testplan yourself or
 just share it with others on the same network. Services like <a href="https://serveo.net">Serveo</a> let you share that
-local server across the internet.</p>
+local server across the internet. <code>ruruku start</code> will also create a user called <code>admin</code> (password: <code>admin</code>),
+which has all permissions; use that one to get started quickly.</p>
 
 <p>More commonly, you&rsquo;ll have a central ruruku instance hosted somewhere (e.g. using the <a href="https://hub.docker.com/r/csweichel/ruruku/">Docker image</a>).
 In that case run <code>ruruku session start --server your-ruruku-server.com:1234 --plan testplan.yaml</code> to start the session.

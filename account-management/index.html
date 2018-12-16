@@ -1,0 +1,244 @@
+
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Managing user accounts &middot; Ruruku</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		
+		<meta http-equiv="content-language" content="en-us" />
+		<meta name="generator" content="Hugo 0.52" />
+		<link rel="stylesheet" href="/ruruku/css/index.css">
+		<link rel="apple-touch-icon" href="/ruruku/apple-touch-icon.png">
+		<link rel="shortcut icon" href="/ruruku/favicon.ico" type="image/x-icon">
+	</head>
+
+	<body>
+		<div class="Wrapper">
+			<div class="Container">
+				<div class="Header">
+  <a href="/ruruku/">
+	<div class="Title center">
+		
+			<img alt="Ruruku Logo" src="/ruruku/logo.svg" height="140" />
+		
+		<span class="text">Ruruku</span>
+		<span class="subtext"></span>
+	</div>
+  </a>
+</div>
+
+				<div class="Content-wrapper">
+					<div class="Sidebar">
+	<div class="Menu">
+		<div class="item">
+			<a href="/ruruku/">Home</a>
+		</div>
+		
+			
+				<div class="item">
+					<a href="/ruruku/introduction/"></a>
+				</div>
+			
+		
+			
+				<div class="item">
+					<a href="/ruruku/getting-started/">Getting Started</a>
+				</div>
+			
+		
+			
+				<div class="item">
+					<a href="/ruruku/secure-installation/">Securing your installation</a>
+				</div>
+			
+		
+			
+				<div class="item">
+					<a href="/ruruku/account-management/">Managing user accounts</a>
+				</div>
+			
+		
+			
+				<div class="item">
+					<a href="/ruruku/cli/ruruku/">Command Line Interface</a>
+				</div>
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+	</div>
+</div>
+
+					<div class="Content">
+						
+	<div class="Page" id="">
+		<h1>Managing user accounts</h1>
+		
+
+<p>Ruruku comes with built-in user management.
+Users are created using the CLI and are given permissions in the sytem.
+When a Ruruku server starts, it can emit a <em>root token</em> which is used to create the first users in the system.</p>
+
+<h1 id="starting-a-server-and-adding-users">Starting a server and adding users</h1>
+
+<p>The <code>ruruku serve</code> command has two flags which emit a root token: <code>--root-token-file &lt;filename&gt;</code> and <code>--root-token-stdout</code>.
+The former stores the root token in a file, the later prints it to the stdout.</p>
+
+<p>To use the root token, pass it to subsequent ruruku calls, either using <code>--token</code> or by setting the <code>RURUKU_TOKEN</code> environment varibale.
+For example:</p>
+
+<pre><code>ruruku serve --root-token-file /var/run/ruruku.root
+export RURUKU_TOKEN=$(cat /var/run/ruruku.root)
+</code></pre>
+
+<p>The root token gives you all permissions within ruruku. At this point we&rsquo;ll be using them to create the actual users.
+To do this, you can either create them one-by-one using <a href="../cli/ruruku_user_add"><code>ruruku user add</code></a> and <a href="../cli/ruruku_user_grant"><code>ruruku user grant</code></a>,
+or all at once from a YAML file. The <a href="https://github.com/32leaves/ruruku/tree/master/examples"><code>examples/</code> folder</a> of the Ruruku repository has
+an example of how such a YAML file looks like. Let&rsquo;s use this file to create a bunch of users:</p>
+
+<pre><code>ruruku user add -f examples/users.yaml
+</code></pre>
+
+<h1 id="logging-in-on-the-command-line">Logging in on the command line</h1>
+
+<p>To login as a user on the command line, use <a href="../cli/ruruku_user_login"><code>ruruku user login &lt;username&gt;</code></a>. After entering the correct password,
+ruruku is going to print the token as an environment variable (can be changed using <code>-o</code>). This way, the login
+command can be used as</p>
+
+<pre><code>eval $(ruruku login user &lt;username&gt;)
+</code></pre>
+
+<p>Notice: tokens have a limited lifespan, you may need to reauthenticate every now and then.</p>
+
+<h1 id="granting-permissions">Granting permissions</h1>
+
+<p>Ruruku has a set of permissions users can have. Each permission gives the user a particular ability, e.g. participating
+in a test session, or creating other users. See below for a list of permissions:</p>
+
+<table>
+<thead>
+<tr>
+<th>Permission</th>
+<th>Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>user.add</td>
+<td>Enables a user to create users.</td>
+</tr>
+
+<tr>
+<td>user.delete</td>
+<td>Enables a user to delete users.</td>
+</tr>
+
+<tr>
+<td>user.grant</td>
+<td>Allows a user to grant permissions to users.</td>
+</tr>
+
+<tr>
+<td>user.chpwd</td>
+<td>Allows a user to change the password of other users. All users can change their own password.</td>
+</tr>
+
+<tr>
+<td>user.list</td>
+<td>Allows a user to retrieve a list of all users in the system, including their permissions.</td>
+</tr>
+
+<tr>
+<td>session.start</td>
+<td>Allows a user to start a new test session,</td>
+</tr>
+
+<tr>
+<td>session.close</td>
+<td>Allows a user to close a test session.</td>
+</tr>
+
+<tr>
+<td>session.view</td>
+<td>Allows a user to view a test session, including all test case details and current results.</td>
+</tr>
+
+<tr>
+<td>session.contribute</td>
+<td>Allows a user to join a session, claim test cases and to contribute test results.</td>
+</tr>
+</tbody>
+</table>
+
+<p>To grant permissions use ]<code>ruruku user grant</code>](../cli/ruruku_user_grant). You must have the <code>user.grant</code> permission yourself to be able to do that.</p>
+
+<h1 id="change-password">Change password</h1>
+
+<p>All users can change their own password using <a href="../cli/ruruku_user_chpwd"><code>ruruku user chpwd</code></a>. To change the password of another user, you need the
+<code>user.chpwd</code> permission, but can use just the same command.</p>
+</div>
+
+						<div class="Footer">
+	<p></p>
+</div>
+<script src="/ruruku/js/index.js"></script>
+
+					</div>
+				</div>
+		</div>
+	</body>
+</html>
