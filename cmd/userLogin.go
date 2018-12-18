@@ -28,13 +28,13 @@ var userAuthCmd = &cobra.Command{
 		defer conn.Close()
 		client := api.NewUserServiceClient(conn)
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.CLI.Timeout)*time.Second)
-		defer cancel()
-
 		password, err := cli.GetPassword(cmd)
 		if err != nil {
 			log.WithError(err).Fatal()
 		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.CLI.Timeout)*time.Second)
+		defer cancel()
 
 		resp, err := client.AuthenticateCredentials(ctx, &api.AuthenticationRequest{Username: args[0], Password: password})
 		if err != nil {

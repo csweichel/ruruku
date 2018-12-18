@@ -2,7 +2,6 @@ package kvsession
 
 import (
 	"fmt"
-	"path"
 
 	"github.com/32leaves/ruruku/pkg/types"
 	bolt "github.com/etcd-io/bbolt"
@@ -16,12 +15,12 @@ func (s *kvsessionStore) claimTestcase(sessionID string, testcaseID string, user
 			return err
 		}
 
-		tckey := []byte(path.Join(sessionID, "case", testcaseID))
+		tckey := pathSessionTestcase(sessionID, testcaseID)
 		if bucket.Get(tckey) == nil {
 			return fmt.Errorf("Testcase '%s' does not exist", testcaseID)
 		}
 
-		key := path.Join(sessionID, "claim", testcaseID, userID)
+		key := pathSessionClaim(sessionID, testcaseID, userID)
 		if claim {
 			if err := bucket.Put([]byte(key), []byte{1}); err != nil {
 				return err
@@ -38,7 +37,7 @@ func (s *kvsessionStore) claimTestcase(sessionID string, testcaseID string, user
 }
 
 func (s *kvsessionStore) hasClaimedTestcase(sessionID string, testcaseID string, userID string) (bool, error) {
-	key := path.Join(sessionID, "claim", testcaseID, userID)
+	key := pathSessionClaim(sessionID, testcaseID, userID)
 
 	var exists bool
 	err := s.DB.View(func(tx *bolt.Tx) error {
@@ -65,7 +64,7 @@ func (s *kvsessionStore) contribute(sessionID string, contribution kvsessionCont
 			return err
 		}
 
-		key := []byte(path.Join(sessionID, "contrib", contribution.TestcaseID, contribution.UserID))
+		key := pathSessionContribution(sessionID, contribution.TestcaseID, contribution.UserID)
 		content, err := proto.Marshal(&TestcaseContribution{
 			Result:  string(contribution.Result),
 			Comment: contribution.Comment,

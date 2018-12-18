@@ -118,7 +118,13 @@ func (s *kvsessionStore) List(req *api.ListSessionsRequest, resp api.SessionServ
 		return err
 	}
 
-	return s.listSessions(resp.Send)
+	err := s.listSessions(resp.Send)
+	if err != nil {
+		log.WithError(err).Error("Error while listing sessions")
+		return err
+	}
+
+	return nil
 }
 
 func (s *kvsessionStore) Register(ctx context.Context, req *api.RegistrationRequest) (*api.RegistrationResponse, error) {

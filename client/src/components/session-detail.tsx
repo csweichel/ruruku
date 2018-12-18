@@ -41,7 +41,7 @@ export class SessionDetailView extends React.Component<SessionDetailViewProps, S
             annotations = (
                 <List.Item>
                     <List.Content>
-                        <Header>Annotations:</Header>
+                        <Header subheader={true}>Annotations</Header>
                         {content}
                     </List.Content>
                 </List.Item>
@@ -52,7 +52,13 @@ export class SessionDetailView extends React.Component<SessionDetailViewProps, S
             <List celled={true}>
                 <List.Item>
                     <List.Content>
-                        <Header>Name:</Header> {session.getName()}
+                        <Header subheader={true}>User</Header> {(this.props.appState.user || { name: "" }).name}
+                    </List.Content>
+                </List.Item>
+                <List.Item>
+                    <List.Content>
+                        <Header subheader={true}>Session Name</Header>
+                        {session.getName()} / {session.getId()}
                     </List.Content>
                 </List.Item>
                 {annotations}

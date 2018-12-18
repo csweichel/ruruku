@@ -51,16 +51,17 @@ input[type="submit"]:disabled {
     justify-content: flex-end;
     position: relative;
     z-index: 10;
-}
-.app.workspace .info.open {
-    text-align: left;
-}
-.app.workspace .info.closed {
     text-align: right;
 }
 .app.workspace .info.closed .accordion {
     background: inherit;
     box-shadow: inherit;
+}
+.app.workspace .info.open .accordion .title {
+    color: black;
+}
+.app.workspace .info.closed .accordion .title {
+    color: white;
 }
 .app.workspace .main {
     position: absolute;

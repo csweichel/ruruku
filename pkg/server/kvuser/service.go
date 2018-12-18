@@ -74,6 +74,23 @@ func (s *kvuserStore) AuthenticateCredentials(ctx context.Context, req *api.Auth
 	return &api.AuthenticationRespose{Token: tkn}, nil
 }
 
+// Renew token provides a fresh token for an already authenticated user
+func (s *kvuserStore) RenewToken(ctx context.Context, req *api.RenewTokenRequest) (*api.RenewTokenResponse, error) {
+	user, err := s.ValidUserFromRequest(ctx, types.PermissionNone)
+	if err != nil {
+		return nil, err
+	}
+
+	tkn, err := s.GetUserToken(user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	log.WithField("user", user).Debug("Renewed user token")
+
+	return &api.RenewTokenResponse{Token: tkn}, nil
+}
+
 // Add creates a new user with a set of credentials.
 func (s *kvuserStore) Add(ctx context.Context, req *api.AddUserRequest) (*api.AddUserResponse, error) {
 	if _, err := s.ValidUserFromRequest(ctx, types.PermissionUserAdd); err != nil {

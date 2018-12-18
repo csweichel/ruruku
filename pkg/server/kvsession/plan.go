@@ -3,7 +3,6 @@ package kvsession
 import (
 	"bytes"
 	"fmt"
-	"path"
 
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"github.com/32leaves/ruruku/pkg/types"
@@ -27,13 +26,13 @@ func (s *kvsessionStore) storePlan(sessionID string, plan *api.TestPlan) error {
 			return err
 		}
 
-		plankey := path.Join(sessionID, "plan")
+		plankey := pathSessionPlan(sessionID)
 		if err := bucket.Put([]byte(plankey), planmeta); err != nil {
 			return err
 		}
 
 		for _, cse := range plan.Case {
-			tckey := []byte(path.Join(sessionID, "case", cse.Id))
+			tckey := pathSessionTestcase(sessionID, cse.Id)
 			if bucket.Get(tckey) != nil {
 				return fmt.Errorf("Testcase '%s' exists already", cse.Id)
 			}
@@ -60,7 +59,7 @@ func (s *kvsessionStore) testcaseExists(sessionID string, testcaseID string) (bo
 	var exists bool
 	err := s.DB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketTestplan))
-		v := b.Get([]byte(path.Join(sessionID, "case", testcaseID)))
+		v := b.Get(pathSessionTestcase(sessionID, testcaseID))
 		exists = v != nil
 
 		return nil
@@ -72,7 +71,7 @@ func (s *kvsessionStore) getStatus(sessionID string) (*api.TestRunStatus, error)
 	res := api.TestRunStatus{}
 	sessionState := types.Passed
 	err := s.DB.View(func(tx *bolt.Tx) error {
-		sv := tx.Bucket([]byte(bucketSessions)).Get([]byte(sessionID))
+		sv := tx.Bucket([]byte(bucketSessions)).Get(pathSession(sessionID))
 		if sv == nil {
 			return fmt.Errorf("Session %s does not exist", sessionID)
 		}
@@ -164,9 +163,9 @@ func (s *kvsessionStore) getStatus(sessionID string) (*api.TestRunStatus, error)
 func forEachTestcase(b *bolt.Bucket, sessionID string, cb func(tcid string, tc *api.Testcase) error) error {
 	var tc api.Testcase
 	c := b.Cursor()
-	prefix := []byte(path.Join(sessionID, "case"))
+	prefix := pathSessionTestcases(sessionID)
 	for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
-		_, tcid := path.Split(string(k))
+		tcid := getLastSegment(k)
 		if err := proto.Unmarshal(v, &tc); err != nil {
 			return err
 		}
@@ -179,9 +178,9 @@ func forEachTestcase(b *bolt.Bucket, sessionID string, cb func(tcid string, tc *
 
 func forEachClaim(b *bolt.Bucket, sessionID string, testcaseID string, cb func(userID string) error) error {
 	c := b.Cursor()
-	prefix := []byte(path.Join(sessionID, "claim", testcaseID))
+	prefix := pathSessionClaims(sessionID, testcaseID)
 	for k, _ := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, _ = c.Next() {
-		_, uid := path.Split(string(k))
+		uid := getLastSegment(k)
 		if err := cb(uid); err != nil {
 			return err
 		}
@@ -192,9 +191,9 @@ func forEachClaim(b *bolt.Bucket, sessionID string, testcaseID string, cb func(u
 func forEachResult(b *bolt.Bucket, sessionID string, testcaseID string, cb func(userID string, res *TestcaseContribution) error) error {
 	var r TestcaseContribution
 	c := b.Cursor()
-	prefix := []byte(path.Join(sessionID, "contrib", testcaseID))
+	prefix := pathSessionContributions(sessionID, testcaseID)
 	for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
-		_, uid := path.Split(string(k))
+		uid := getLastSegment(k)
 		if err := proto.Unmarshal(v, &r); err != nil {
 			return err
 		}
