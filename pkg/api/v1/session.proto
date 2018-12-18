@@ -36,6 +36,8 @@ message StartSessionRequest {
     string name = 1;
     // Plan are the tests of the new session
     TestPlan plan = 2;
+    // Annotations are key-value pairs containing metadata of the test session
+    map<string, string> annotations = 3;
 }
 
 message StartSessionResponse {
@@ -171,10 +173,12 @@ message TestRunStatus {
     string planID = 3;
     // Open denotes if participants can still join and contribute
     bool open = 4;
+    // Annotations are key-value pairs containing metadata of the test session
+    map<string, string> annotations = 5;
     // Status lists the status for each testcase of the plan
-    repeated TestcaseStatus status = 5;
+    repeated TestcaseStatus status = 6;
     // State is the overall test run state
-    TestRunState state = 6;
+    TestRunState state = 7;
 }
 
 message TestPlan {
