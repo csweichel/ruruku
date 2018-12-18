@@ -110,7 +110,7 @@ func (s *kvsessionStore) listSessions(cb func(session *api.ListSessionsResponse)
 			}
 
 			err := cb(&api.ListSessionsResponse{
-				Id:     string(k),
+				Id:     getLastSegment(k),
 				Name:   r.Name,
 				IsOpen: r.Open,
 			})

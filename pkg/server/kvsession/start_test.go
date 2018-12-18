@@ -1,5 +1,7 @@
 package kvsession
 
+//go:generate mockgen -package kvsession -destination mock_sessionService_listserver.go github.com/32leaves/ruruku/pkg/api/v1 SessionService_ListServer
+
 import (
 	"testing"
 
@@ -49,8 +51,8 @@ func TestStartValidSession(t *testing.T) {
 	s, reqval := newTestServer(ctrl)
 
 	user := "user"
-	resp, err := s.Start(reqval.GetContext(user, types.PermissionSessionStart), validStartSessionRequest())
-
+    req := validStartSessionRequest()
+	resp, err := s.Start(reqval.GetContext(user, types.PermissionSessionStart), req)
 	if err != nil {
 		t.Errorf("Start returned error despite valid request: %v", err)
 	}
@@ -61,6 +63,14 @@ func TestStartValidSession(t *testing.T) {
 	if resp.Id == "" {
 		t.Error("Start returned empty ID")
 	}
+
+    listsrv := NewMockSessionService_ListServer(ctrl)
+    listsrv.EXPECT().Context().Return(reqval.GetContext(user, types.PermissionSessionView))
+    listsrv.EXPECT().Send(&api.ListSessionsResponse{ Id: resp.Id, Name: req.Name, IsOpen: true }).Return(nil)
+    err = s.List(&api.ListSessionsRequest{}, listsrv)
+    if err != nil {
+        t.Errorf("List returned an error despite valie request: %v", err)
+    }
 }
 
 func TestStartInvalidSession(t *testing.T) {

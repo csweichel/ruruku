@@ -221,7 +221,7 @@ func (s *kvsessionStore) Contribute(ctx context.Context, req *api.ContributionRe
 		return nil, err
 	}
 	if !ok {
-		return nil, fmt.Errorf("Invalid participant token %s: does not exist in session", uid)
+		return nil, fmt.Errorf("Invalid participant %s: does not exist in session", uid)
 	}
 
 	exists, err = s.testcaseExists(sid, req.TestcaseID)
@@ -266,7 +266,7 @@ func (s *kvsessionStore) Status(ctx context.Context, req *api.SessionStatusReque
 		return nil, err
 	}
 	if !exists {
-		return nil, fmt.Errorf("Invalid participant token: session %s does not exist", sid)
+		return nil, fmt.Errorf("Invalid participant: session %s does not exist", sid)
 	}
 
 	status, err := s.getStatus(sid)
