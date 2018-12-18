@@ -36,8 +36,10 @@ func (s *kvuserStore) ValidUserFromRequest(ctx context.Context, reqperm types.Pe
 		return "", err
 	}
 
-	if ok, err := s.hasPermission(usr, reqperm); err != nil || !ok {
-		return "", status.Errorf(codes.PermissionDenied, "%s does not have %v permission", usr, reqperm)
+	if reqperm != types.PermissionNone {
+		if ok, err := s.hasPermission(usr, reqperm); err != nil || !ok {
+			return "", status.Errorf(codes.PermissionDenied, "%s does not have %v permission", usr, reqperm)
+		}
 	}
 
 	return usr, nil

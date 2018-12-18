@@ -51,6 +51,10 @@ export class SessionSelector extends React.Component<SessionSelectorProps, Sessi
             value: s.id,
             text: s.name
         }});
+        if (options.length === 1) {
+            this.props.onSelect(options[0].value);
+        }
+
         let error: JSX.Element | undefined;
         if (this.props.appState.error) {
             error = <Message error={true}>{this.props.appState.error}</Message>

@@ -1,4 +1,4 @@
-import { AuthenticationRequest, AuthenticationRespose } from '../api/v1/user_pb';
+import { AuthenticationRequest, AuthenticationRespose, RenewTokenRequest, RenewTokenResponse } from '../api/v1/user_pb';
 import { grpc } from 'grpc-web-client';
 import { UserService } from '../api/v1/user_pb_service';
 import { ProtobufMessage } from 'grpc-web-client/dist/typings/message';
@@ -58,6 +58,13 @@ export class Client {
         req.setResult(result);
         req.setComment(comment);
         await this.invoke(SessionService.Contribute, req);
+    }
+
+    public async renewToken(): Promise<void> {
+        const resp = await this.invoke(UserService.RenewToken, new RenewTokenRequest(), {
+            onMessage: (msg: RenewTokenResponse) => msg.getToken()
+        });
+        this.appState.token = resp;
     }
 
     public async getStatus(): Promise<TestRunStatus> {

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import logo from '../logo.svg';
 import { Sidebar, Segment, Message, TransitionGroup, Accordion, Icon } from 'semantic-ui-react';
-import { AppStateContent } from 'src/types/app-state';
+import { AppStateContent, getClient } from 'src/types/app-state';
 import { TestplanView } from './testplan-view';
 
 import './workspace.css';
@@ -19,6 +19,8 @@ interface WorkspaceState {
 }
 
 export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
+    protected tokenRenewal?: NodeJS.Timer;
+
     constructor(props: WorkspaceProps) {
         super(props);
 
@@ -28,6 +30,16 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
         this.state = {
             showSessionDropdown: false
         };
+    }
+
+    public componentWillMount() {
+        this.startTokenRenewal();
+    }
+
+    public componentWillUnmount() {
+        if (this.tokenRenewal) {
+            clearTimeout(this.tokenRenewal);
+        }
     }
 
     public render() {
@@ -41,7 +53,9 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
                     <img src={logo} className="app-logo" alt="logo" />
                     <div className={"info " + (this.state.showSessionDropdown ? "open" : "closed")}>
                         <Accordion styled={true}>
-                            <Accordion.Title onClick={this.toggleSessionInfo}><Icon name='dropdown' /> {this.props.appState.session}</Accordion.Title>
+                            <Accordion.Title onClick={this.toggleSessionInfo}>
+                                {this.state.showSessionDropdown ? "Close" : (<Icon name="user circle" />)}
+                            </Accordion.Title>
                             <Accordion.Content active={this.state.showSessionDropdown}>
                                 <SessionDetailView appState={this.props.appState} />
                             </Accordion.Content>
@@ -76,6 +90,17 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
 
     protected toggleSessionInfo() {
         this.setState({ showSessionDropdown: !this.state.showSessionDropdown });
+    }
+
+    protected startTokenRenewal() {
+        const renewer = async () => {
+            try {
+                await getClient(this.props.appState).renewToken();
+            } catch (err) {
+                this.props.appState.setError("Error while renewing user token: " + err);
+            }
+        };
+        this.tokenRenewal = setInterval(renewer.bind(this), 5 * 60 * 1000);
     }
 
 }

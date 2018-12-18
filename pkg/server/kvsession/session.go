@@ -1,12 +1,13 @@
 package kvsession
 
 import (
+	"bytes"
 	"fmt"
-	"path"
 
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	bolt "github.com/etcd-io/bbolt"
 	"github.com/golang/protobuf/proto"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -18,7 +19,7 @@ func (s *kvsessionStore) isSessionOpen(sessionID string) (bool, error) {
 	var open bool
 	err := s.DB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketSessions))
-		v := b.Get([]byte(sessionID))
+		v := b.Get(pathSession(sessionID))
 		if v == nil {
 			return fmt.Errorf("Session %s does not exist", sessionID)
 		}
@@ -38,7 +39,7 @@ func (s *kvsessionStore) sessionExists(sessionID string) (bool, error) {
 	var exists bool
 	err := s.DB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketSessions))
-		v := b.Get([]byte(sessionID))
+		v := b.Get(pathSession(sessionID))
 		exists = v != nil
 
 		return nil
@@ -63,7 +64,7 @@ func (s *kvsessionStore) storeSession(sessionID string, name string, planID stri
 			return err
 		}
 
-		return bucket.Put([]byte(sessionID), content)
+		return bucket.Put(pathSession(sessionID), content)
 	})
 	if err != nil {
 		return err
@@ -76,7 +77,7 @@ func (s *kvsessionStore) closeSession(sessionID string) error {
 	return s.DB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketSessions))
 
-		v := b.Get([]byte(sessionID))
+		v := b.Get(pathSession(sessionID))
 		if v == nil {
 			return fmt.Errorf("Session %s does not exist", sessionID)
 		}
@@ -92,7 +93,7 @@ func (s *kvsessionStore) closeSession(sessionID string) error {
 			return err
 		}
 
-		return b.Put([]byte(sessionID), content)
+		return b.Put(pathSession(sessionID), content)
 	})
 }
 
@@ -101,10 +102,11 @@ func (s *kvsessionStore) listSessions(cb func(session *api.ListSessionsResponse)
 		b := tx.Bucket([]byte(bucketSessions))
 		c := b.Cursor()
 
+		prefix := pathSessions()
 		var r SessionMetadata
-		for k, v := c.First(); k != nil; k, v = c.Next() {
+		for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
 			if err := proto.Unmarshal(v, &r); err != nil {
-				return err
+				return fmt.Errorf("Cannot load session %s: %v", k, err)
 			}
 
 			err := cb(&api.ListSessionsResponse{
@@ -113,6 +115,7 @@ func (s *kvsessionStore) listSessions(cb func(session *api.ListSessionsResponse)
 				IsOpen: r.Open,
 			})
 			if err != nil {
+				log.WithError(err).Debug("Error from listSession callback")
 				return err
 			}
 		}
@@ -125,13 +128,13 @@ func (s *kvsessionStore) registerParticipant(sessionID string, name string) erro
 	return s.DB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketSessions))
 
-		key := []byte(path.Join(sessionID, "p", name))
+		key := pathSessionParticipant(sessionID, name)
 		return b.Put(key, []byte(name))
 	})
 }
 
 func (s *kvsessionStore) getParticipant(sessionID string, participantID string) (*api.Participant, error) {
-	key := []byte(path.Join(sessionID, "p", participantID))
+	key := pathSessionParticipant(sessionID, participantID)
 
 	var result *api.Participant = nil
 	err := s.DB.View(func(tx *bolt.Tx) error {
@@ -152,7 +155,7 @@ func (s *kvsessionStore) getParticipant(sessionID string, participantID string) 
 }
 
 func (s *kvsessionStore) participantInSession(sessionID string, participantID string) (bool, error) {
-	key := []byte(path.Join(sessionID, "p", participantID))
+	key := pathSessionParticipant(sessionID, participantID)
 
 	var exists bool
 	err := s.DB.View(func(tx *bolt.Tx) error {

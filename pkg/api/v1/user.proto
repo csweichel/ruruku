@@ -6,6 +6,9 @@ service UserService {
     // AuthenticateCredentials authenticates a user based on username/password
     rpc AuthenticateCredentials(AuthenticationRequest) returns (AuthenticationRespose) {}
 
+    // Renew token provides a fresh token for an already authenticated user
+    rpc RenewToken(RenewTokenRequest) returns (RenewTokenResponse) {}
+
     // Add creates a new user with a set of credentials.
     rpc Add(AddUserRequest) returns (AddUserResponse) {}
 
@@ -47,6 +50,14 @@ message AuthenticationRespose {
     // Token is the user token which other requests require for authentication/authorization
     string token = 1;
 }
+
+message RenewTokenRequest {}
+
+message RenewTokenResponse {
+    // Token is the user token which other requests require for authentication/authorization
+    string token = 1;
+}
+
 
 message AddUserRequest {
     // Username is the name of the user

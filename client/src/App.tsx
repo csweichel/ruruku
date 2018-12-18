@@ -7,10 +7,16 @@ import { AppStateContent } from './types/app-state';
 import { LoginForm } from './components/login-form';
 import { SessionSelector } from './components/session-selector';
 import { Workspace } from './components/workspace';
+import { MiniEventEmitter } from './types/mini-event-emitter';
+import { Modal, Button, Icon } from 'semantic-ui-react';
 
-class App extends React.Component<{}, AppStateContent> {
+export interface AppProps {
+    reloadRequest: MiniEventEmitter<boolean>;
+}
 
-    constructor(props: {}) {
+class App extends React.Component<AppProps, AppStateContent & { shouldReload?: boolean }> {
+
+    constructor(props: AppProps) {
         super(props);
 
         let errorTimeout: NodeJS.Timeout | undefined;
@@ -27,6 +33,13 @@ class App extends React.Component<{}, AppStateContent> {
         };
 
         this.onLogin = this.onLogin.bind(this);
+        this.ignoreReloadRequest = this.ignoreReloadRequest.bind(this);
+    }
+
+    public componentWillMount() {
+        this.props.reloadRequest.subscribe(() => {
+            this.setState({ shouldReload: true });
+        });
     }
 
     public render() {
@@ -44,6 +57,15 @@ class App extends React.Component<{}, AppStateContent> {
 
         return (
             <div className={`app ${className}`}>
+                <Modal basic={true} open={!!this.state.shouldReload}>
+                    <Modal.Content>
+                        <p>A new version of Ruruku is available. Please reload this page.</p>
+                    </Modal.Content>
+                    <Modal.Actions>
+                        <Button basic={true} color='red' inverted={true} onClick={this.ignoreReloadRequest}>Ignore</Button>
+                        <Button color='green' inverted={true} onClick={this.reloadPage}><Icon name='checkmark' /> Do it</Button>
+                    </Modal.Actions>
+                </Modal>
                 <header id="header">
                     <img src={logo} className="app-logo" alt="logo" />
                 </header>
@@ -56,6 +78,14 @@ class App extends React.Component<{}, AppStateContent> {
 
     protected onLogin(token: string) {
         this.setState({ token });
+    }
+
+    protected ignoreReloadRequest() {
+        this.setState({ shouldReload: false });
+    }
+
+    protected reloadPage() {
+        window.location.reload();
     }
 
 }
