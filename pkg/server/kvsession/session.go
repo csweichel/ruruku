@@ -46,11 +46,12 @@ func (s *kvsessionStore) sessionExists(sessionID string) (bool, error) {
 	return exists, err
 }
 
-func (s *kvsessionStore) storeSession(sessionID string, name string, planID string) error {
+func (s *kvsessionStore) storeSession(sessionID string, name string, planID string, annotations map[string]string) error {
 	content, err := proto.Marshal(&SessionMetadata{
-		Name:   name,
-		PlanID: planID,
-		Open:   true,
+		Name:        name,
+		PlanID:      planID,
+		Open:        true,
+		Annotations: annotations,
 	})
 	if err != nil {
 		return err

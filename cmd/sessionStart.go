@@ -11,9 +11,10 @@ import (
 )
 
 type sessionStartFlags struct {
-	name   string
-	planfn string
-	quiet  bool
+	name        string
+	planfn      string
+	quiet       bool
+	annotations map[string]string
 }
 
 var sessionStartFlagValues sessionStartFlags
@@ -25,7 +26,8 @@ func (s *sessionStartFlags) Run() error {
 	}
 
 	req := &api.StartSessionRequest{
-		Name: moniker.New().Name(),
+		Name:        moniker.New().Name(),
+		Annotations: s.annotations,
 	}
 
 	if s.name == "" {
@@ -90,4 +92,5 @@ func init() {
 
 	sessionStartCmd.Flags().StringVarP(&sessionStartFlagValues.name, "name", "n", "", "Name of the session")
 	sessionStartCmd.Flags().StringVarP(&sessionStartFlagValues.planfn, "plan", "p", "", "Path to the test plan of this session")
+	sessionStartCmd.Flags().StringToStringVarP(&sessionStartFlagValues.annotations, "annotations", "a", map[string]string{}, "Metadata for this session")
 }

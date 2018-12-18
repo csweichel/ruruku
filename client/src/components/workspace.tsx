@@ -1,10 +1,12 @@
 import * as React from 'react';
 import logo from '../logo.svg';
-import { Sidebar, Segment, Message, TransitionGroup } from 'semantic-ui-react';
+import { Sidebar, Segment, Message, TransitionGroup, Accordion, Icon } from 'semantic-ui-react';
 import { AppStateContent } from 'src/types/app-state';
 import { TestplanView } from './testplan-view';
 
 import './workspace.css';
+import { TestRunStatus } from 'src/api/v1/session_pb';
+import { SessionDetailView } from './session-detail';
 
 export interface WorkspaceProps {
     appState: AppStateContent
@@ -12,6 +14,8 @@ export interface WorkspaceProps {
 
 interface WorkspaceState {
     sidebar?: any
+    showSessionDropdown: boolean;
+    sessionInfo?: TestRunStatus;
 }
 
 export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
@@ -19,8 +23,11 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
         super(props);
 
         this.showSidebar = this.showSidebar.bind(this);
+        this.toggleSessionInfo = this.toggleSessionInfo.bind(this);
 
-        this.state = { };
+        this.state = {
+            showSessionDropdown: false
+        };
     }
 
     public render() {
@@ -32,9 +39,13 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
             <div className="workspace">
                 <div id="header">
                     <img src={logo} className="app-logo" alt="logo" />
-                    <div className="info">
-                        <div className="session">{this.props.appState.session}</div>
-                        <div className="username" />
+                    <div className={"info " + (this.state.showSessionDropdown ? "open" : "closed")}>
+                        <Accordion styled={true}>
+                            <Accordion.Title onClick={this.toggleSessionInfo}><Icon name='dropdown' /> {this.props.appState.session}</Accordion.Title>
+                            <Accordion.Content active={this.state.showSessionDropdown}>
+                                <SessionDetailView appState={this.props.appState} />
+                            </Accordion.Content>
+                        </Accordion>
                     </div>
                 </div>
 
@@ -61,6 +72,10 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
 
     protected showSidebar(sidebar: any | undefined) {
         this.setState({ sidebar });
+    }
+
+    protected toggleSessionInfo() {
+        this.setState({ showSessionDropdown: !this.state.showSessionDropdown });
     }
 
 }

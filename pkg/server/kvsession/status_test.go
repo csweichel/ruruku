@@ -1,7 +1,6 @@
 package kvsession
 
 import (
-	"context"
 	"sort"
 	"testing"
 
@@ -21,16 +20,15 @@ func TestBasicStatus(t *testing.T) {
 	defer ctrl.Finish()
 	s, reqval := newTestServer(ctrl)
 
-	reqval.EXPECT().ValidUserFromRequest(gomock.Any(), types.PermissionSessionStart).Return("user", nil)
+	user := "user"
 	sreq := validStartSessionRequest()
-	sresp, err := s.Start(context.Background(), sreq)
+	sresp, err := s.Start(reqval.GetContext(user, types.PermissionSessionStart), sreq)
 	if err != nil {
 		t.Errorf("Cannot start session: %v", err)
 		return
 	}
 
-	reqval.EXPECT().ValidUserFromRequest(gomock.Any(), types.PermissionSessionView).Return("user", nil)
-	resp, err := s.Status(context.Background(), validStatusRequest(sresp.Id))
+	resp, err := s.Status(reqval.GetContext(user, types.PermissionSessionView), validStatusRequest(sresp.Id))
 	if err != nil {
 		t.Errorf("Status returned an error despite valid request: %v", err)
 	}
@@ -48,6 +46,17 @@ func TestBasicStatus(t *testing.T) {
 	}
 	if status.PlanID != sreq.Plan.Id {
 		t.Errorf("Status returned wrong planID: expected %s, actual %s", sreq.Plan.Id, status.PlanID)
+	}
+	if status.Annotations == nil {
+		t.Error("Status returned nil for annoations")
+	} else {
+		for k, v := range sreq.Annotations {
+			if sv, ok := status.Annotations[k]; !ok {
+				t.Errorf("Status misses annotation with key %s", k)
+			} else if sv != v {
+				t.Errorf("Status returned wrong value for annotation %s: expected %s, actual %s", k, v, sv)
+			}
+		}
 	}
 	if status.Open != true {
 		t.Errorf("Status returned wrong open flag: expected %v, actual %v", true, status.Open)

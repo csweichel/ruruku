@@ -6,6 +6,7 @@ message SessionMetadata {
     string name = 1;
     string planID = 2;
     bool open = 3;
+    map<string, string> annotations = 4;
 }
 
 message TestplanMetadata {

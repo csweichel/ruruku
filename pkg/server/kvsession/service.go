@@ -82,7 +82,7 @@ func (s *kvsessionStore) Start(ctx context.Context, req *api.StartSessionRequest
 		}
 		planID = req.Plan.Id
 	}
-	if err := s.storeSession(sid, req.Name, planID); err != nil {
+	if err := s.storeSession(sid, req.Name, planID, req.Annotations); err != nil {
 		return nil, err
 	}
 

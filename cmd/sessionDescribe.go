@@ -10,6 +10,10 @@ const sessionDescribeTpl = `ID:	{{ .Id }}
 Name:	{{ .Name }}
 Plan:	{{ .PlanID }}
 Result:	{{ .State }}
+{{- if .Annotations }}
+Annotations:	{{ range $k, $v := .Annotations }}{{ $k }}:	{{ $v }}
+	{{ end -}}
+{{ end }}
 Tests:
 {{- range .Status }}
   {{ .Case.Id }}:

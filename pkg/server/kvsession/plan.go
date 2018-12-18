@@ -85,6 +85,11 @@ func (s *kvsessionStore) getStatus(sessionID string) (*api.TestRunStatus, error)
 		res.PlanID = meta.PlanID
 		res.Name = meta.Name
 		res.Open = meta.Open
+		if meta.Annotations == nil {
+			res.Annotations = map[string]string{}
+		} else {
+			res.Annotations = meta.Annotations
+		}
 
 		status := make([]*api.TestcaseStatus, 0)
 		tb := tx.Bucket([]byte(bucketTestplan))

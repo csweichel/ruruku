@@ -1,7 +1,6 @@
 package kvsession
 
 import (
-	"context"
 	"testing"
 
 	api "github.com/32leaves/ruruku/pkg/api/v1"
@@ -37,6 +36,10 @@ var validStartSessionRequest = func() *api.StartSessionRequest {
 				},
 			},
 		},
+		Annotations: map[string]string{
+			"commit":  "91816720613ad4ecbd0198246aa6f44c264c129f",
+			"version": "v0.3.0",
+		},
 	}
 }
 
@@ -45,8 +48,8 @@ func TestStartValidSession(t *testing.T) {
 	defer ctrl.Finish()
 	s, reqval := newTestServer(ctrl)
 
-	reqval.EXPECT().ValidUserFromRequest(gomock.Any(), types.PermissionSessionStart).Return("user", nil)
-	resp, err := s.Start(context.Background(), validStartSessionRequest())
+	user := "user"
+	resp, err := s.Start(reqval.GetContext(user, types.PermissionSessionStart), validStartSessionRequest())
 
 	if err != nil {
 		t.Errorf("Start returned error despite valid request: %v", err)
@@ -65,11 +68,11 @@ func TestStartInvalidSession(t *testing.T) {
 	defer ctrl.Finish()
 	s, reqval := newTestServer(ctrl)
 
-	reqval.EXPECT().ValidUserFromRequest(gomock.Any(), types.PermissionSessionStart).Return("user", nil)
+	user := "user"
 	req := &api.StartSessionRequest{
 		Name: "",
 	}
-	resp, err := s.Start(context.Background(), req)
+	resp, err := s.Start(reqval.GetContext(user, types.PermissionSessionStart), req)
 	if err == nil {
 		t.Errorf("Start accepted invalid session (name == \"\")")
 	}
@@ -79,8 +82,7 @@ func TestStartInvalidSession(t *testing.T) {
 
 	req = validStartSessionRequest()
 	req.Plan.Case[0].Name = ""
-	reqval.EXPECT().ValidUserFromRequest(gomock.Any(), types.PermissionSessionStart).Return("user", nil)
-	resp, err = s.Start(context.Background(), req)
+	resp, err = s.Start(reqval.GetContext(user, types.PermissionSessionStart), req)
 	if err == nil {
 		t.Errorf("Start accepted invalid testcase (name == \"\")")
 	}
@@ -90,8 +92,7 @@ func TestStartInvalidSession(t *testing.T) {
 
 	req = validStartSessionRequest()
 	req.Plan.Case[0].Id = req.Plan.Case[1].Id
-	reqval.EXPECT().ValidUserFromRequest(gomock.Any(), types.PermissionSessionStart).Return("user", nil)
-	resp, err = s.Start(context.Background(), req)
+	resp, err = s.Start(reqval.GetContext(user, types.PermissionSessionStart), req)
 	if err == nil {
 		t.Errorf("Start accepted invalid testcases (two cases with ID \"%s\")", req.Plan.Case[0].Id)
 	}
