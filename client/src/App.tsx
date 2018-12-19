@@ -29,7 +29,9 @@ class App extends React.Component<AppProps, AppStateContent & { shouldReload?: b
                     }
                     errorTimeout = setTimeout(() => this.setState({ error: undefined }), 5000);
                 }
-            }
+            },
+            logout: () => this.setState({ token: undefined }),
+            resetSession: () => this.setState({ session: undefined })
         };
 
         this.onLogin = this.onLogin.bind(this);

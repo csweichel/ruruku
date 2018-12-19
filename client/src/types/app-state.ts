@@ -9,6 +9,8 @@ export interface AppStateContent {
 
     readonly error?: string
     setError: (msg: string) => void;
+    resetSession(): void;
+    logout(): void;
 }
 
 export function getClient(state: AppStateContent): Client {

@@ -1,10 +1,11 @@
 import { AppStateContent, getClient } from 'src/types/app-state';
 import { TestRunStatus } from 'src/api/v1/session_pb';
 import * as React from 'react';
-import { List, Header, Label } from 'semantic-ui-react';
+import { List, Header, Label, Segment, Grid, Transition } from 'semantic-ui-react';
 
 export interface SessionDetailViewProps {
     appState: AppStateContent;
+    onChangePwd: () => void;
 }
 
 interface SessionDetailViewState {
@@ -15,7 +16,8 @@ export class SessionDetailView extends React.Component<SessionDetailViewProps, S
 
     constructor(props: SessionDetailViewProps) {
         super(props);
-        this.state = {};
+        this.state = {
+        };
     }
 
     public componentWillMount() {
@@ -49,20 +51,41 @@ export class SessionDetailView extends React.Component<SessionDetailViewProps, S
         }
 
         return (
-            <List celled={true}>
-                <List.Item>
-                    <List.Content>
-                        <Header subheader={true}>User</Header> {(this.props.appState.user || { name: "" }).name}
-                    </List.Content>
-                </List.Item>
-                <List.Item>
-                    <List.Content>
-                        <Header subheader={true}>Session Name</Header>
-                        {session.getName()} / {session.getId()}
-                    </List.Content>
-                </List.Item>
-                {annotations}
-            </List>
+            <Segment>
+                <Transition.Group animation="fly left">
+                    <Grid columns={2} relaxed='very'>
+                <Grid.Column>
+                    <List>
+                        <List.Item>
+                            <List.Content>
+                                <Header subheader={true}>User</Header> {(this.props.appState.user || { name: "" }).name}
+                            </List.Content>
+                        </List.Item>
+                        <List.Item>
+                            <List.Content>
+                                <Header subheader={true}>Session Name</Header>
+                                {session.getName()} / {session.getId()}
+                            </List.Content>
+                        </List.Item>
+                        {annotations}
+                    </List>
+                </Grid.Column>
+                <Grid.Column>
+                    <List selection={true} divided={true}>
+                        <List.Item onClick={this.props.onChangePwd}>
+                            <List.Content>Change Password</List.Content>
+                        </List.Item>
+                        <List.Item onClick={this.props.appState.resetSession}>
+                            <List.Content>Switch Session</List.Content>
+                        </List.Item>
+                        <List.Item onClick={this.props.appState.logout}>
+                            <List.Content>Logout</List.Content>
+                        </List.Item>
+                    </List>
+                </Grid.Column>
+            </Grid>
+                </Transition.Group>
+            </Segment>
         );
     }
 

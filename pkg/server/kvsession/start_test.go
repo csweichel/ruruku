@@ -51,7 +51,7 @@ func TestStartValidSession(t *testing.T) {
 	s, reqval := newTestServer(ctrl)
 
 	user := "user"
-    req := validStartSessionRequest()
+	req := validStartSessionRequest()
 	resp, err := s.Start(reqval.GetContext(user, types.PermissionSessionStart), req)
 	if err != nil {
 		t.Errorf("Start returned error despite valid request: %v", err)
@@ -64,13 +64,13 @@ func TestStartValidSession(t *testing.T) {
 		t.Error("Start returned empty ID")
 	}
 
-    listsrv := NewMockSessionService_ListServer(ctrl)
-    listsrv.EXPECT().Context().Return(reqval.GetContext(user, types.PermissionSessionView))
-    listsrv.EXPECT().Send(&api.ListSessionsResponse{ Id: resp.Id, Name: req.Name, IsOpen: true }).Return(nil)
-    err = s.List(&api.ListSessionsRequest{}, listsrv)
-    if err != nil {
-        t.Errorf("List returned an error despite valie request: %v", err)
-    }
+	listsrv := NewMockSessionService_ListServer(ctrl)
+	listsrv.EXPECT().Context().Return(reqval.GetContext(user, types.PermissionSessionView))
+	listsrv.EXPECT().Send(&api.ListSessionsResponse{Id: resp.Id, Name: req.Name, IsOpen: true}).Return(nil)
+	err = s.List(&api.ListSessionsRequest{}, listsrv)
+	if err != nil {
+		t.Errorf("List returned an error despite valie request: %v", err)
+	}
 }
 
 func TestStartInvalidSession(t *testing.T) {

@@ -1,4 +1,4 @@
-import { AuthenticationRequest, AuthenticationRespose, RenewTokenRequest, RenewTokenResponse } from '../api/v1/user_pb';
+import { AuthenticationRequest, AuthenticationRespose, RenewTokenRequest, RenewTokenResponse, ChangePasswordRequest } from '../api/v1/user_pb';
 import { grpc } from 'grpc-web-client';
 import { UserService } from '../api/v1/user_pb_service';
 import { ProtobufMessage } from 'grpc-web-client/dist/typings/message';
@@ -65,6 +65,22 @@ export class Client {
             onMessage: (msg: RenewTokenResponse) => msg.getToken()
         });
         this.appState.token = resp;
+    }
+
+    public async changePassword(oldPassword: string, newPassword: string): Promise<void> {
+        console.log(oldPassword);
+        const lreq = new AuthenticationRequest();
+        lreq.setUsername((this.appState.user || { name: "" }).name);
+        lreq.setPassword(oldPassword);
+        await this.invoke(UserService.AuthenticateCredentials, lreq, {
+            onMessage: (msg: AuthenticationRespose) => {
+                return msg.getToken();
+            }
+        });
+
+        const req = new ChangePasswordRequest();
+        req.setNewpassword(newPassword);
+        await this.invoke(UserService.ChangePassword, req);
     }
 
     public async getStatus(): Promise<TestRunStatus> {

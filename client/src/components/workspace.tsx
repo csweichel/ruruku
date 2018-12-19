@@ -7,6 +7,7 @@ import { TestplanView } from './testplan-view';
 import './workspace.css';
 import { TestRunStatus } from 'src/api/v1/session_pb';
 import { SessionDetailView } from './session-detail';
+import { ChangePasswordForm } from './change-password-form';
 
 export interface WorkspaceProps {
     appState: AppStateContent
@@ -14,7 +15,7 @@ export interface WorkspaceProps {
 
 interface WorkspaceState {
     sidebar?: any
-    showSessionDropdown: boolean;
+    cornerDropdown?: 'session-info' | 'chpwd';
     sessionInfo?: TestRunStatus;
 }
 
@@ -25,11 +26,9 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
         super(props);
 
         this.showSidebar = this.showSidebar.bind(this);
-        this.toggleSessionInfo = this.toggleSessionInfo.bind(this);
+        this.toggleCornerMenu = this.toggleCornerMenu.bind(this);
 
-        this.state = {
-            showSessionDropdown: false
-        };
+        this.state = { };
     }
 
     public componentWillMount() {
@@ -47,17 +46,22 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
             ? <Message error={true}>{this.props.appState.error}</Message>
             : undefined;
 
+        let content = <SessionDetailView appState={this.props.appState} onChangePwd={this.openCornerMenu.bind(this, 'chpwd')} />;
+        if (this.state.cornerDropdown === 'chpwd') {
+            content = <ChangePasswordForm appState={this.props.appState} onClose={this.openCornerMenu.bind(this, undefined)} />;
+        }
+
         return (
             <div className="workspace">
                 <div id="header">
                     <img src={logo} className="app-logo" alt="logo" />
-                    <div className={"info " + (this.state.showSessionDropdown ? "open" : "closed")}>
+                    <div className={"info " + (!!this.state.cornerDropdown ? "open" : "closed")}>
                         <Accordion styled={true}>
-                            <Accordion.Title onClick={this.toggleSessionInfo}>
-                                {this.state.showSessionDropdown ? "Close" : (<Icon name="user circle" />)}
+                            <Accordion.Title onClick={this.toggleCornerMenu}>
+                                {!!this.state.cornerDropdown ? "Close" : (<Icon name="user circle" />)}
                             </Accordion.Title>
-                            <Accordion.Content active={this.state.showSessionDropdown}>
-                                <SessionDetailView appState={this.props.appState} />
+                            <Accordion.Content active={!!this.state.cornerDropdown}>
+                                { content }
                             </Accordion.Content>
                         </Accordion>
                     </div>
@@ -88,8 +92,12 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
         this.setState({ sidebar });
     }
 
-    protected toggleSessionInfo() {
-        this.setState({ showSessionDropdown: !this.state.showSessionDropdown });
+    protected toggleCornerMenu() {
+        this.setState({ cornerDropdown: !this.state.cornerDropdown ? 'session-info' : undefined });
+    }
+
+    protected openCornerMenu(cornerDropdown?: 'session-info' | 'chpwd') {
+        this.setState({ cornerDropdown });
     }
 
     protected startTokenRenewal() {
