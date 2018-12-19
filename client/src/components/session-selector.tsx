@@ -52,7 +52,7 @@ export class SessionSelector extends React.Component<SessionSelectorProps, Sessi
             text: s.name
         }});
         if (options.length === 1) {
-            this.props.onSelect(options[0].value);
+            this.joinSession(options[0].value);
         }
 
         let error: JSX.Element | undefined;
@@ -77,12 +77,16 @@ export class SessionSelector extends React.Component<SessionSelectorProps, Sessi
 
     protected onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        getClient(this.props.appState).joinSession(this.state.selectedSessionID!);
-        this.props.onSelect(this.state.selectedSessionID!);
+        this.joinSession(this.state.selectedSessionID!)
     }
 
     protected selectSession(evt: React.SyntheticEvent, props: DropdownProps) {
         this.setState({ selectedSessionID: props.value as string });
+    }
+
+    protected async joinSession(sessionID: string) {
+        getClient(this.props.appState).joinSession(sessionID);
+        this.props.onSelect(sessionID);
     }
 
     protected getSessions() {
