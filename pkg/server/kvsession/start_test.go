@@ -109,4 +109,24 @@ func TestStartInvalidSession(t *testing.T) {
 	if resp != nil {
 		t.Errorf("Start returned a response despite an invalid request")
 	}
+
+	req = validStartSessionRequest()
+	req.Plan.Case[0].Id = "foo/bar/this/is/not/valid"
+	resp, err = s.Start(reqval.GetContext(user, types.PermissionSessionStart), req)
+	if err == nil {
+		t.Errorf("Start accepted invalid testcases (ID contains slash: %s)", req.Plan.Case[0].Id)
+	}
+	if resp != nil {
+		t.Errorf("Start returned a response despite an invalid request")
+	}
+
+	req = validStartSessionRequest()
+	req.Plan.Case[0].Group = ""
+	resp, err = s.Start(reqval.GetContext(user, types.PermissionSessionStart), req)
+	if err == nil {
+		t.Errorf("Start accepted invalid testcases (empty group)")
+	}
+	if resp != nil {
+		t.Errorf("Start returned a response despite an invalid request")
+	}
 }
