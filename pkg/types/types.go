@@ -1,16 +1,16 @@
 package types
 
 type Participant struct {
-	Name string `validate:"required"`
+	Name string
 }
 
 type Testcase struct {
 	// ID of the testcase. Must be unique within the test suite.
-	ID string `validate:"required"`
+	ID string
 	// Name is the short description of the testcase
-	Name string `validate:"required"`
+	Name string
 	// Groups helps organize testcases
-	Group string `validate:"required"`
+	Group string
 	// Description is a long description
 	Description string
 	// Steps lists the individual steps a tester should perform
@@ -43,42 +43,42 @@ type TestcaseRunResult struct {
 	// Participant who contributed this result
 	Participant Participant
 	// State denotes the success of a testcase
-	State TestRunState `validate:"required"`
+	State TestRunState
 	// Comment is free text entered by the participant
 	Comment string
 }
 
 type TestcaseStatus struct {
 	// The testcase this run concerns
-	Case Testcase `validate:"required"`
+	Case Testcase
 	// Claims mark testers who want to run a testcase
 	Claim []Participant
 	// Runs are completed testcase executions
 	Result []TestcaseRunResult
 	// State is the overall testcase success state
-	State TestRunState `validate:"required"`
+	State TestRunState
 }
 
 type TestRunStatus struct {
 	// ID is the globally unique ID of this test run
-	ID string `validate:"required"`
+	ID string
 	// Name is a short description of this run
-	Name string `validate:"required"`
+	Name string
 	// Plan ID is the ID of the testplan being executed
-	PlanID string `validate:"required"`
+	PlanID string
 	// Status lists the status for each testcase of the plan
 	Status []TestcaseStatus
 	// State is the overall test run state
-	State TestRunState `validate:"required"`
+	State TestRunState
 }
 
 type TestPlan struct {
 	// ID is the globally unique ID of this testplan
-	ID string `validate:"required"`
+	ID string
 	// Name is the short description of the testplan
-	Name string `validate:"required"`
+	Name string
 	// Description is a long description
-	Description string `validate:"required"`
+	Description string
 	// Case lists the testcases of this plan
 	Case []Testcase
 }

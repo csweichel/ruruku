@@ -70,9 +70,14 @@ func (s *kvsessionStore) Start(ctx context.Context, req *api.StartSessionRequest
 
 	planID := ""
 	if req.Plan != nil {
+		plan := req.Plan.Convert()
+		if err := plan.Validate(); err != nil {
+			return nil, err
+		}
+
 		for _, cse := range req.Plan.Case {
 			tcs := cse.Convert()
-			if err := types.ValidateTestcase(&tcs); err != nil {
+			if err := tcs.Validate(); err != nil {
 				return nil, err
 			}
 		}
