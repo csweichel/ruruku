@@ -85,13 +85,6 @@ input[type="submit"]:disabled {
     padding: 0px !important;
 }
 
-.ui.card {
-    width: 100% !important;
-}
-.ui.overlay.sidebar {
-    background-color: white;
-}
-
 .ui.pushable {
     overflow-y: hidden;
 }

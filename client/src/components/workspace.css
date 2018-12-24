@@ -1,4 +1,21 @@
 
-.ui.error {
-    padding-bottom: 1em;
+.ui.error.message {
+    height: calc(50px - 0.75em);
+    width: 50vw;
+    padding: calc(50px - 2.8em);
+    padding-left: 1em;
+}
+
+.ui.overlay.sidebar {
+    background-color: #fafafa;
+    padding-left: 1em;
+    padding-right: 0.5em;
+}
+
+.ui.overlay.sidebar.super.wide {
+    width: 60vw;
+}
+
+.ui.overlay.sidebar .card {
+    width: 100% !important;
 }

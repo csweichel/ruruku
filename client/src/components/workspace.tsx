@@ -1,6 +1,6 @@
 import * as React from 'react';
 import logo from '../logo.svg';
-import { Sidebar, Segment, Message, TransitionGroup, Accordion, Icon } from 'semantic-ui-react';
+import { Sidebar, Segment, Message, TransitionGroup, Accordion, Icon, Menu } from 'semantic-ui-react';
 import { AppStateContent, getClient } from 'src/types/app-state';
 import { TestplanView } from './testplan-view';
 
@@ -17,6 +17,7 @@ interface WorkspaceState {
     sidebar?: any
     cornerDropdown?: 'session-info' | 'chpwd';
     sessionInfo?: TestRunStatus;
+    superWideSidebar?: boolean;
 }
 
 export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
@@ -27,8 +28,11 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
 
         this.showSidebar = this.showSidebar.bind(this);
         this.toggleCornerMenu = this.toggleCornerMenu.bind(this);
+        this.toggleSidebarWidth = this.toggleSidebarWidth.bind(this);
 
-        this.state = { };
+        this.state = {
+            superWideSidebar: true,
+        };
     }
 
     public componentWillMount() {
@@ -55,6 +59,9 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
             <div className="workspace">
                 <div id="header">
                     <img src={logo} className="app-logo" alt="logo" />
+                    <TransitionGroup animation="drop">
+                        {error}
+                    </TransitionGroup>
                     <div className={"info " + (!!this.state.cornerDropdown ? "open" : "closed")}>
                         <Accordion styled={true}>
                             <Accordion.Title onClick={this.toggleCornerMenu}>
@@ -68,11 +75,14 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
                 </div>
 
                 <div className="main">
-                    <TransitionGroup animation="drop">
-                        {error}
-                    </TransitionGroup>
                     <Sidebar.Pushable as={Segment} attached="bottom" className="no-border">
-                        <Sidebar width="very wide" animation="overlay" visible={!!this.state.sidebar} icon="labeled" vertical={true} inline={true} inverted={false} direction="right">
+                        <Sidebar width="very wide" className={!!this.state.superWideSidebar ? "super" : ""} animation="overlay" visible={!!this.state.sidebar} icon="labeled" vertical={true} inline={true} inverted={false} direction="right">
+                            <Menu icon={true} size="mini" secondary={true}>
+                                <Menu.Item icon={"angle double " + (!!this.state.superWideSidebar ? "right" : "left")} onClick={this.toggleSidebarWidth} />
+                                <Menu.Menu position="right">
+                                    <Menu.Item icon="times" onClick={this.showSidebar.bind(this, undefined)} />
+                                </Menu.Menu>
+                            </Menu>
                             {this.state.sidebar}
                         </Sidebar>
                         <Sidebar.Pusher>
@@ -98,6 +108,10 @@ export class Workspace extends React.Component<WorkspaceProps, WorkspaceState> {
 
     protected openCornerMenu(cornerDropdown?: 'session-info' | 'chpwd') {
         this.setState({ cornerDropdown });
+    }
+
+    protected toggleSidebarWidth() {
+        this.setState({ superWideSidebar: !this.state.superWideSidebar });
     }
 
     protected startTokenRenewal() {
