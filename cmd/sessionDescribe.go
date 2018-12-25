@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const sessionDescribeTpl = `ID:	{{ .Id }}
+const sessionDescribeTpl = `ID:	{{ .ID }}
 Name:	{{ .Name }}
 Plan:	{{ .PlanID }}
 Result:	{{ .State }}
@@ -16,7 +16,7 @@ Annotations:	{{ range $k, $v := .Annotations }}{{ $k }}:	{{ $v }}
 {{ end }}
 Tests:
 {{- range .Status }}
-  {{ .Case.Id }}:
+  {{ .Case.ID }}:
     Name:	{{ .Case.Name }}
     Result:	{{ .State }}
     Claims:	{{ len .Claim -}}
@@ -49,7 +49,7 @@ var sessionDescribeCmd = &cobra.Command{
 			log.WithError(err).Fatal()
 		}
 
-		ctnt := remoteCmdValues.GetOutputFormat(resp.Status, sessionDescribeTpl)
+		ctnt := remoteCmdValues.GetOutputFormat(resp.Status.Convert(), sessionDescribeTpl)
 		if err := ctnt.Print(); err != nil {
 			log.WithError(err).Fatal()
 		}
