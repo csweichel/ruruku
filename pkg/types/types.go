@@ -70,6 +70,8 @@ type TestRunStatus struct {
 	Status []TestcaseStatus
 	// State is the overall test run state
 	State TestRunState
+	// Annotations are session metadata
+	Annotations map[string]string
 }
 
 type TestPlan struct {

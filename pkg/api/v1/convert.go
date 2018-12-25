@@ -78,11 +78,12 @@ func (s *TestRunStatus) Convert() types.TestRunStatus {
 		status[i] = c.Convert()
 	}
 	return types.TestRunStatus{
-		ID:     s.Id,
-		Name:   s.Name,
-		PlanID: s.PlanID,
-		Status: status,
-		State:  s.State.Convert(),
+		ID:          s.Id,
+		Name:        s.Name,
+		PlanID:      s.PlanID,
+		Status:      status,
+		State:       s.State.Convert(),
+		Annotations: s.Annotations,
 	}
 }
 
