@@ -1,11 +1,13 @@
 import { grpc } from 'grpc-web-client';
 import { Client } from './service-client';
 import { HOST } from 'src/api/host';
+import { Keybindings } from 'src/components/keybindings';
 
 export interface AppStateContent {
     token?: string;
     session?: string;
-    user?: { name: string }
+    user?: { name: string };
+    readonly keybindings: Keybindings;
 
     readonly error?: string
     setError: (msg: string) => void;

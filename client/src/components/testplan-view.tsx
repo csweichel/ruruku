@@ -21,6 +21,7 @@ interface TestplanViewState {
 
 export class TestplanView extends React.Component<TestplanViewProps, TestplanViewState> {
     protected updateListener: Disposable;
+    protected lastOpenedTestcaseIndex: number | undefined;
 
     public constructor(props: TestplanViewProps) {
         super(props);
@@ -28,9 +29,18 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
             column: 'name',
             direction: 'ascending'
         };
+
+        this.closeSidebar = this.closeSidebar.bind(this);
     }
 
     public async componentWillMount() {
+        this.props.appState.keybindings.push(
+            { keys: 'esc', description: 'Close the sidebar', handler: () => this.closeSidebar() },
+            { keys: 'ctrl+b', description: "Mark current testcase as passed", handler: this.claimContributeAdvance.bind(this, TestRunState.PASSED) },
+            { keys: 'ctrl+n', description: "Mark current testcase as undecided", handler: this.claimContributeAdvance.bind(this, TestRunState.UNDECIDED) },
+            { keys: 'ctrl+m', description: "Mark current testcase as failed", handler: this.claimContributeAdvance.bind(this, TestRunState.FAILED) }
+        );
+
         this.fetchStatus();
         try {
             this.updateListener = await getClient(this.props.appState).listenForUpdates((s, err) => {
@@ -43,6 +53,10 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
         } catch (err) {
             this.props.appState.setError(err);
         }
+    }
+
+    public async componentWillUnmount() {
+        this.props.appState.keybindings.pop();
     }
 
     public render() {
@@ -117,31 +131,35 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
             return result;
         });
 
-        return sortedCases.map(tcs => {
+        return sortedCases.map((tcs, idx) => {
             const cse = tcs.getCase()!;
-            return <Table.Row key={cse.getId()}>
+            const caseComplete = tcs.getResultList().length === cse.getMintestercount();
+            const positive = caseComplete && tcs.getState() === TestRunState.PASSED;
+            const warning = caseComplete && tcs.getState() === TestRunState.UNDECIDED;
+            const negative = caseComplete && tcs.getState() === TestRunState.FAILED;
+            return <Table.Row key={cse.getId()} active={this.lastOpenedTestcaseIndex === idx} positive={positive} warning={warning} negative={negative}>
                 <Table.Cell>{cse.getGroup()}</Table.Cell>
-                <Table.Cell><a href="#" onClick={this.showDetails.bind(this, tcs)}>{cse.getName()}</a></Table.Cell>
+                <Table.Cell><a href="#" onClick={this.showDetails.bind(this, idx, tcs)}>{cse.getName()}</a></Table.Cell>
                 <Table.Cell><TestCaseStatusView case={tcs} /></Table.Cell>
                 <Table.Cell collapsing={true}>
-                    {this.getActions(tcs)}
+                    {this.getActions(idx, tcs)}
                 </Table.Cell>
             </Table.Row>
         });
     }
 
-    protected getActions(tc: TestcaseStatus) {
+    protected getActions(index: number, tc: TestcaseStatus) {
         if (this.isClaimed(tc)) {
             const previousRun = this.getPreviousRun(tc);
             if (previousRun) {
                 // TODO: add edit button - see #4
-                return <Button label="Edit" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, tc, undefined)} />;
+                return <Button label="Edit" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, index, tc, undefined)} />;
             } else {
                 return (
                     <ButtonGroup>
-                        <Button icon="check" key="pass" onClick={this.showNewRunForm.bind(this, tc, TestRunState.PASSED)} />
-                        <Button icon="question" key="undecided" onClick={this.showNewRunForm.bind(this, tc, TestRunState.UNDECIDED)} />
-                        <Button icon="times" key="fail" onClick={this.showNewRunForm.bind(this, tc, TestRunState.FAILED)} />
+                        <Button icon="check" key="pass" onClick={this.showNewRunForm.bind(this, index, tc, TestRunState.PASSED)} />
+                        <Button icon="question" key="undecided" onClick={this.showNewRunForm.bind(this, index, tc, TestRunState.UNDECIDED)} />
+                        <Button icon="times" key="fail" onClick={this.showNewRunForm.bind(this, index, tc, TestRunState.FAILED)} />
                         <ButtonOr />
                         <Button label="Unclaim" icon="minus circle" onClick={this.claim.bind(this, tc, false)} key="claim" />;
                     </ButtonGroup>
@@ -152,17 +170,19 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
         }
     }
 
-    protected showDetails(cse: TestcaseStatus, evt: React.SyntheticEvent) {
+    protected showDetails(idx: number, cse: TestcaseStatus, evt: React.SyntheticEvent) {
         evt.preventDefault();
-        this.props.showDetails(<TestcaseDetailView testcase={cse} onClose={this.props.showDetails} />);
+        this.lastOpenedTestcaseIndex = idx;
+        this.props.showDetails(<TestcaseDetailView testcase={cse} onClose={this.closeSidebar} />);
     }
 
-    protected showNewRunForm(cse: TestcaseStatus, result?: TestRunState) {
+    protected showNewRunForm(idx: number, cse: TestcaseStatus, result?: TestRunState) {
+        this.lastOpenedTestcaseIndex = idx;
         this.props.showDetails(<NewTestcaseRunView
             appState={this.props.appState}
             testcase={cse}
             result={result}
-            onClose={this.props.showDetails} />)
+            onClose={this.closeSidebar} />)
     }
 
     protected isClaimed(cse: TestcaseStatus): boolean {
@@ -180,6 +200,38 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
         evt.preventDefault();
         try {
             await getClient(this.props.appState).claim(cse.getCase()!.getId(), claim);
+        } catch (err) {
+            this.props.appState.setError(err);
+        }
+    }
+
+    protected closeSidebar() {
+        this.lastOpenedTestcaseIndex = undefined;
+        this.props.showDetails(undefined);
+    }
+
+    protected async claimContributeAdvance(result: TestRunState): Promise<void> {
+        if (!this.state.status) {
+            return;
+        }
+
+        const cases = this.state.status.getStatusList();
+        if (!cases || this.lastOpenedTestcaseIndex === undefined || this.lastOpenedTestcaseIndex >= cases.length) {
+            return;
+        }
+
+        const cse = cases[this.lastOpenedTestcaseIndex];
+        try {
+            const client = await getClient(this.props.appState);
+            await client.claim(cse.getCase()!.getId(), true);
+            await client.contribute(cse.getCase()!.getId(), result, "");
+
+            const nidx = this.lastOpenedTestcaseIndex + 1;
+            if (nidx >= cases.length) {
+                this.closeSidebar();
+            } else {
+                this.showNewRunForm(nidx, cases[nidx], result);
+            }
         } catch (err) {
             this.props.appState.setError(err);
         }

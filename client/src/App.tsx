@@ -9,12 +9,18 @@ import { SessionSelector } from './components/session-selector';
 import { Workspace } from './components/workspace';
 import { MiniEventEmitter } from './types/mini-event-emitter';
 import { Modal, Button, Icon } from 'semantic-ui-react';
+import { Keybindings, KeybindingHelpDialog } from './components/keybindings';
 
 export interface AppProps {
     reloadRequest: MiniEventEmitter<boolean>;
 }
 
-class App extends React.Component<AppProps, AppStateContent & { shouldReload?: boolean }> {
+interface AppPrivateState {
+    shouldReload?: boolean;
+    showKeybindingHelp?: boolean;
+}
+
+class App extends React.Component<AppProps, AppStateContent & AppPrivateState> {
 
     constructor(props: AppProps) {
         super(props);
@@ -31,7 +37,8 @@ class App extends React.Component<AppProps, AppStateContent & { shouldReload?: b
                 }
             },
             logout: () => this.setState({ token: undefined }),
-            resetSession: () => this.setState({ session: undefined })
+            resetSession: () => this.setState({ session: undefined }),
+            keybindings: new Keybindings(),
         };
 
         this.onLogin = this.onLogin.bind(this);
@@ -41,6 +48,9 @@ class App extends React.Component<AppProps, AppStateContent & { shouldReload?: b
     public componentWillMount() {
         this.props.reloadRequest.subscribe(() => {
             this.setState({ shouldReload: true });
+        });
+        this.state.keybindings.push({
+            keys: 'h', description: 'Show help dialog', handler: () => this.showKeyboardHelpDialog(true)
         });
     }
 
@@ -68,6 +78,7 @@ class App extends React.Component<AppProps, AppStateContent & { shouldReload?: b
                         <Button color='green' inverted={true} onClick={this.reloadPage}><Icon name='checkmark' /> Do it</Button>
                     </Modal.Actions>
                 </Modal>
+                <KeybindingHelpDialog bindings={this.state.keybindings} open={!!this.state.showKeybindingHelp} closeDialog={this.showKeyboardHelpDialog.bind(this, false)} />
                 <header id="header">
                     <img src={logo} className="app-logo" alt="logo" />
                 </header>
@@ -88,6 +99,10 @@ class App extends React.Component<AppProps, AppStateContent & { shouldReload?: b
 
     protected reloadPage() {
         window.location.reload();
+    }
+
+    protected showKeyboardHelpDialog(open: boolean) {
+        this.setState({ showKeybindingHelp: open });
     }
 
 }
