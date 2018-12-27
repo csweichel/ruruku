@@ -102,7 +102,7 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
             return [];
         }
 
-        const cases = this.state.status.getStatusList();
+        const cases = this.state.status.getCaseList();
         if (!cases) {
             console.warn("Session has empty case list");
             return [];

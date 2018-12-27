@@ -37,6 +37,7 @@ enum Permission {
     SESSION_CLOSE = 11;
     SESSION_VIEW = 12; // list, status, updates
     SESSION_CONTRIBUTE = 13; // register, claim, contribute
+    SESSION_MODIFY = 14;
 }
 
 message AuthenticationRequest {

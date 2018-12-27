@@ -8,6 +8,8 @@ import (
 	"github.com/32leaves/ruruku/pkg/types"
 	bolt "github.com/etcd-io/bbolt"
 	"github.com/golang/protobuf/proto"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (s *kvsessionStore) storePlan(sessionID string, plan *api.TestPlan) error {
@@ -33,8 +35,9 @@ func (s *kvsessionStore) storePlan(sessionID string, plan *api.TestPlan) error {
 
 		for _, cse := range plan.Case {
 			tckey := pathSessionTestcase(sessionID, cse.Id)
-			if bucket.Get(tckey) != nil {
-				return fmt.Errorf("Testcase '%s' exists already", cse.Id)
+			caseExists := bucket.Get(tckey) != nil
+			if caseExists {
+				return status.Errorf(codes.AlreadyExists, "Testcase '%s' exists already", cse.Id)
 			}
 
 			content, err := proto.Marshal(cse)
@@ -42,6 +45,69 @@ func (s *kvsessionStore) storePlan(sessionID string, plan *api.TestPlan) error {
 				return err
 			}
 			if err := bucket.Put(tckey, content); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *kvsessionStore) addOrUpdateTestcase(sessionID string, tc []*api.Testcase, tcMustExist bool) error {
+	err := s.DB.Update(func(tx *bolt.Tx) error {
+		bucket, err := tx.CreateBucketIfNotExists([]byte(bucketTestplan))
+		if err != nil {
+			return err
+		}
+
+		for _, cse := range tc {
+			tckey := pathSessionTestcase(sessionID, cse.Id)
+			caseExists := bucket.Get(tckey) != nil
+			if tcMustExist && !caseExists {
+				return status.Errorf(codes.NotFound, "Testcase '%s' does not exist", cse.Id)
+			}
+			if !tcMustExist && caseExists {
+				return status.Errorf(codes.AlreadyExists, "Testcase '%s' exists already", cse.Id)
+			}
+
+			content, err := proto.Marshal(cse)
+			if err != nil {
+				return err
+			}
+			if err := bucket.Put(tckey, content); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *kvsessionStore) removeTestcase(sessionID string, tc []*api.Testcase) error {
+	err := s.DB.Update(func(tx *bolt.Tx) error {
+		bucket, err := tx.CreateBucketIfNotExists([]byte(bucketTestplan))
+		if err != nil {
+			return err
+		}
+
+		for _, cse := range tc {
+			tckey := pathSessionTestcase(sessionID, cse.Id)
+			caseExists := bucket.Get(tckey) != nil
+			if !caseExists {
+				return status.Errorf(codes.NotFound, "Testcase '%s' does not exist", cse.Id)
+			}
+
+			if err := bucket.Delete(tckey); err != nil {
 				return err
 			}
 		}
@@ -84,13 +150,14 @@ func (s *kvsessionStore) getStatus(sessionID string) (*api.TestRunStatus, error)
 		res.PlanID = meta.PlanID
 		res.Name = meta.Name
 		res.Open = meta.Open
+		res.Modifiable = meta.Modifiable
 		if meta.Annotations == nil {
 			res.Annotations = map[string]string{}
 		} else {
 			res.Annotations = meta.Annotations
 		}
 
-		status := make([]*api.TestcaseStatus, 0)
+		cases := make([]*api.TestcaseStatus, 0)
 		tb := tx.Bucket([]byte(bucketTestplan))
 		err := forEachTestcase(tb, sessionID, func(tcid string, tc *api.Testcase) error {
 			claims := make([]*api.Participant, 0)
@@ -142,14 +209,14 @@ func (s *kvsessionStore) getStatus(sessionID string) (*api.TestRunStatus, error)
 				State:  api.ConvertTestRunState(tcres),
 			}
 
-			status = append(status, &cse)
+			cases = append(cases, &cse)
 			return nil
 		})
 		if err != nil {
 			return err
 		}
 
-		res.Status = status
+		res.Case = cases
 		return nil
 	})
 	if err != nil {

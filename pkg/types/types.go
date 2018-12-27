@@ -67,7 +67,7 @@ type TestRunStatus struct {
 	// Plan ID is the ID of the testplan being executed
 	PlanID string
 	// Status lists the status for each testcase of the plan
-	Status []TestcaseStatus
+	Cases []TestcaseStatus
 	// State is the overall test run state
 	State TestRunState
 	// Annotations are session metadata

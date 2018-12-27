@@ -79,9 +79,9 @@ func TestValidContribution(t *testing.T) {
 		t.Errorf("Cannot get status: %v", err)
 		return
 	}
-	status := statusResp.Status.Status
-	sort.Slice(status, func(i, j int) bool { return status[i].Case.Id < status[j].Case.Id })
-	contributions := status[0].Result
+	cases := statusResp.Status.Case
+	sort.Slice(cases, func(i, j int) bool { return cases[i].Case.Id < cases[j].Case.Id })
+	contributions := cases[0].Result
 	if len(contributions) == 0 {
 		t.Errorf("Contribute did not record contribution")
 		return
@@ -109,9 +109,9 @@ func TestValidContribution(t *testing.T) {
 		t.Errorf("Cannot get status: %v", err)
 		return
 	}
-	status = statusResp.Status.Status
-	sort.Slice(status, func(i, j int) bool { return status[i].Case.Id < status[j].Case.Id })
-	contributions = status[0].Result
+	cases = statusResp.Status.Case
+	sort.Slice(cases, func(i, j int) bool { return cases[i].Case.Id < cases[j].Case.Id })
+	contributions = cases[0].Result
 	if len(contributions) == 0 {
 		t.Errorf("Contribute did not record contribution")
 		return

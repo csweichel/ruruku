@@ -61,12 +61,15 @@ func TestBasicStatus(t *testing.T) {
 	if status.Open != true {
 		t.Errorf("Status returned wrong open flag: expected %v, actual %v", true, status.Open)
 	}
+	if status.Modifiable != true {
+		t.Errorf("Status returned wrong modifiable flag: expected %v, actual %v", true, status.Modifiable)
+	}
 	if status.State != api.TestRunState_UNDECIDED {
 		t.Errorf("Session without a single run should have \"undecided\" as state, not %s", status.State.String())
 	}
 
-	sort.Slice(status.Status, func(i, j int) bool { return status.Status[i].Case.Id < status.Status[j].Case.Id })
-	for i, tcs := range status.Status {
+	sort.Slice(status.Case, func(i, j int) bool { return status.Case[i].Case.Id < status.Case[j].Case.Id })
+	for i, tcs := range status.Case {
 		orig := sreq.Plan.Case[i]
 		if tcs.Case.Group != orig.Group {
 			t.Errorf("Status returned wrong group for TC %d: expected %s, actual: %s", i, orig.Group, tcs.Case.Group)
