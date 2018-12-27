@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Table, Button, ButtonGroup, ButtonOr } from 'semantic-ui-react';
+import { Table, Button, ButtonGroup, ButtonOr, Checkbox, Menu } from 'semantic-ui-react';
 import { TestRunStatus, TestcaseStatus, TestcaseRunResult, TestRunState } from '../api/v1/session_pb';
 import { TestcaseDetailView } from './testcase-detail-view';
 import { TestCaseStatusView } from './testcase-status'
@@ -17,6 +17,7 @@ interface TestplanViewState {
     column: SortableColumns
     direction: 'ascending' | 'descending'
     status?: TestRunStatus
+    editMode: boolean
 }
 
 export class TestplanView extends React.Component<TestplanViewProps, TestplanViewState> {
@@ -27,10 +28,12 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
         super(props);
         this.state = {
             column: 'name',
-            direction: 'ascending'
+            direction: 'ascending',
+            editMode: false
         };
 
         this.closeSidebar = this.closeSidebar.bind(this);
+        this.toggleEditMode = this.toggleEditMode.bind(this);
     }
 
     public async componentWillMount() {
@@ -63,19 +66,27 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
         const { column, direction } = this.state;
 
         const testcases = this.buildRows();
-        return <Table celled={true} sortable={true} fixed={true}>
-            <Table.Header>
-                <Table.Row>
-                    <Table.HeaderCell sorted={column === 'group' ? direction : undefined} onClick={this.handleSort.bind(this, 'group')}>Group</Table.HeaderCell>
-                    <Table.HeaderCell sorted={column === 'name' ? direction : undefined} onClick={this.handleSort.bind(this, 'name')}>Name</Table.HeaderCell>
-                    <Table.HeaderCell>Testers</Table.HeaderCell>
-                    <Table.HeaderCell sorted={column === 'actions' ? direction : undefined} onClick={this.handleSort.bind(this, 'actions')} />
-                </Table.Row>
-            </Table.Header>
-            <Table.Body>
-                {testcases}
-            </Table.Body>
-        </Table>
+        return (
+            <div>
+            <Menu secondary={true}>
+
+            </Menu>
+            <Checkbox toggle={true} label="Edit test plan" checked={this.state.editMode} onChange={this.toggleEditMode} />
+            <Table celled={true} sortable={true} fixed={true}>
+                <Table.Header>
+                    <Table.Row>
+                        <Table.HeaderCell sorted={column === 'group' ? direction : undefined} onClick={this.handleSort.bind(this, 'group')}>Group</Table.HeaderCell>
+                        <Table.HeaderCell sorted={column === 'name' ? direction : undefined} onClick={this.handleSort.bind(this, 'name')}>Name</Table.HeaderCell>
+                        <Table.HeaderCell>Testers</Table.HeaderCell>
+                        <Table.HeaderCell sorted={column === 'actions' ? direction : undefined} onClick={this.handleSort.bind(this, 'actions')} />
+                    </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                    {testcases}
+                </Table.Body>
+            </Table>
+            </div>
+        )
     }
 
     protected async fetchStatus() {
@@ -149,11 +160,19 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
     }
 
     protected getActions(index: number, tc: TestcaseStatus) {
+        if (this.state.editMode) {
+            return (
+                <ButtonGroup>
+                    <Button icon="pencil" key="edit" />
+                    <Button icon="minus" key="remove" />
+                </ButtonGroup>
+            );
+        }
+
         if (this.isClaimed(tc)) {
             const previousRun = this.getPreviousRun(tc);
             if (previousRun) {
-                // TODO: add edit button - see #4
-                return <Button label="Edit" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, index, tc, undefined)} />;
+                return <Button label="Edit contribution" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, tc, undefined)} />;
             } else {
                 return (
                     <ButtonGroup>
@@ -215,7 +234,7 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
             return;
         }
 
-        const cases = this.state.status.getStatusList();
+        const cases = this.state.status.getCaseList();
         if (!cases || this.lastOpenedTestcaseIndex === undefined || this.lastOpenedTestcaseIndex >= cases.length) {
             return;
         }
@@ -235,6 +254,11 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
         } catch (err) {
             this.props.appState.setError(err);
         }
+    }
+
+    protected toggleEditMode() {
+        this.setState({ editMode: !this.state.editMode });
+        this.lastOpenedTestcaseIndex = undefined;
     }
 
 }
