@@ -6,6 +6,20 @@ permissions:
 - user.grant
 - user.delete
 - user.chpwd
+- session.start
+- session.contribute
+- session.view
+- session.modify
+- session.close
+---
+username: useradmin
+password: useradmin
+email: user-admin-user@ruruku.sh
+permissions:
+- user.add
+- user.grant
+- user.delete
+- user.chpwd
 ---
 username: test-manager
 password: test-manager
