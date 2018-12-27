@@ -42,6 +42,7 @@ var validStartSessionRequest = func() *api.StartSessionRequest {
 			"commit":  "91816720613ad4ecbd0198246aa6f44c264c129f",
 			"version": "v0.3.0",
 		},
+		Modifiable: true,
 	}
 }
 

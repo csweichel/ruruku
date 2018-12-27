@@ -6,6 +6,9 @@ service SessionService {
     // Start begins a new test run session
     rpc Start(StartSessionRequest) returns (StartSessionResponse) {}
 
+    // Modify modifies the testcases/metadata of a session
+    rpc Modify(ModifySessionRequest) returns (ModifySessionResponse) {}
+
     // Close closes a session so that no further participation is possible
     rpc Close(CloseSessionRequest) returns (CloseSessionResponse) {}
 
@@ -38,12 +41,34 @@ message StartSessionRequest {
     TestPlan plan = 2;
     // Annotations are key-value pairs containing metadata of the test session
     map<string, string> annotations = 3;
+    // Modifiable controls if the session can be modified while it's open
+    bool modifiable = 4;
 }
 
 message StartSessionResponse {
     // ID is the unique session ID required for participating
     string id = 1;
 }
+
+message ModifySessionRequest {
+    // ID of the session to modify
+    string id = 1;
+    // Modification denotes which kind of operation should be performed
+    Modification modification = 2;
+    // The new complete set of testcases
+    repeated Testcase case = 3;
+    // The new set of annotations
+    map<string, string> annotations = 4;
+}
+
+enum Modification {
+    UPDATE_ANNOTATIONS = 0;
+    ADD_TESTCASE = 10;
+    MODIFY_TESTCASE = 11;
+    REMOVE_TESTCASE = 12;
+}
+
+message ModifySessionResponse {}
 
 message CloseSessionRequest {
     // ID of the session to close
@@ -115,7 +140,6 @@ message SessionUpdateResponse {
     TestRunStatus status = 2;
 }
 
-
 message Participant {
     // Name of the participant. Must be unique among all participants
     string name = 1;
@@ -173,12 +197,14 @@ message TestRunStatus {
     string planID = 3;
     // Open denotes if participants can still join and contribute
     bool open = 4;
+    // Modifiable controls if session can be modified while it's open
+    bool modifiable = 5;
     // Annotations are key-value pairs containing metadata of the test session
-    map<string, string> annotations = 5;
+    map<string, string> annotations = 6;
     // Status lists the status for each testcase of the plan
-    repeated TestcaseStatus status = 6;
+    repeated TestcaseStatus case = 7;
     // State is the overall test run state
-    TestRunState state = 7;
+    TestRunState state = 8;
 }
 
 message TestPlan {

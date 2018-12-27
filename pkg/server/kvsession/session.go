@@ -2,7 +2,9 @@ package kvsession
 
 import (
 	"bytes"
-	"fmt"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	bolt "github.com/etcd-io/bbolt"
@@ -15,24 +17,36 @@ const (
 	bucketTestplan = "Testplan"
 )
 
-func (s *kvsessionStore) isSessionOpen(sessionID string) (bool, error) {
-	var open bool
+func (s *kvsessionStore) isSession(sessionID string, getter func(s *SessionMetadata) bool) (bool, error) {
+	var res bool
 	err := s.DB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketSessions))
 		v := b.Get(pathSession(sessionID))
 		if v == nil {
-			return fmt.Errorf("Session %s does not exist", sessionID)
+			return status.Errorf(codes.NotFound, "Session %s does not exist", sessionID)
 		}
 
 		var meta SessionMetadata
 		if err := proto.Unmarshal(v, &meta); err != nil {
 			return err
 		}
-		open = meta.Open
+		res = getter(&meta)
 
 		return nil
 	})
-	return open, err
+	return res, err
+}
+
+func (s *kvsessionStore) isSessionOpen(sessionID string) (bool, error) {
+	return s.isSession(sessionID, func(session *SessionMetadata) bool {
+		return session.Open
+	})
+}
+
+func (s *kvsessionStore) isSessionModifiable(sessionID string) (bool, error) {
+	return s.isSession(sessionID, func(session *SessionMetadata) bool {
+		return session.Modifiable
+	})
 }
 
 func (s *kvsessionStore) sessionExists(sessionID string) (bool, error) {
@@ -47,11 +61,12 @@ func (s *kvsessionStore) sessionExists(sessionID string) (bool, error) {
 	return exists, err
 }
 
-func (s *kvsessionStore) storeSession(sessionID string, name string, planID string, annotations map[string]string) error {
+func (s *kvsessionStore) storeSession(sessionID string, name string, planID string, modifiable bool, annotations map[string]string) error {
 	content, err := proto.Marshal(&SessionMetadata{
 		Name:        name,
 		PlanID:      planID,
 		Open:        true,
+		Modifiable:  modifiable,
 		Annotations: annotations,
 	})
 	if err != nil {
@@ -73,13 +88,13 @@ func (s *kvsessionStore) storeSession(sessionID string, name string, planID stri
 	return nil
 }
 
-func (s *kvsessionStore) closeSession(sessionID string) error {
+func (s *kvsessionStore) modifySession(sessionID string, mod func(session *SessionMetadata)) error {
 	return s.DB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketSessions))
 
 		v := b.Get(pathSession(sessionID))
 		if v == nil {
-			return fmt.Errorf("Session %s does not exist", sessionID)
+			return status.Errorf(codes.NotFound, "Session %s does not exist", sessionID)
 		}
 
 		var meta SessionMetadata
@@ -87,7 +102,7 @@ func (s *kvsessionStore) closeSession(sessionID string) error {
 			return err
 		}
 
-		meta.Open = false
+		mod(&meta)
 		content, err := proto.Marshal(&meta)
 		if err != nil {
 			return err
@@ -106,7 +121,7 @@ func (s *kvsessionStore) listSessions(cb func(session *api.ListSessionsResponse)
 		var r SessionMetadata
 		for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
 			if err := proto.Unmarshal(v, &r); err != nil {
-				return fmt.Errorf("Cannot load session %s: %v", k, err)
+				return status.Errorf(codes.Internal, "Cannot load session %s: %v", k, err)
 			}
 
 			err := cb(&api.ListSessionsResponse{

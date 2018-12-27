@@ -62,13 +62,13 @@ func TestValidClaim(t *testing.T) {
 		t.Errorf("Cannot get status: %v", err)
 		return
 	}
-	status := statusResp.Status.Status
-	sort.Slice(status, func(i, j int) bool { return status[i].Case.Id < status[j].Case.Id })
+	cases := statusResp.Status.Case
+	sort.Slice(cases, func(i, j int) bool { return cases[i].Case.Id < cases[j].Case.Id })
 
-	if len(status[0].Claim) == 0 {
+	if len(cases[0].Claim) == 0 {
 		t.Errorf("Claim did not register test case claim")
 	}
-	claims := status[0].Claim
+	claims := cases[0].Claim
 	sort.Slice(claims, func(i, j int) bool { return claims[i].Name < claims[j].Name })
 	if len(claims) < 2 {
 		t.Errorf("Claim returned wrong number of claims: %d instead of 2", len(claims))
@@ -98,15 +98,15 @@ func TestValidClaim(t *testing.T) {
 		t.Errorf("Cannot get status: %v", err)
 		return
 	}
-	status = statusResp.Status.Status
-	sort.Slice(status, func(i, j int) bool { return status[i].Case.Id < status[j].Case.Id })
-	if len(status) < 2 {
-		t.Errorf("Status returned wrong number of testcases: %d instead of 2", len(status))
+	cases = statusResp.Status.Case
+	sort.Slice(cases, func(i, j int) bool { return cases[i].Case.Id < cases[j].Case.Id })
+	if len(cases) < 2 {
+		t.Errorf("Status returned wrong number of testcases: %d instead of 2", len(cases))
 	} else {
-		if len(status[0].Claim) != 1 {
+		if len(cases[0].Claim) != 1 {
 			t.Errorf("Claim did not unregister previous claim")
 		} else {
-			if status[0].Claim[0].Name != "user01" {
+			if cases[0].Claim[0].Name != "user01" {
 				t.Errorf("Claim unregistered the wrong claim")
 			}
 		}

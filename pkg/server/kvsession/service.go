@@ -14,6 +14,8 @@ import (
 	"github.com/32leaves/ruruku/pkg/types"
 	bolt "github.com/etcd-io/bbolt"
 	log "github.com/sirupsen/logrus"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func NewSession(db *bolt.DB, reqvalidator request.Validator) (*kvsessionStore, error) {
@@ -87,7 +89,7 @@ func (s *kvsessionStore) Start(ctx context.Context, req *api.StartSessionRequest
 		}
 		planID = req.Plan.Id
 	}
-	if err := s.storeSession(sid, req.Name, planID, req.Annotations); err != nil {
+	if err := s.storeSession(sid, req.Name, planID, req.Modifiable, req.Annotations); err != nil {
 		return nil, err
 	}
 
@@ -95,6 +97,67 @@ func (s *kvsessionStore) Start(ctx context.Context, req *api.StartSessionRequest
 
 	log.WithField("id", sid).WithField("name", req.Name).Info("Starting session")
 	return &api.StartSessionResponse{Id: sid}, nil
+}
+
+func (s *kvsessionStore) Modify(ctx context.Context, req *api.ModifySessionRequest) (*api.ModifySessionResponse, error) {
+	if _, err := s.ReqValidator.ValidUserFromRequest(ctx, types.PermissionSessionModify); err != nil {
+		return nil, err
+	}
+
+	exists, err := s.isSessionOpen(req.Id)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		return nil, status.Errorf(codes.FailedPrecondition, "Session %s is not open", req.Id)
+	}
+
+	modifiable, err := s.isSessionModifiable(req.Id)
+	if err != nil {
+		return nil, err
+	}
+	if !modifiable {
+		return nil, status.Errorf(codes.PermissionDenied, "Session %s is not modifiable", req.Id)
+	}
+
+	if req.Modification == api.Modification_ADD_TESTCASE || req.Modification == api.Modification_MODIFY_TESTCASE {
+		if req.Case == nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Testcase must not be empty")
+		}
+		for _, tc := range req.Case {
+			tcc := tc.Convert()
+			if err := tcc.Validate(); err != nil {
+				return nil, status.Errorf(codes.InvalidArgument, "%v", err)
+			}
+		}
+	}
+
+	switch req.Modification {
+	case api.Modification_ADD_TESTCASE:
+		err = s.addOrUpdateTestcase(req.Id, req.Case, false)
+	case api.Modification_MODIFY_TESTCASE:
+		err = s.addOrUpdateTestcase(req.Id, req.Case, true)
+	case api.Modification_REMOVE_TESTCASE:
+		if req.Case == nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Testcase must not be empty")
+		}
+		err = s.removeTestcase(req.Id, req.Case)
+	case api.Modification_UPDATE_ANNOTATIONS:
+		if req.Annotations == nil {
+			return nil, status.Errorf(codes.InvalidArgument, "Annotations must not be nil")
+		}
+		err = s.modifySession(req.Id, func(session *SessionMetadata) {
+			session.Annotations = req.Annotations
+		})
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.broadcastChange(req.Id); err != nil {
+		return nil, err
+	}
+	return &api.ModifySessionResponse{}, nil
 }
 
 func (s *kvsessionStore) Close(ctx context.Context, req *api.CloseSessionRequest) (*api.CloseSessionResponse, error) {
@@ -107,10 +170,13 @@ func (s *kvsessionStore) Close(ctx context.Context, req *api.CloseSessionRequest
 		return nil, err
 	}
 	if !exists {
-		return nil, fmt.Errorf("Session %s does not exist", req.Id)
+		return nil, status.Errorf(codes.NotFound, "Session %s does not exist", req.Id)
 	}
 
-	if err := s.closeSession(req.Id); err != nil {
+	err = s.modifySession(req.Id, func(session *SessionMetadata) {
+		session.Open = false
+	})
+	if err != nil {
 		return nil, err
 	}
 
@@ -143,7 +209,7 @@ func (s *kvsessionStore) Register(ctx context.Context, req *api.RegistrationRequ
 		return nil, err
 	}
 	if !exists {
-		return nil, fmt.Errorf("Session %s is not open", req.Session)
+		return nil, status.Errorf(codes.NotFound, "Session %s does not exist", req.Session)
 	}
 
 	if err := s.registerParticipant(req.Session, user); err != nil {
@@ -161,7 +227,7 @@ func (s *kvsessionStore) Claim(ctx context.Context, req *api.ClaimRequest) (*api
 	}
 
 	if req.TestcaseID == "" {
-		return nil, fmt.Errorf("Testcase does not exist in session")
+		return nil, status.Errorf(codes.NotFound, "Testcase does not exist in session")
 	}
 
 	// parse token
@@ -173,7 +239,7 @@ func (s *kvsessionStore) Claim(ctx context.Context, req *api.ClaimRequest) (*api
 		return nil, err
 	}
 	if !exists {
-		return nil, fmt.Errorf("Session %s is closed", sid)
+		return nil, status.Errorf(codes.FailedPrecondition, "Session %s is closed", sid)
 	}
 
 	ok, err := s.participantInSession(sid, uid)
@@ -181,7 +247,7 @@ func (s *kvsessionStore) Claim(ctx context.Context, req *api.ClaimRequest) (*api
 		return nil, err
 	}
 	if !ok {
-		return nil, fmt.Errorf("Invalid participant %s: does not exist in session", uid)
+		return nil, status.Errorf(codes.NotFound, "Invalid participant %s: does not exist in session", uid)
 	}
 
 	err = s.claimTestcase(sid, req.TestcaseID, uid, req.Claim)
@@ -218,7 +284,7 @@ func (s *kvsessionStore) Contribute(ctx context.Context, req *api.ContributionRe
 		return nil, err
 	}
 	if !exists {
-		return nil, fmt.Errorf("Session %s is closed", sid)
+		return nil, status.Errorf(codes.FailedPrecondition, "Session %s is closed", sid)
 	}
 
 	ok, err := s.participantInSession(sid, uid)
@@ -226,7 +292,7 @@ func (s *kvsessionStore) Contribute(ctx context.Context, req *api.ContributionRe
 		return nil, err
 	}
 	if !ok {
-		return nil, fmt.Errorf("Invalid participant %s: does not exist in session", uid)
+		return nil, status.Errorf(codes.NotFound, "Invalid participant %s: does not exist in session", uid)
 	}
 
 	exists, err = s.testcaseExists(sid, req.TestcaseID)
@@ -234,7 +300,7 @@ func (s *kvsessionStore) Contribute(ctx context.Context, req *api.ContributionRe
 		return nil, err
 	}
 	if !exists {
-		return nil, fmt.Errorf("Testcase %s does not exist in session", req.TestcaseID)
+		return nil, status.Errorf(codes.NotFound, "Testcase %s does not exist in session", req.TestcaseID)
 	}
 
 	exists, err = s.hasClaimedTestcase(sid, req.TestcaseID, uid)
@@ -242,7 +308,7 @@ func (s *kvsessionStore) Contribute(ctx context.Context, req *api.ContributionRe
 		return nil, err
 	}
 	if !exists {
-		return nil, fmt.Errorf("Participant must claim the testcase before contributing")
+		return nil, status.Errorf(codes.FailedPrecondition, "Participant must claim the testcase before contributing")
 	}
 
 	result := req.Result.Convert()
@@ -271,7 +337,7 @@ func (s *kvsessionStore) Status(ctx context.Context, req *api.SessionStatusReque
 		return nil, err
 	}
 	if !exists {
-		return nil, fmt.Errorf("Invalid participant: session %s does not exist", sid)
+		return nil, status.Errorf(codes.NotFound, "Session %s does not exist", sid)
 	}
 
 	status, err := s.getStatus(sid)
@@ -293,12 +359,12 @@ func (s *kvsessionStore) Updates(req *api.SessionUpdatesRequest, update api.Sess
 		return err
 	}
 	if !exists {
-		return fmt.Errorf("Session %s does not exist", sid)
+		return status.Errorf(codes.NotFound, "Session %s does not exist", sid)
 	}
 
 	notifier, exists := s.Notifier[sid]
 	if !exists {
-		return fmt.Errorf("Session notifier %s does not exist", sid)
+		return status.Errorf(codes.Internal, "Session notifier %s does not exist", sid)
 	}
 
 	for {
@@ -315,7 +381,7 @@ func (s *kvsessionStore) Updates(req *api.SessionUpdatesRequest, update api.Sess
 func (s *kvsessionStore) broadcastChange(sid string) error {
 	notifier, ok := s.Notifier[sid]
 	if !ok {
-		return fmt.Errorf("Session %s does not exist", sid)
+		return status.Errorf(codes.NotFound, "Session %s does not exist", sid)
 	}
 
 	status, err := s.getStatus(sid)
@@ -342,7 +408,7 @@ func toSessionID(name string) (string, error) {
 	if err != nil {
 		return "", err
 	} else if n < len(uid) {
-		return "", fmt.Errorf("Did not read enough random bytes")
+		return "", status.Errorf(codes.Internal, "Did not read enough random bytes")
 	}
 	segments = append(segments, hex.EncodeToString(uid))
 

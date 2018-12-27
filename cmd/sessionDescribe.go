@@ -15,8 +15,8 @@ Annotations:	{{ range $k, $v := .Annotations }}{{ $k }}:	{{ $v }}
 	{{ end -}}
 {{ end }}
 Tests:
-{{- range .Status }}
-  {{ .Case.ID }}:
+{{- range .Case }}
+  {{ .Case.Id }}:
     Name:	{{ .Case.Name }}
     Result:	{{ .State }}
     Claims:	{{ len .Claim -}}

@@ -73,15 +73,15 @@ func (s *TestcaseStatus) Convert() types.TestcaseStatus {
 }
 
 func (s *TestRunStatus) Convert() types.TestRunStatus {
-	status := make([]types.TestcaseStatus, len(s.Status))
-	for i, c := range s.Status {
-		status[i] = c.Convert()
+	cases := make([]types.TestcaseStatus, len(s.Case))
+	for i, c := range s.Case {
+		cases[i] = c.Convert()
 	}
 	return types.TestRunStatus{
 		ID:          s.Id,
 		Name:        s.Name,
 		PlanID:      s.PlanID,
-		Status:      status,
+		Cases:       cases,
 		State:       s.State.Convert(),
 		Annotations: s.Annotations,
 	}
@@ -161,6 +161,9 @@ func (s Permission) Convert() types.Permission {
 	if s == Permission_SESSION_CONTRIBUTE {
 		return types.PermissionSessionContribute
 	}
+	if s == Permission_SESSION_MODIFY {
+		return types.PermissionSessionModify
+	}
 	return types.PermissionNone
 }
 
@@ -191,6 +194,9 @@ func ConvertPermission(s types.Permission) Permission {
 	}
 	if s == types.PermissionSessionContribute {
 		return Permission_SESSION_CONTRIBUTE
+	}
+	if s == types.PermissionSessionModify {
+		return Permission_SESSION_MODIFY
 	}
 	return Permission_NONE
 }

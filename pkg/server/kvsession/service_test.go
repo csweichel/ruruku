@@ -6,13 +6,16 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"testing"
 
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"github.com/32leaves/ruruku/pkg/types"
 	bolt "github.com/etcd-io/bbolt"
 	"github.com/golang/mock/gomock"
 	log "github.com/sirupsen/logrus"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 func newTestServer(ctrl *gomock.Controller) (api.SessionServiceServer, *MockValidator) {
@@ -46,4 +49,18 @@ func (reqval *MockValidator) GetContext(user string, perm types.Permission) cont
 	reqval.EXPECT().ValidUserFromRequest(ctx, perm).Return(user, nil)
 
 	return ctx
+}
+
+func testNegativeResponse(t *testing.T, operation string, expectedCode codes.Code, respNil bool, err error) {
+	if err == nil {
+		t.Errorf("%s did not return an error despite invalid request", operation)
+	} else {
+		stat, _ := status.FromError(err)
+		if stat.Code() != expectedCode {
+			t.Errorf("%s did not return an %v code, but %v", operation, expectedCode, stat.Code())
+		}
+	}
+	if !respNil {
+		t.Errorf("%s returned a response despite invalid request", operation)
+	}
 }
