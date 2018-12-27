@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { Table, Button, ButtonGroup, ButtonOr, Checkbox, Menu } from 'semantic-ui-react';
-import { TestRunStatus, TestcaseStatus, TestcaseRunResult, TestRunState } from '../api/v1/session_pb';
+import { Table, Button, ButtonGroup, ButtonOr, Checkbox, Menu, Modal, Icon } from 'semantic-ui-react';
+import { TestRunStatus, TestcaseStatus, TestcaseRunResult, TestRunState, Testcase } from '../api/v1/session_pb';
 import { TestcaseDetailView } from './testcase-detail-view';
 import { TestCaseStatusView } from './testcase-status'
 import { NewTestcaseRunView } from './new-testcase-run-view';
 import { AppStateContent, getClient } from 'src/types/app-state';
 import { Disposable } from 'src/types/service-client';
+import { NewTestcaseView } from './new-testcase-view';
 
 export interface TestplanViewProps {
     appState: AppStateContent
@@ -18,6 +19,7 @@ interface TestplanViewState {
     direction: 'ascending' | 'descending'
     status?: TestRunStatus
     editMode: boolean
+    testcaseToRemove?: Testcase
 }
 
 export class TestplanView extends React.Component<TestplanViewProps, TestplanViewState> {
@@ -39,9 +41,10 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
     public async componentWillMount() {
         this.props.appState.keybindings.push(
             { keys: 'esc', description: 'Close the sidebar', handler: () => this.closeSidebar() },
-            { keys: 'ctrl+b', description: "Mark current testcase as passed", handler: this.claimContributeAdvance.bind(this, TestRunState.PASSED) },
-            { keys: 'ctrl+n', description: "Mark current testcase as undecided", handler: this.claimContributeAdvance.bind(this, TestRunState.UNDECIDED) },
-            { keys: 'ctrl+m', description: "Mark current testcase as failed", handler: this.claimContributeAdvance.bind(this, TestRunState.FAILED) }
+            { keys: 'e', description: "Toggle edit mode", handler: this.toggleEditMode },
+            { keys: 'b', description: "Mark current testcase as passed", handler: this.claimContributeAdvance.bind(this, TestRunState.PASSED) },
+            { keys: 'n', description: "Mark current testcase as undecided", handler: this.claimContributeAdvance.bind(this, TestRunState.UNDECIDED) },
+            { keys: 'm', description: "Mark current testcase as failed", handler: this.claimContributeAdvance.bind(this, TestRunState.FAILED) }
         );
 
         this.fetchStatus();
@@ -60,6 +63,9 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
 
     public async componentWillUnmount() {
         this.props.appState.keybindings.pop();
+        if (this.state.editMode) {
+            this.props.appState.keybindings.pop();
+        }
     }
 
     public render() {
@@ -68,10 +74,27 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
         const testcases = this.buildRows();
         return (
             <div>
-            <Menu secondary={true}>
-
-            </Menu>
-            <Checkbox toggle={true} label="Edit test plan" checked={this.state.editMode} onChange={this.toggleEditMode} />
+            <Modal open={!!this.state.testcaseToRemove}>
+                <Modal.Header>Remove testcase</Modal.Header>
+                <Modal.Content>
+                    <p>You are about to remove the testcase {this.state.testcaseToRemove ? this.state.testcaseToRemove.getId() : ""}.
+                    <b>This action cannot be undone.</b> Do you want to continue?</p>
+                </Modal.Content>
+                <Modal.Actions>
+                    <Button basic={true} color='red' onClick={this.removeTestcase.bind(this, undefined)}>Cancel</Button>
+                    <Button color='green' inverted={true} onClick={this.removeTestcase.bind(this, this.state.testcaseToRemove)}><Icon name='checkmark' /> Do it</Button>
+                </Modal.Actions>
+            </Modal>
+            {this.state.status && this.state.status.getModifiable() && (
+                <Menu secondary={true}>
+                    {this.state.editMode && (
+                        <Menu.Item onClick={this.showNewTestcaseForm.bind(this, undefined)}><Icon name="plus" />Add testcase</Menu.Item>
+                    )}
+                    <Menu.Menu position="right">
+                        <Menu.Item><Checkbox toggle={true} label="Edit test plan" checked={this.state.editMode} onChange={this.toggleEditMode} /></Menu.Item>
+                    </Menu.Menu>
+                </Menu>
+            )}
             <Table celled={true} sortable={true} fixed={true}>
                 <Table.Header>
                     <Table.Row>
@@ -91,7 +114,11 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
 
     protected async fetchStatus() {
         try {
-            this.setState({ status: await getClient(this.props.appState).getStatus() });
+            const s = await getClient(this.props.appState).getStatus();
+            this.setState({ status: s });
+            if (!!s && s.getModifiable() && s.getCaseList().length === 0) {
+                this.toggleEditMode();
+            }
         } catch (err) {
             this.props.appState.setError(err);
         }
@@ -163,8 +190,8 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
         if (this.state.editMode) {
             return (
                 <ButtonGroup>
-                    <Button icon="pencil" key="edit" />
-                    <Button icon="minus" key="remove" />
+                    <Button icon="pencil" key="edit" onClick={this.showNewTestcaseForm.bind(this, tc.getCase())} />
+                    <Button icon="minus" key="remove" onClick={this.removeTestcase.bind(this, tc.getCase())} />
                 </ButtonGroup>
             );
         }
@@ -201,6 +228,13 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
             appState={this.props.appState}
             testcase={cse}
             result={result}
+            onClose={this.closeSidebar} />)
+    }
+
+    protected showNewTestcaseForm(cse?: Testcase) {
+        this.props.showDetails(<NewTestcaseView
+            appState={this.props.appState}
+            testcase={cse}
             onClose={this.closeSidebar} />)
     }
 
@@ -257,8 +291,37 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
     }
 
     protected toggleEditMode() {
-        this.setState({ editMode: !this.state.editMode });
+        let newEditMode = !this.state.editMode;
+        if (!this.state.status || !this.state.status.getModifiable()) {
+            newEditMode = false;
+        }
+
+        this.setState({ editMode: newEditMode });
         this.lastOpenedTestcaseIndex = undefined;
+
+        if (newEditMode) {
+            this.props.appState.keybindings.push({ keys: 'a', description: "Add a new testcase", handler: () => this.showNewTestcaseForm(undefined) });
+        } else {
+            this.props.appState.keybindings.pop();
+        }
+    }
+
+    protected async removeTestcase(tc?: Testcase) {
+        if (tc && tc === this.state.testcaseToRemove) {
+            this.setState({ testcaseToRemove: undefined });
+            try {
+                const client = await getClient(this.props.appState);
+                await client.removeTestcase(tc);
+            } catch (err) {
+                this.props.appState.setError(err);
+            }
+        } else if (tc) {
+            // open the modal
+            this.setState({ testcaseToRemove: tc });
+        } else {
+            // close the modal
+            this.setState({ testcaseToRemove: undefined });
+        }
     }
 
 }

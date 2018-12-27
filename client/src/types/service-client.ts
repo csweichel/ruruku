@@ -3,7 +3,7 @@ import { grpc } from 'grpc-web-client';
 import { UserService } from '../api/v1/user_pb_service';
 import { ProtobufMessage } from 'grpc-web-client/dist/typings/message';
 import { MethodDefinition } from 'grpc-web-client/dist/typings/service';
-import { ClaimRequest, TestRunState, ContributionRequest, TestRunStatus, SessionStatusRequest, SessionStatusResponse, SessionUpdatesRequest, SessionUpdateResponse, RegistrationRequest } from '../api/v1/session_pb';
+import { ClaimRequest, TestRunState, ContributionRequest, TestRunStatus, SessionStatusRequest, SessionStatusResponse, SessionUpdatesRequest, SessionUpdateResponse, RegistrationRequest, Testcase, ModifySessionRequest, Modification } from '../api/v1/session_pb';
 import { SessionService } from '../api/v1/session_pb_service';
 import { AppStateContent, getAuthentication } from './app-state';
 
@@ -96,6 +96,30 @@ export class Client {
         const listener = new UpdateListener(this.host, getAuthentication(this.appState)!, callback);
         await listener.start(this.appState.session!);
         return listener;
+    }
+
+    public async modifyTestcase(tc: Testcase): Promise<void> {
+        const req = new ModifySessionRequest();
+        req.setModification(Modification.MODIFY_TESTCASE);
+        req.setId(this.appState.session!);
+        req.addCase(tc);
+        await this.invoke(SessionService.Modify, req);
+    }
+
+    public async addTestcase(tc: Testcase): Promise<void> {
+        const req = new ModifySessionRequest();
+        req.setModification(Modification.ADD_TESTCASE);
+        req.setId(this.appState.session!);
+        req.addCase(tc);
+        await this.invoke(SessionService.Modify, req);
+    }
+
+    public async removeTestcase(tc: Testcase): Promise<void> {
+        const req = new ModifySessionRequest();
+        req.setModification(Modification.REMOVE_TESTCASE);
+        req.setId(this.appState.session!);
+        req.addCase(tc);
+        await this.invoke(SessionService.Modify, req);
     }
 
     protected async invoke<Response, TRequest extends ProtobufMessage, TResponse extends ProtobufMessage, M extends MethodDefinition<TRequest, TResponse>>(methodDescriptor: M, req: TRequest, options?: InvokeOptions<Response, TResponse>): Promise<Response | undefined> {

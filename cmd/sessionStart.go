@@ -15,6 +15,7 @@ type sessionStartFlags struct {
 	planfn      string
 	quiet       bool
 	annotations map[string]string
+	modifiable  bool
 }
 
 var sessionStartFlagValues sessionStartFlags
@@ -28,6 +29,7 @@ func (s *sessionStartFlags) Run() error {
 	req := &api.StartSessionRequest{
 		Name:        moniker.New().Name(),
 		Annotations: s.annotations,
+		Modifiable:  s.modifiable,
 	}
 
 	if s.name == "" {
@@ -36,11 +38,19 @@ func (s *sessionStartFlags) Run() error {
 		req.Name = s.name
 	}
 
-	plan, err := cli.LoadTestplan(s.planfn)
-	if err != nil {
-		return err
+	if s.planfn != "" {
+		plan, err := cli.LoadTestplan(s.planfn)
+		if err != nil {
+			return err
+		}
+		req.Plan = api.ConvertTestPlan(plan)
+	} else {
+		req.Plan = &api.TestPlan{
+			Id:   req.Name,
+			Name: req.Name,
+			Case: []*api.Testcase{},
+		}
 	}
-	req.Plan = api.ConvertTestPlan(plan)
 
 	conn, err := cfg.Connect()
 	if err != nil {
@@ -75,8 +85,8 @@ var sessionStartCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Starts a new test session based on a test plan",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		if sessionStartFlagValues.planfn == "" {
-			return fmt.Errorf("Cannot start a session without a plan (use --plan)")
+		if !sessionStartFlagValues.modifiable && sessionStartFlagValues.planfn == "" {
+			return fmt.Errorf("Cannot start an unmodifiable session without a plan (use --plan or --modifiable)")
 		}
 		return nil
 	},
@@ -93,4 +103,5 @@ func init() {
 	sessionStartCmd.Flags().StringVarP(&sessionStartFlagValues.name, "name", "n", "", "Name of the session")
 	sessionStartCmd.Flags().StringVarP(&sessionStartFlagValues.planfn, "plan", "p", "", "Path to the test plan of this session")
 	sessionStartCmd.Flags().StringToStringVarP(&sessionStartFlagValues.annotations, "annotations", "a", map[string]string{}, "Metadata for this session")
+	sessionStartCmd.Flags().BoolVar(&sessionStartFlagValues.modifiable, "modifiable", false, "Make this session modifiable")
 }

@@ -70,7 +70,7 @@ var startCmd = &cobra.Command{
 		}
 
 		viper.Set("cli.token", token)
-		sessionStart := sessionStartFlags{planfn: args[0], quiet: true}
+		sessionStart := sessionStartFlags{planfn: args[0], quiet: true, modifiable: true}
 		if err := sessionStart.Run(); err != nil {
 			log.WithError(err).Fatal("Cannot start session")
 		}
