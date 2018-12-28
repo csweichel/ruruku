@@ -15,6 +15,7 @@ type InitPlan struct {
 	Init
 	ID   string
 	Name string
+	Plan *types.TestPlan
 }
 
 func validatePlanID(val string) error {
@@ -30,9 +31,19 @@ func validatePlanID(val string) error {
 }
 
 func (cfg *InitPlan) Run() error {
-	r := types.TestPlan{
-		Name: cfg.Name,
-		Case: make([]types.Testcase, 0),
+	var r types.TestPlan
+	if cfg.Plan != nil {
+		r = *cfg.Plan
+	} else {
+		r = types.TestPlan{
+			Case: make([]types.Testcase, 0),
+		}
+	}
+	if cfg.ID != "" {
+		r.ID = cfg.ID
+	}
+	if cfg.Name != "" {
+		r.Name = cfg.Name
 	}
 
 	var err error

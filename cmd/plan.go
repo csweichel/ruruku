@@ -18,6 +18,9 @@ var initCmd = &cobra.Command{
 Most fields are available as flags as well, e.g.:
     ruruku plan -f testplan.yaml --name Demo
     ruruku plan -f testplan.yaml add --name "My testcase" --id tc1 --group grp
+
+This command can extract a testplan from a ruruku session (requires session.view permission):
+    ruruku plan from-session my-session-id
     `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := initFlags.Run(); err != nil {
