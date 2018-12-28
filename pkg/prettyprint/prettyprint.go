@@ -7,7 +7,9 @@ import (
 
 type Format string
 
-const StringFormat Format = "string"
+const (
+	StringFormat Format = "string"
+)
 
 type formatterFunc func(*Content) error
 
@@ -15,6 +17,7 @@ var formatter = map[Format]formatterFunc{
 	StringFormat:   formatString,
 	TemplateFormat: formatTemplate,
 	JSONFormat:     formatJSON,
+	JSONPathFormat: formatJSONPath,
 }
 
 func formatString(pp *Content) error {
