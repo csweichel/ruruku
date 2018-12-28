@@ -64,10 +64,11 @@ var rootCmd = &cobra.Command{
 	Short: "A simple manual test coordinator",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		log.SetLevel(log.InfoLevel)
-		// if verbose {
-		log.SetLevel(log.DebugLevel)
-		log.Debug("Set log level to debug")
-		// }
+
+		if verbose {
+			log.SetLevel(log.DebugLevel)
+			log.Debug("Set log level to debug")
+		}
 	},
 	BashCompletionFunction: bash_completion_func,
 }

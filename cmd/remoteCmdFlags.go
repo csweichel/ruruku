@@ -28,6 +28,13 @@ type remoteCmdFlags struct {
 var remoteCmdValues remoteCmdFlags
 
 func remoteCmdValuesPreRun(cmd *cobra.Command, args []string) error {
+	// HACK: call the root persistent prerun
+	for c := cmd; c != nil; c = c.Parent() {
+		if !c.HasParent() && c.PersistentPreRun != nil {
+			c.PersistentPreRun(cmd, args)
+		}
+	}
+
 	var flags *flag.FlagSet
 	for c := cmd; c.HasParent(); c = c.Parent() {
 		if c.PersistentFlags().Lookup("output") != nil {
