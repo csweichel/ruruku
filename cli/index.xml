@@ -1,57 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Ruruku</title>
-    <link>/ruruku/</link>
-    <description>Recent content on Ruruku</description>
+    <title>Clis on Ruruku</title>
+    <link>/ruruku/cli/</link>
+    <description>Recent content in Clis on Ruruku</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Fri, 28 Dec 2018 16:03:06 +0000</lastBuildDate>
     
-	<atom:link href="/ruruku/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/ruruku/cli/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title></title>
-      <link>/ruruku/introduction/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/ruruku/introduction/</guid>
-      <description>Ruruku is a manual test coordinator. Its goal is to make it easier for developers, teams, QA folks and robots to coordinate their testing efforts.
-We think that testcase descriptions should live next to your code - in Ruruku the testplan is just a YAML file. When the time has come to go through the tests, submit your testplan to a Ruruku instance and start testing. Every tester (man or machine) can claim test cases, contribute their results and watch for updates.</description>
-    </item>
-    
-    <item>
-      <title>Getting Started</title>
-      <link>/ruruku/getting-started/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/ruruku/getting-started/</guid>
-      <description>Ruruku ships as a single executable that contains the ruruku server and command-line interface. The former stores the data, serves the web-based UI and offers a gRPC API. You can talk to this server using the UI or a command-line interface. The latter can also be used to create testplans and add testcases.
-Download Ruruku Ruruku can be downloaded from the release page. It runs on Linux, OSX and Windows.</description>
-    </item>
-    
-    <item>
-      <title>Securing your installation</title>
-      <link>/ruruku/secure-installation/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/ruruku/secure-installation/</guid>
-      <description>By default Ruruku runs without any transport encryption/security. This way getting started is easy, but it&amp;rsquo;s not exactly secure.
-Especially if you intent to expose your Ruruku installation to the internet, it&amp;rsquo;s a good idea to use TLS for the gRPC API server, and HTTPS/TLS for the UI server.
-To enable TLS for the API server and HTTPS for the UI server, add the following to your config
-server: ui: port: 443 https: enabled cert: ui.</description>
-    </item>
-    
-    <item>
-      <title>Managing user accounts</title>
-      <link>/ruruku/account-management/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/ruruku/account-management/</guid>
-      <description>Ruruku comes with built-in user management. Users are created using the CLI and are given permissions in the sytem. When a Ruruku server starts, it can emit a root token which is used to create the first users in the system.
-Starting a server and adding users The ruruku serve command has two flags which emit a root token: --root-token-file &amp;lt;filename&amp;gt; and --root-token-stdout. The former stores the root token in a file, the later prints it to the stdout.</description>
-    </item>
     
     <item>
       <title>Command Line Interface</title>
