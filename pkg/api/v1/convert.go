@@ -81,7 +81,7 @@ func (s *TestRunStatus) Convert() types.TestRunStatus {
 		ID:          s.Id,
 		Name:        s.Name,
 		PlanID:      s.PlanID,
-		Cases:       cases,
+		Case:        cases,
 		State:       s.State.Convert(),
 		Annotations: s.Annotations,
 	}

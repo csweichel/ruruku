@@ -67,7 +67,7 @@ type TestRunStatus struct {
 	// Plan ID is the ID of the testplan being executed
 	PlanID string
 	// Status lists the status for each testcase of the plan
-	Cases []TestcaseStatus
+	Case []TestcaseStatus
 	// State is the overall test run state
 	State TestRunState
 	// Annotations are session metadata
@@ -83,4 +83,17 @@ type TestPlan struct {
 	Description string
 	// Case lists the testcases of this plan
 	Case []Testcase
+}
+
+func (s *TestRunStatus) ToTestplan() TestPlan {
+	cases := make([]Testcase, len(s.Case))
+	for idx, c := range s.Case {
+		cases[idx] = c.Case
+	}
+
+	return TestPlan{
+		ID:   s.PlanID,
+		Name: s.Name,
+		Case: cases,
+	}
 }
