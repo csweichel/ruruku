@@ -100,7 +100,7 @@ func hstsHandler(fn http.HandlerFunc) http.Handler {
 
 func grpcTrafficSplitter(fallback http.Handler, wrappedGrpc *grpcweb.WrappedGrpcServer) http.HandlerFunc {
 	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
-		if wrappedGrpc.IsGrpcWebRequest(req) {
+		if wrappedGrpc.IsGrpcWebRequest(req) || wrappedGrpc.IsAcceptableGrpcCorsRequest(req) {
 			wrappedGrpc.ServeHTTP(resp, req)
 		} else {
 			// Fall back to other servers.
