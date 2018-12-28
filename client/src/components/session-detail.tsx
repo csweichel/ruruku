@@ -64,7 +64,7 @@ export class SessionDetailView extends React.Component<SessionDetailViewProps, S
                         <List.Item>
                             <List.Content>
                                 <Header subheader={true}>Session Name</Header>
-                                {session.getName()} / {session.getId()}
+                                <a href={`/#join/${session.getId()}`}>{session.getName()} / {session.getId()}</a>
                             </List.Content>
                         </List.Item>
                         {annotations}

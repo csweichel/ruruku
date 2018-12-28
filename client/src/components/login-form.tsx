@@ -46,7 +46,7 @@ export class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
                         <Input type="password" placeholder="Password" value={this.state.password} onChange={this.onChange.bind("password")} />
                     </Form.Field>
                     <Form.Field>
-                        <Button type="submit" primary={true} disabled={!this.state.name || !this.state.password}>Join</Button>
+                        <Button type="submit" primary={true} disabled={!this.state.name || !this.state.password}>Login</Button>
                     </Form.Field>
                 </Form>
             </Segment>
