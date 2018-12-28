@@ -3,155 +3,33 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/introduction/</loc>
+    <loc>/ruruku/introduction/</loc>
   </url>
   
   <url>
-    <loc>/getting-started/</loc>
+    <loc>/ruruku/getting-started/</loc>
   </url>
   
   <url>
-    <loc>/secure-installation/</loc>
+    <loc>/ruruku/secure-installation/</loc>
   </url>
   
   <url>
-    <loc>/account-management/</loc>
+    <loc>/ruruku/account-management/</loc>
   </url>
   
   <url>
-    <loc>/cli/ruruku/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_plan/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_plan_add/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_serve/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_session/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_session_close/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_session_describe/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_session_join/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_session_list/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_session_start/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_session_updates/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_start/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_test/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_test_claim/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_test_contribute/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_test_unclaim/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_user/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_user_add/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_user_chpwd/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_user_delete/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_user_grant/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_user_list/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/cli/ruruku_user_login/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/</loc>
+    <loc>/ruruku/categories/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/cli/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
+    <loc>/ruruku/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/</loc>
-    <lastmod>2018-12-19T22:02:50+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
+    <loc>/ruruku/tags/</loc>
     <priority>0</priority>
   </url>
   

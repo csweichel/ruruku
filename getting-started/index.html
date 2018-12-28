@@ -10,19 +10,19 @@
 		
 		<meta http-equiv="content-language" content="en-us" />
 		<meta name="generator" content="Hugo 0.52" />
-		<link rel="stylesheet" href="/css/index.css">
-		<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+		<link rel="stylesheet" href="/ruruku/css/index.css">
+		<link rel="apple-touch-icon" href="/ruruku/apple-touch-icon.png">
+		<link rel="shortcut icon" href="/ruruku/favicon.ico" type="image/x-icon">
 	</head>
 
 	<body>
 		<div class="Wrapper">
 			<div class="Container">
 				<div class="Header">
-  <a href="/">
+  <a href="/ruruku/">
 	<div class="Title center">
 		
-			<img alt="Ruruku Logo" src="/logo.svg" height="140" />
+			<img alt="Ruruku Logo" src="/ruruku/logo.svg" height="140" />
 		
 		<span class="text">Ruruku</span>
 		<span class="subtext"></span>
@@ -34,83 +34,31 @@
 					<div class="Sidebar">
 	<div class="Menu">
 		<div class="item">
-			<a href="/">Home</a>
+			<a href="/ruruku/">Home</a>
 		</div>
 		
 			
 				<div class="item">
-					<a href="/introduction/"></a>
+					<a href="/ruruku/introduction/"></a>
 				</div>
 			
 		
 			
 				<div class="item">
-					<a href="/getting-started/">Getting Started</a>
+					<a href="/ruruku/getting-started/">Getting Started</a>
 				</div>
 			
 		
 			
 				<div class="item">
-					<a href="/secure-installation/">Securing your installation</a>
+					<a href="/ruruku/secure-installation/">Securing your installation</a>
 				</div>
 			
 		
 			
 				<div class="item">
-					<a href="/account-management/">Managing user accounts</a>
+					<a href="/ruruku/account-management/">Managing user accounts</a>
 				</div>
-			
-		
-			
-				<div class="item">
-					<a href="/cli/ruruku/">Command Line Interface</a>
-				</div>
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
-			
-		
 			
 		
 			
@@ -136,8 +84,9 @@ and add testcases.</p>
 <h2 id="download-ruruku">Download Ruruku</h2>
 
 <p>Ruruku can be downloaded from the <a href="https://github.com/32leaves/ruruku/releases">release page</a>. It runs on Linux,
-OSX and Windows. For concenience sake, it&rsquo;s best to place the <code>ruruku</code> binary somewhere in your <code>PATH</code> (that&rsquo;s
-not a requirement though).</p>
+OSX and Windows. On Linux and OSX there are two things you can do to make your life easier:
+1. Place the <code>ruruku</code> binary somewhere in your <code>PATH</code> so that you can simply type <code>ruruku</code> and are good to go,
+2. Enable Bash auto-completion by adding <code>. &lt;(ruruku completion)</code> to your <code>~/.bashrc</code> (for this to work, ruruku must be in your path).</p>
 
 <p>If you want to run ruruku in Docker, there&rsquo;s also a <a href="https://hub.docker.com/r/csweichel/ruruku/">Docker image</a> available.</p>
 
@@ -153,6 +102,11 @@ groups.</p>
 If you want to convert an existing list of testcase descriptions, have a closer look at the flags
 of <a href="../cli/ruruku_plan"><code>ruruku plan</code></a>, especially <code>-y</code> which disables manual input.</p>
 
+<p>Testplans can also be created collaboratively using a <em>modifiable session</em>:
+1. Start a modifiable session using <code>ruruku session start --modifiable</code>
+2. Have other users to join the session, enter edit mode (there&rsquo;s a switch on top of the list of testcases or press <code>e</code>) and add testcases
+3. When you&rsquo;re done, extract a testplan using <code>ruruku plan from-session &lt;session-id&gt;</code></p>
+
 <p>Testplans are meant to live next to your code, i.e. it&rsquo;s best to check them into your repository.</p>
 
 <h2 id="start-a-test-session">Start a test session</h2>
@@ -164,7 +118,7 @@ local server across the internet. <code>ruruku start</code> will also create a u
 which has all permissions; use that one to get started quickly.</p>
 
 <p>More commonly, you&rsquo;ll have a central ruruku instance hosted somewhere (e.g. using the <a href="https://hub.docker.com/r/csweichel/ruruku/">Docker image</a>).
-In that case run <code>ruruku session start --server your-ruruku-server.com:1234 --plan testplan.yaml</code> to start the session.
+In that case run <code>RURUKU_HOST=your-ruruku-server.com:1234 ruruku session start --plan testplan.yaml</code> to start the session.
 If you don&rsquo;t provide a name for the session (using <code>--name</code>), ruruku will come up with one.</p>
 
 <h2 id="participate-in-a-session">Participate in a session</h2>
@@ -193,7 +147,7 @@ Make sure to check out the <code>-o</code> flag with which you download the test
 						<div class="Footer">
 	<p></p>
 </div>
-<script src="/js/index.js"></script>
+<script src="/ruruku/js/index.js"></script>
 
 					</div>
 				</div>
