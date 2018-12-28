@@ -12,8 +12,9 @@ and add testcases.
 
 ## Download Ruruku
 Ruruku can be downloaded from the [release page](https://github.com/32leaves/ruruku/releases). It runs on Linux,
-OSX and Windows. For concenience sake, it's best to place the `ruruku` binary somewhere in your `PATH` (that's
-not a requirement though).
+OSX and Windows. On Linux and OSX there are two things you can do to make your life easier:
+1. Place the `ruruku` binary somewhere in your `PATH` so that you can simply type `ruruku` and are good to go,
+2. Enable Bash auto-completion by adding `. <(ruruku completion)` to your `~/.bashrc` (for this to work, ruruku must be in your path).
 
 If you want to run ruruku in Docker, there's also a [Docker image](https://hub.docker.com/r/csweichel/ruruku/) available.
 

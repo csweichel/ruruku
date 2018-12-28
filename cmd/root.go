@@ -16,6 +16,48 @@ import (
 var cfgFile string
 var verbose bool
 
+const (
+	bash_completion_func = `
+__ruruku_get_output_formats()
+{
+    local ruruku_output out
+    ruruku_output="string json jsonpath template"
+    COMPREPLY=( $( compgen -W "${ruruku_output[*]}" -- "$cur" ) )
+}
+
+__ruruku_get_session()
+{
+    local ruruku_output out
+    if ruruku_output=$(ruruku session list -o jsonpath 2>/dev/null); then
+        COMPREPLY=( $( compgen -W "${ruruku_output[*]}" -- "$cur" ) )
+    fi
+}
+
+__ruruku_get_user()
+{
+    local ruruku_output out
+    if ruruku_output=$(ruruku user list -o jsonpath 2>/dev/null); then
+        COMPREPLY=( $( compgen -W "${ruruku_output[*]}" -- "$cur" ) )
+    fi
+}
+
+__ruruku_custom_func() {
+    case ${last_command} in
+        ruruku_session_close | ruruku_session_join | ruruku_session_describe)
+            __ruruku_get_session
+            return
+            ;;
+        ruruku_user_chpwd | ruruku_user_delete | ruruku_user_grant)
+            __ruruku_get_user
+            return
+            ;;
+        *)
+            ;;
+    esac
+}
+`
+)
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "ruruku",
@@ -27,9 +69,7 @@ var rootCmd = &cobra.Command{
 		log.Debug("Set log level to debug")
 		// }
 	},
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	BashCompletionFunction: bash_completion_func,
 }
 
 func GetRoot() *cobra.Command {
