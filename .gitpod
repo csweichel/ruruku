@@ -18,6 +18,8 @@ tasks:
     go get -v github.com/spf13/cobra/cobra &&
     openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -subj "/CN=*/" -out /workspace/server.crt -keyout /workspace/server.key &&
     echo "alias ruruku=\"go run main.go\"" >> ~/.bash_profile &&
+    echo "cd /workspace/src/github.com/32leaves/ruruku" >> ~/.bash_profile &&
+    echo ". <(ruruku completion)" >> ~/.bash_profile &&
     source ~/.bash_profile
 checkoutLocation: src/github.com/32leaves/ruruku
 workspaceLocation: .
