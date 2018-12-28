@@ -56,7 +56,7 @@ var userListCmd = &cobra.Command{
 {{ .Name }}	{{ .Email }}	{{ .Permissions -}}
 {{ end }}
 `
-		ctnt := remoteCmdValues.GetOutputFormat(out, tpl)
+		ctnt := remoteCmdValues.GetOutputFormat(out, tpl, `{..name}`)
 		if err := ctnt.Print(); err != nil {
 			log.WithError(err).Fatal()
 		}

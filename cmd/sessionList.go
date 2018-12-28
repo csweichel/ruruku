@@ -49,7 +49,7 @@ var sessionListCmd = &cobra.Command{
 {{ .Id }}	{{ .IsOpen }}	{{ .Name -}}
 {{ end }}
 `
-		ctnt := remoteCmdValues.GetOutputFormat(resp, tpl)
+		ctnt := remoteCmdValues.GetOutputFormat(resp, tpl, `{..id}`)
 		if err := ctnt.Print(); err != nil {
 			log.WithError(err).Fatal()
 		}

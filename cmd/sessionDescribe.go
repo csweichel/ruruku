@@ -6,7 +6,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const sessionDescribeTpl = `ID:	{{ .ID }}
+const (
+	sessionDescribeTpl = `ID:	{{ .ID }}
 Name:	{{ .Name }}
 Plan:	{{ .PlanID }}
 Result:	{{ .State }}
@@ -22,6 +23,8 @@ Tests:
     Claims:	{{ len .Claim -}}
 {{ end }}
 `
+	sessionDescribeJSONPath = `{.ID}`
+)
 
 // sessionDescribeCmd represents the sessionDescribe command
 var sessionDescribeCmd = &cobra.Command{
@@ -49,7 +52,7 @@ var sessionDescribeCmd = &cobra.Command{
 			log.WithError(err).Fatal()
 		}
 
-		ctnt := remoteCmdValues.GetOutputFormat(resp.Status.Convert(), sessionDescribeTpl)
+		ctnt := remoteCmdValues.GetOutputFormat(resp.Status.Convert(), sessionDescribeTpl, sessionDescribeJSONPath)
 		if err := ctnt.Print(); err != nil {
 			log.WithError(err).Fatal()
 		}

@@ -61,11 +61,12 @@ func registerRemoteCmdValueFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().Uint32("timeout", 10, "Request timeout in seconds")
 	cmd.PersistentFlags().String("tls", "", "Path to the server TLS certificate")
 
-	cmd.PersistentFlags().StringVarP(&remoteCmdValues.format, "output", "o", "", "Output format. One of: string|json|template")
-	cmd.PersistentFlags().StringVar(&remoteCmdValues.template, "output-template", "", "Output format Go template. Use with -o template")
+	cmd.PersistentFlags().StringVarP(&remoteCmdValues.format, "output", "o", "", "Output format. One of: string|json|jsonpath|template")
+	cmd.PersistentFlags().Lookup("output").Annotations = map[string][]string{cobra.BashCompCustom: {"__ruruku_get_output_formats"}}
+	cmd.PersistentFlags().StringVar(&remoteCmdValues.template, "output-template", "", "Output format Go template or jsonpath. Use with -o template or -o jsonpath")
 }
 
-func (s *remoteCmdFlags) GetOutputFormat(obj interface{}, template string) *prettyprint.Content {
+func (s *remoteCmdFlags) GetOutputFormat(obj interface{}, template string, jsonpath string) *prettyprint.Content {
 	format := prettyprint.TemplateFormat
 	if remoteCmdValues.outputFlagset.Lookup("output").Changed {
 		if s.format == "json" {
@@ -74,6 +75,9 @@ func (s *remoteCmdFlags) GetOutputFormat(obj interface{}, template string) *pret
 			format = prettyprint.StringFormat
 		} else if s.format == "template" {
 			format = prettyprint.TemplateFormat
+		} else if s.format == "jsonpath" {
+			format = prettyprint.JSONPathFormat
+			template = jsonpath
 		} else {
 			log.WithField("format", s.format).Warn("Unknown format, falling back to template")
 		}

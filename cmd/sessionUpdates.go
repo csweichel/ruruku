@@ -43,7 +43,7 @@ var sessionUpdatesCmd = &cobra.Command{
 				break
 			}
 
-			ctnt := remoteCmdValues.GetOutputFormat(resp.Status, sessionDescribeTpl)
+			ctnt := remoteCmdValues.GetOutputFormat(resp.Status, sessionDescribeTpl, sessionDescribeJSONPath)
 			if err := ctnt.Print(); err != nil {
 				log.WithError(err).Fatal()
 			}

@@ -51,7 +51,7 @@ export RURUKU_USER={{ .User }}
 			Token: resp.Token,
 			User:  args[0],
 		}
-		ctnt := remoteCmdValues.GetOutputFormat(result, tpl)
+		ctnt := remoteCmdValues.GetOutputFormat(result, tpl, `{.token}`)
 		if err := ctnt.Print(); err != nil {
 			log.WithError(err).Fatal()
 		}
