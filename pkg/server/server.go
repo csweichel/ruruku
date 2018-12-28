@@ -45,6 +45,7 @@ func Start(cfg *Config, srv api.SessionServiceServer, usr api.UserServiceServer)
 	grpcServer := grpc.NewServer(opts...)
 	api.RegisterSessionServiceServer(grpcServer, srv)
 	api.RegisterUserServiceServer(grpcServer, usr)
+	api.RegisterVersionServiceServer(grpcServer, &versionServer{})
 
 	if cfg.GRPC.Enabled {
 		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.GRPC.Port))

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package v1;
+
+service VersionService {
+    // Get returns the version of this server
+    rpc Get(GetVersionRequest) returns (GetVersionResponse) {}
+}
+
+message GetVersionRequest {}
+
+message GetVersionResponse {
+    // Tag is the release tag
+    string tag = 1;
+    // Rev is the release Git commit hash
+    string rev = 2;
+    // BuildDate is the date when the server was built
+    string buildDate = 3;
+}
