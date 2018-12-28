@@ -29,6 +29,11 @@ To create a testplan run [`ruruku plan`](../cli/ruruku_plan) and the CLI will gu
 If you want to convert an existing list of testcase descriptions, have a closer look at the flags
 of [`ruruku plan`](../cli/ruruku_plan), especially `-y` which disables manual input.
 
+Testplans can also be created collaboratively using a _modifiable session_:
+1. Start a modifiable session using `ruruku session start --modifiable`
+2. Have other users to join the session, enter edit mode (there's a switch on top of the list of testcases or press `e`) and add testcases
+3. When you're done, extract a testplan using `ruruku plan from-session <session-id>`
+
 Testplans are meant to live next to your code, i.e. it's best to check them into your repository.
 
 ## Start a test session
@@ -39,7 +44,7 @@ local server across the internet. `ruruku start` will also create a user called 
 which has all permissions; use that one to get started quickly.
 
 More commonly, you'll have a central ruruku instance hosted somewhere (e.g. using the [Docker image](https://hub.docker.com/r/csweichel/ruruku/)).
-In that case run `ruruku session start --server your-ruruku-server.com:1234 --plan testplan.yaml` to start the session.
+In that case run `RURUKU_HOST=your-ruruku-server.com:1234 ruruku session start --plan testplan.yaml` to start the session.
 If you don't provide a name for the session (using `--name`), ruruku will come up with one.
 
 ## Participate in a session

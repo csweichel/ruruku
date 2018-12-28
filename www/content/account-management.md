@@ -52,6 +52,7 @@ in a test session, or creating other users. See below for a list of permissions:
 | session.close      | Allows a user to close a test session.                                                        |
 | session.view       | Allows a user to view a test session, including all test case details and current results.    |
 | session.contribute | Allows a user to join a session, claim test cases and to contribute test results.             |
+| session.modify     | Allows a user to add/remove/modify the testcases and annotations of a session (if marked modifiable and it's open) |
 
 To grant permissions use [`ruruku user grant`](../cli/ruruku_user_grant). You must have the `user.grant` permission yourself to be able to do that.
 
