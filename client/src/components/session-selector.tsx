@@ -55,6 +55,15 @@ export class SessionSelector extends React.Component<SessionSelectorProps, Sessi
             this.joinSession(options[0].value);
         }
 
+        const joinPrefix = "#join/";
+        if (window.location.hash.startsWith(joinPrefix)) {
+            const targetSessionID =window.location.hash.substring(joinPrefix.length);
+            const targetSession = options.find(o => o.value === targetSessionID);
+            if (targetSession) {
+                this.joinSession(targetSession.value);
+            }
+        }
+
         let error: JSX.Element | undefined;
         if (this.props.appState.error) {
             error = <Message error={true}>{this.props.appState.error}</Message>

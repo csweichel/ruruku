@@ -15,6 +15,9 @@ tasks:
     go get -v github.com/golang/mock/gomock &&
     go get -v github.com/golang/mock/mockgen &&
     go get -v golang.org/x/tools/cmd/goimports &&
-    openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -subj "/CN=*/" -out /workspace/server.crt -keyout /workspace/server.key
+    go get -v github.com/spf13/cobra/cobra &&
+    openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -subj "/CN=*/" -out /workspace/server.crt -keyout /workspace/server.key &&
+    echo "alias ruruku=\"go run main.go\"" >> ~/.bash_profile &&
+    source ~/.bash_profile
 checkoutLocation: src/github.com/32leaves/ruruku
 workspaceLocation: .
