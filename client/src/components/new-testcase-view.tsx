@@ -78,11 +78,11 @@ export class NewTestcaseView extends React.Component<NewTestcaseViewProps, NewTe
                 </Form.Field>
                 <Form.Field>
                     <label>Description</label>
-                    <FormTextArea content={this.state.description} onChange={this.onChange.bind(this, "description")} />
+                    <FormTextArea value={this.state.description} onChange={this.onChange.bind(this, "description")} />
                 </Form.Field>
                 <Form.Field>
                     <label>Steps</label>
-                    <FormTextArea content={this.state.steps} onChange={this.onChange.bind(this, "steps")} />
+                    <FormTextArea value={this.state.steps} onChange={this.onChange.bind(this, "steps")} />
                 </Form.Field>
 
                 <ButtonGroup>
@@ -137,7 +137,7 @@ export class NewTestcaseView extends React.Component<NewTestcaseViewProps, NewTe
                 this.setState({ minTesterCount: n });
             }
         } else if (field === "mustPass") {
-            this.setState({ mustPass: !!(props as CheckboxProps).value });
+            this.setState({ mustPass: !!(props as CheckboxProps).checked });
         } else {
             const val = (props as InputProps).value;
             const s: any = {};

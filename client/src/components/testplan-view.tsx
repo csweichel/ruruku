@@ -171,7 +171,7 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
 
         return sortedCases.map((tcs, idx) => {
             const cse = tcs.getCase()!;
-            const caseComplete = tcs.getResultList().length === cse.getMintestercount();
+            const caseComplete = tcs.getResultList().length >= cse.getMintestercount();
             const positive = caseComplete && tcs.getState() === TestRunState.PASSED;
             const warning = caseComplete && tcs.getState() === TestRunState.UNDECIDED;
             const negative = caseComplete && tcs.getState() === TestRunState.FAILED;
@@ -199,7 +199,7 @@ export class TestplanView extends React.Component<TestplanViewProps, TestplanVie
         if (this.isClaimed(tc)) {
             const previousRun = this.getPreviousRun(tc);
             if (previousRun) {
-                return <Button label="Edit contribution" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, tc, undefined)} />;
+                return <Button label="Edit contribution" icon="write square" key="contribute" onClick={this.showNewRunForm.bind(this, index, tc, undefined)} />;
             } else {
                 return (
                     <ButtonGroup>
