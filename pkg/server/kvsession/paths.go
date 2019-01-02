@@ -30,7 +30,7 @@ func pathSessionTestcase(session, tc string) []byte {
 }
 
 func pathSessionClaims(session, tc string) []byte {
-	return []byte(strings.Join([]string{session, "claim", tc}, pathSeparator))
+	return []byte(strings.Join([]string{session, "claim", tc, ""}, pathSeparator))
 }
 
 func pathSessionClaim(session, tc, user string) []byte {
@@ -38,7 +38,7 @@ func pathSessionClaim(session, tc, user string) []byte {
 }
 
 func pathSessionContributions(session, tc string) []byte {
-	return []byte(strings.Join([]string{session, "contrib", tc}, pathSeparator))
+	return []byte(strings.Join([]string{session, "contrib", tc, ""}, pathSeparator))
 }
 
 func pathSessionContribution(session, tc, user string) []byte {
