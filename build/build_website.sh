@@ -34,7 +34,7 @@ echo "Removing existing files"
 rm -rf public/*
 
 echo "Generating site"
-cd www && hugo -d ../public -b "/ruruku/"; cd ..
+cd www && hugo -d ../public; cd ..
 echo ruruku.sh > public/CNAME
 
 echo "Updating gh-pages branch"
