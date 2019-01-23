@@ -13,7 +13,8 @@ export class TestCaseStatusView extends React.Component<TestCaseStatusViewProps,
         const cse = this.props.case.getCase()!;
         const results = this.props.case.getResultList() || [];
         const claims = this.props.case.getClaimList() || [];
-        const remainingCellCount = Math.max(cse.getMintestercount(), results.length) - results.length;
+        const claimAndContributionCount = results.length + claims.length;
+        const remainingCellCount = Math.max(cse.getMintestercount(), claimAndContributionCount) - claimAndContributionCount;
         const resolvedClaims = new Map<string, boolean>();
 
         const content = [];
