@@ -24,7 +24,7 @@ func (obj *Testcase) Validate() error {
 	err := validation.ValidateStruct(obj,
 		validation.Field(&obj.ID, validation.Required, validation.NewStringRule(containsNoSlashes, "must not contain /")),
 		validation.Field(&obj.Group, validation.Required),
-		validation.Field(&obj.Name, validation.Required, validation.Length(5, 300)),
+		validation.Field(&obj.Name, validation.Required),
 	)
 	if err != nil {
 		return fmt.Errorf("Testcase: %v", err)
