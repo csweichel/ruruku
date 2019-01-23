@@ -1,5 +1,6 @@
 ports:
 - port: 8080
+  onOpen: open-preview
 image:
   file: Dockerfile.gitpod
   context: .
