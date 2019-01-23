@@ -8,6 +8,8 @@ import { AppStateContent, getClient } from 'src/types/app-state';
 import { Disposable } from 'src/types/service-client';
 import { NewTestcaseView } from './new-testcase-view';
 
+import './testplan-view.css';
+
 export interface TestplanViewProps {
     appState: AppStateContent
     showDetails(content?: any): void

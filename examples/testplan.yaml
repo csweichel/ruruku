@@ -27,3 +27,703 @@ case:
     use `Ctrl+C` on a running ruruku process
   mustpass: false
   mintestercount: 2
+- id: tc1
+  name: testcase 1
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc2
+  name: testcase 2
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc3
+  name: testcase 3
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc4
+  name: testcase 4
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc5
+  name: testcase 5
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc6
+  name: testcase 6
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc7
+  name: testcase 7
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc8
+  name: testcase 8
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc9
+  name: testcase 9
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc10
+  name: testcase 10
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc11
+  name: testcase 11
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc12
+  name: testcase 12
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc13
+  name: testcase 13
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc14
+  name: testcase 14
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc15
+  name: testcase 15
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc16
+  name: testcase 16
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc17
+  name: testcase 17
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc18
+  name: testcase 18
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc19
+  name: testcase 19
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc20
+  name: testcase 20
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc21
+  name: testcase 21
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc22
+  name: testcase 22
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc23
+  name: testcase 23
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc24
+  name: testcase 24
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc25
+  name: testcase 25
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc26
+  name: testcase 26
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc27
+  name: testcase 27
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc28
+  name: testcase 28
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc29
+  name: testcase 29
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc30
+  name: testcase 30
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc31
+  name: testcase 31
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc32
+  name: testcase 32
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc33
+  name: testcase 33
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc34
+  name: testcase 34
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc35
+  name: testcase 35
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc36
+  name: testcase 36
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc37
+  name: testcase 37
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc38
+  name: testcase 38
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc39
+  name: testcase 39
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc40
+  name: testcase 40
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc41
+  name: testcase 41
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc42
+  name: testcase 42
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc43
+  name: testcase 43
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc44
+  name: testcase 44
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc45
+  name: testcase 45
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc46
+  name: testcase 46
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc47
+  name: testcase 47
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc48
+  name: testcase 48
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc49
+  name: testcase 49
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc50
+  name: testcase 50
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc51
+  name: testcase 51
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc52
+  name: testcase 52
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc53
+  name: testcase 53
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc54
+  name: testcase 54
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc55
+  name: testcase 55
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc56
+  name: testcase 56
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc57
+  name: testcase 57
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc58
+  name: testcase 58
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc59
+  name: testcase 59
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc60
+  name: testcase 60
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc61
+  name: testcase 61
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc62
+  name: testcase 62
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc63
+  name: testcase 63
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc64
+  name: testcase 64
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc65
+  name: testcase 65
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc66
+  name: testcase 66
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc67
+  name: testcase 67
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc68
+  name: testcase 68
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc69
+  name: testcase 69
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc70
+  name: testcase 70
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc71
+  name: testcase 71
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc72
+  name: testcase 72
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc73
+  name: testcase 73
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc74
+  name: testcase 74
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc75
+  name: testcase 75
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc76
+  name: testcase 76
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc77
+  name: testcase 77
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc78
+  name: testcase 78
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc79
+  name: testcase 79
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc80
+  name: testcase 80
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc81
+  name: testcase 81
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc82
+  name: testcase 82
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc83
+  name: testcase 83
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc84
+  name: testcase 84
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc85
+  name: testcase 85
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc86
+  name: testcase 86
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc87
+  name: testcase 87
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc88
+  name: testcase 88
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc89
+  name: testcase 89
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc90
+  name: testcase 90
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc91
+  name: testcase 91
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc92
+  name: testcase 92
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc93
+  name: testcase 93
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc94
+  name: testcase 94
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc95
+  name: testcase 95
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc96
+  name: testcase 96
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc97
+  name: testcase 97
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc98
+  name: testcase 98
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc99
+  name: testcase 99
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
+- id: tc100
+  name: testcase 100
+  group: foo
+  description: ""
+  steps: ""
+  mustpass: false
+  mintestercount: 1
