@@ -33,7 +33,7 @@ export class LoginForm extends React.Component<LoginFormProps, LoginFormState> {
     public render() {
         let error: JSX.Element | undefined;
         if (this.props.appState.error) {
-            error = <Message error={true}>{this.props.appState.error}</Message>
+            error = <Message error={true}>{this.props.appState.error}</Message>;
         }
         return (
             <Segment id="login-form">

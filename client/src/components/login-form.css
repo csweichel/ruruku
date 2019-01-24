@@ -3,3 +3,7 @@
     width: 30vw;
     margin: auto;
 }
+
+#login-form .error {
+    width: 100%;
+}
