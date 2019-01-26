@@ -6,7 +6,7 @@
     <description>Recent content on Ruruku</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 26 Jan 2019 23:04:53 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 26 Jan 2019 23:14:37 +0000</lastBuildDate>
     
 	<atom:link href="https://ruruku.sh/index.xml" rel="self" type="application/rss+xml" />
     
@@ -37,7 +37,7 @@ Download Ruruku Ruruku can be downloaded from the release page. It runs on Linux
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://ruruku.sh/testplan/</guid>
-      <description>Test Cases In Ruruku a &amp;ldquo;unit of test&amp;rdquo; is called a testcase. A testcase is a single test that can fail or pass. It has a description and a set of steps that must be performed by a tester to execute the testcase. Both fields support Markdown. Additionally, test cases can have annotations which are basically key/value pairs used for conveying additional metadata or for selecing tests (see test sets below).</description>
+      <description>In Ruruku a testcase is the basic &amp;ldquo;unit of test&amp;rdquo;. A testcase is a single test that can fail or pass. It has a description and a set of steps that must be performed by a tester to execute the testcase. Both fields support Markdown. Additionally, test cases can have annotations which are basically key/value pairs used for conveying additional metadata or for selecing tests (see test sets below).</description>
     </item>
     
     <item>
@@ -65,7 +65,7 @@ Starting a server and adding users The ruruku serve command has two flags which 
     <item>
       <title>Command Line Interface</title>
       <link>https://ruruku.sh/cli/ruruku/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku/</guid>
       <description>ruruku A simple manual test coordinator
@@ -76,7 +76,7 @@ Options  --config string config file (default is $HOME/.ruruku.yaml) -h, --help 
     <item>
       <title>ruruku completion</title>
       <link>https://ruruku.sh/cli/ruruku_completion/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_completion/</guid>
       <description> ruruku completion Generates bash completion scripts
@@ -90,7 +90,7 @@ ruruku completion [flags]  Options  -h, --help help for completion  Options inhe
     <item>
       <title>ruruku plan</title>
       <link>https://ruruku.sh/cli/ruruku_plan/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_plan/</guid>
       <description>ruruku plan Creates a new testplan
@@ -103,7 +103,7 @@ ruruku plan [flags]  Options  -f, --filename string the output filename -h, --he
     <item>
       <title>ruruku plan add</title>
       <link>https://ruruku.sh/cli/ruruku_plan_add/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_plan_add/</guid>
       <description>ruruku plan add Add a testcase to a plan
@@ -114,7 +114,7 @@ ruruku plan add [flags]  Options  -d, --description string long description - ca
     <item>
       <title>ruruku plan from-session</title>
       <link>https://ruruku.sh/cli/ruruku_plan_from-session/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_plan_from-session/</guid>
       <description>ruruku plan from-session Extracts a testplan from a test session
@@ -125,7 +125,7 @@ ruruku plan from-session &amp;lt;sessionID&amp;gt; [flags]  Options  -h, --help 
     <item>
       <title>ruruku serve</title>
       <link>https://ruruku.sh/cli/ruruku_serve/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_serve/</guid>
       <description>ruruku serve Starts a ruruku API server
@@ -136,7 +136,7 @@ ruruku serve [flags]  Options  --db string Path to the data storage location (de
     <item>
       <title>ruruku session</title>
       <link>https://ruruku.sh/cli/ruruku_session/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_session/</guid>
       <description>ruruku session Controls a test session/run
@@ -147,7 +147,7 @@ ruruku session [flags]  Options  -h, --help help for session --host string Host 
     <item>
       <title>ruruku session close</title>
       <link>https://ruruku.sh/cli/ruruku_session_close/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_session_close/</guid>
       <description> ruruku session close Closes a testing session
@@ -158,7 +158,7 @@ ruruku session close &amp;lt;session-id&amp;gt; [flags]  Options  -h, --help hel
     <item>
       <title>ruruku session describe</title>
       <link>https://ruruku.sh/cli/ruruku_session_describe/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_session_describe/</guid>
       <description> ruruku session describe Prints session details and its testcases
@@ -169,7 +169,7 @@ ruruku session describe [flags]  Options  -h, --help help for describe  Options 
     <item>
       <title>ruruku session join</title>
       <link>https://ruruku.sh/cli/ruruku_session_join/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_session_join/</guid>
       <description> ruruku session join Joins a testing session
@@ -180,7 +180,7 @@ ruruku session join &amp;lt;session-id&amp;gt; [flags]  Options  -h, --help help
     <item>
       <title>ruruku session list</title>
       <link>https://ruruku.sh/cli/ruruku_session_list/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_session_list/</guid>
       <description>ruruku session list Prints a table of the available sessions and their status
@@ -191,7 +191,7 @@ ruruku session list [flags]  Options  -h, --help help for list  Options inherite
     <item>
       <title>ruruku session start</title>
       <link>https://ruruku.sh/cli/ruruku_session_start/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_session_start/</guid>
       <description>ruruku session start Starts a new test session based on a test plan
@@ -202,7 +202,7 @@ ruruku session start [flags]  Options  -a, --annotations stringToString Metadata
     <item>
       <title>ruruku session updates</title>
       <link>https://ruruku.sh/cli/ruruku_session_updates/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_session_updates/</guid>
       <description>ruruku session updates Listens for changes in the session
@@ -213,7 +213,7 @@ ruruku session updates &amp;lt;session-id&amp;gt; [flags]  Options  -h, --help h
     <item>
       <title>ruruku start</title>
       <link>https://ruruku.sh/cli/ruruku_start/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_start/</guid>
       <description> ruruku start Creates a ruruku API server and starts a session
@@ -224,7 +224,7 @@ ruruku start &amp;lt;testplan.yaml&amp;gt; [flags]  Options  -h, --help help for
     <item>
       <title>ruruku test</title>
       <link>https://ruruku.sh/cli/ruruku_test/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_test/</guid>
       <description>ruruku test Claim or contribute to tests
@@ -235,7 +235,7 @@ ruruku test [flags]  Options  -h, --help help for test --host string Host addres
     <item>
       <title>ruruku test claim</title>
       <link>https://ruruku.sh/cli/ruruku_test_claim/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_test_claim/</guid>
       <description>ruruku test claim Claim a test for a participant
@@ -246,7 +246,7 @@ ruruku test claim &amp;lt;testcase-id&amp;gt; [flags]  Options  -h, --help help 
     <item>
       <title>ruruku test contribute</title>
       <link>https://ruruku.sh/cli/ruruku_test_contribute/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_test_contribute/</guid>
       <description>ruruku test contribute Contribute results of a test execution
@@ -257,7 +257,7 @@ ruruku test contribute &amp;lt;testcase-id&amp;gt; passed|undecided|failed [flag
     <item>
       <title>ruruku test unclaim</title>
       <link>https://ruruku.sh/cli/ruruku_test_unclaim/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_test_unclaim/</guid>
       <description>ruruku test unclaim Unclaim a test for a participant
@@ -268,7 +268,7 @@ ruruku test unclaim &amp;lt;testcase-id&amp;gt; [flags]  Options  -h, --help hel
     <item>
       <title>ruruku user</title>
       <link>https://ruruku.sh/cli/ruruku_user/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_user/</guid>
       <description>ruruku user Interacts with ruruku users, e.g. authenticates, adds or deletes users
@@ -279,7 +279,7 @@ ruruku user [flags]  Options  -h, --help help for user --host string Host addres
     <item>
       <title>ruruku user add</title>
       <link>https://ruruku.sh/cli/ruruku_user_add/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_user_add/</guid>
       <description>ruruku user add Adds a new user
@@ -291,7 +291,7 @@ username: foo password: ThisIsMySecretPassword email: foo@bar.</description>
     <item>
       <title>ruruku user chpwd</title>
       <link>https://ruruku.sh/cli/ruruku_user_chpwd/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_user_chpwd/</guid>
       <description>ruruku user chpwd Changes the password of a user
@@ -302,7 +302,7 @@ ruruku user chpwd [username] [flags]  Options  -h, --help help for chpwd --passw
     <item>
       <title>ruruku user delete</title>
       <link>https://ruruku.sh/cli/ruruku_user_delete/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_user_delete/</guid>
       <description>ruruku user delete Deletes a user
@@ -313,7 +313,7 @@ ruruku user delete &amp;lt;username&amp;gt; [flags]  Options  -h, --help help fo
     <item>
       <title>ruruku user grant</title>
       <link>https://ruruku.sh/cli/ruruku_user_grant/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_user_grant/</guid>
       <description>ruruku user grant Grants permissions to a user (requires user.grant permission)
@@ -324,7 +324,7 @@ ruruku user grant &amp;lt;username&amp;gt; [flags]  Options  -h, --help help for
     <item>
       <title>ruruku user list</title>
       <link>https://ruruku.sh/cli/ruruku_user_list/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_user_list/</guid>
       <description>ruruku user list Lists all users in the system (requires user.list permission)
@@ -335,7 +335,7 @@ ruruku user list [flags]  Options  -h, --help help for list  Options inherited f
     <item>
       <title>ruruku user login</title>
       <link>https://ruruku.sh/cli/ruruku_user_login/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_user_login/</guid>
       <description>ruruku user login Authenticates a user against an API server
@@ -346,7 +346,7 @@ ruruku user login &amp;lt;username&amp;gt; [flags]  Options  -h, --help help for
     <item>
       <title>ruruku version</title>
       <link>https://ruruku.sh/cli/ruruku_version/</link>
-      <pubDate>Sat, 26 Jan 2019 23:04:53 +0000</pubDate>
+      <pubDate>Sat, 26 Jan 2019 23:14:37 +0000</pubDate>
       
       <guid>https://ruruku.sh/cli/ruruku_version/</guid>
       <description>ruruku version Prints the version of ruruku
