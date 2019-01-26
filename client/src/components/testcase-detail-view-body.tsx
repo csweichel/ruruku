@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Converter } from 'showdown';
-import { Card, Icon, Feed } from 'semantic-ui-react';
+import { Card, Icon, Feed, Table } from 'semantic-ui-react';
 import { TestcaseStatus, TestRunState } from '../api/v1/session_pb';
 
 export class TestcaseDetailViewBody extends React.Component<{ tcs: TestcaseStatus }, {}> {
@@ -22,6 +22,16 @@ export class TestcaseDetailViewBody extends React.Component<{ tcs: TestcaseStatu
             <Card.Content key="steps">
                 <h3>Steps</h3>
                 <div dangerouslySetInnerHTML={{__html: markdown.makeHtml(tc.getSteps())}} />
+            </Card.Content>
+        ) : undefined;
+
+        const annotationMap = tc.getAnnotationsMap();
+        const annotations = !annotationMap.keys().next().done ? (
+            <Card.Content key="annotations">
+                <h3>Annotations</h3>
+                <Table definition={true}>
+                    { annotationMap.getEntryList().map(kv => <tr key={kv[0]}><td>{kv[0]}</td><td>{kv[1]}</td></tr>) }
+                </Table>
             </Card.Content>
         ) : undefined;
 
@@ -53,7 +63,7 @@ export class TestcaseDetailViewBody extends React.Component<{ tcs: TestcaseStatu
             );
         }
 
-        return [ steps, runs, mustPass ].filter(e => !!e);
+        return [ steps, runs, mustPass, annotations ].filter(e => !!e);
     }
 
 }

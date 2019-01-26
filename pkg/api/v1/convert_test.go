@@ -25,6 +25,10 @@ func TestConvertTestcase(t *testing.T) {
 		Steps:          "stps",
 		MustPass:       true,
 		MinTesterCount: 42,
+		Annotations: map[string]string{
+			"foo": "bar",
+			"baz": "5",
+		},
 	}
 
 	conv := ConvertTestcase(&orig)
@@ -35,6 +39,7 @@ func TestConvertTestcase(t *testing.T) {
 	assertEqual(t, orig.Steps, conv.Steps)
 	assertEqual(t, orig.MustPass, conv.MustPass)
 	assertEqual(t, orig.MinTesterCount, conv.MinTesterCount)
+	assertMapEqual(t, orig.Annotations, conv.Annotations)
 
 	convb := conv.Convert()
 	assertEqual(t, orig.ID, convb.ID)
@@ -44,6 +49,7 @@ func TestConvertTestcase(t *testing.T) {
 	assertEqual(t, orig.Steps, convb.Steps)
 	assertEqual(t, orig.MustPass, convb.MustPass)
 	assertEqual(t, orig.MinTesterCount, convb.MinTesterCount)
+	assertMapEqual(t, orig.Annotations, conv.Annotations)
 }
 
 func TestConvertTestcaseRunResult(t *testing.T) {
@@ -133,5 +139,23 @@ func TestConvertPermission(t *testing.T) {
 func assertEqual(t *testing.T, expected interface{}, actual interface{}) {
 	if expected != actual {
 		t.Errorf("Values do not match: (expected) %v != %v (actual)", expected, actual)
+	}
+}
+
+func assertMapEqual(t *testing.T, expected map[string]string, actual map[string]string) {
+	for ekey, eval := range expected {
+		if aval, ok := actual[ekey]; !ok {
+			t.Errorf("Did not find %s in actual map", ekey)
+		} else if eval != aval {
+			t.Errorf("Values did not match for %s: expected %v, actual %v", ekey, eval, aval)
+		}
+	}
+
+	for ekey, aval := range actual {
+		if eval, ok := expected[ekey]; !ok {
+			t.Errorf("Did not find %s in expected map", ekey)
+		} else if eval != aval {
+			t.Errorf("Values did not match for %s: expected %v, actual %v", ekey, eval, aval)
+		}
 	}
 }

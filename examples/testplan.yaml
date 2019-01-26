@@ -15,6 +15,9 @@ case:
     run `ruruku start example-suite.yaml`
   mustpass: false
   mintestercount: 5
+  annotations:
+    generated: false
+    makes_sense: yes
 - id: basics_stop_server
   name: Stop server
   group: basics
