@@ -16,6 +16,8 @@ type sessionStartFlags struct {
 	quiet       bool
 	annotations map[string]string
 	modifiable  bool
+	testset     string
+	expression  string
 }
 
 var sessionStartFlagValues sessionStartFlags
@@ -32,10 +34,10 @@ func (s *sessionStartFlags) Run() error {
 		Modifiable:  s.modifiable,
 	}
 
-	if s.name == "" {
-		log.WithField("name", req.Name).Info("Using an auto-generated session name")
-	} else {
-		req.Name = s.name
+	if s.expression != "" && s.testset != "" {
+		log.Fatal("Cannot use --set and --set-select at the same time")
+	} else if s.planfn == "" {
+		log.Fatal("Cannot use --set or --set-select without testplan")
 	}
 
 	if s.planfn != "" {
@@ -43,6 +45,23 @@ func (s *sessionStartFlags) Run() error {
 		if err != nil {
 			return err
 		}
+
+		expr := s.expression
+		if s.testset != "" {
+			set := plan.GetTestSet(s.testset)
+			if set == nil {
+				log.Fatalf("Testset \"%s\" does not exist", s.testset)
+			}
+			expr = set.Expression
+			req.Annotations["testset"] = s.testset
+		}
+		if expr != "" {
+			err := plan.SelectTestCases(expr)
+			if err != nil {
+				log.WithError(err).Fatal("Error while selecting test cases")
+			}
+		}
+
 		req.Plan = api.ConvertTestPlan(plan)
 	} else {
 		req.Plan = &api.TestPlan{
@@ -50,6 +69,12 @@ func (s *sessionStartFlags) Run() error {
 			Name: req.Name,
 			Case: []*api.Testcase{},
 		}
+	}
+
+	if s.name == "" {
+		log.WithField("name", req.Name).Info("Using an auto-generated session name")
+	} else {
+		req.Name = s.name
 	}
 
 	conn, err := cfg.Connect()
@@ -104,4 +129,6 @@ func init() {
 	sessionStartCmd.Flags().StringVarP(&sessionStartFlagValues.planfn, "plan", "p", "", "Path to the test plan of this session")
 	sessionStartCmd.Flags().StringToStringVarP(&sessionStartFlagValues.annotations, "annotations", "a", map[string]string{}, "Metadata for this session")
 	sessionStartCmd.Flags().BoolVar(&sessionStartFlagValues.modifiable, "modifiable", false, "Make this session modifiable")
+	sessionStartCmd.Flags().StringVar(&sessionStartFlagValues.testset, "set", "", "Start the session with a testset (subset of test cases)")
+	sessionStartCmd.Flags().StringVar(&sessionStartFlagValues.expression, "set-select", "", "Only add test-cases which match this expression")
 }

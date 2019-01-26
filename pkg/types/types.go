@@ -93,7 +93,7 @@ type TestPlan struct {
 	// Description is a long description
 	Description string
 	// Set lists the testsets that subselect testcases
-	Set []TestSet
+	Testset []TestSet
 	// Case lists the testcases of this plan
 	Case []Testcase
 }
