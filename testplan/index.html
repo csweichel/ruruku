@@ -1,0 +1,187 @@
+
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Plans, sessions and sets &middot; Ruruku</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		
+		<meta http-equiv="content-language" content="en-us" />
+		<meta name="generator" content="Hugo 0.52" />
+		<link rel="stylesheet" href="https://ruruku.sh/css/index.css">
+		<link rel="apple-touch-icon" href="https://ruruku.sh/apple-touch-icon.png">
+		<link rel="shortcut icon" href="https://ruruku.sh/favicon.ico" type="image/x-icon">
+	</head>
+
+	<body>
+		<div class="Wrapper">
+			<div class="Container">
+				<div class="Header">
+  <a href="https://ruruku.sh/">
+	<div class="Title center">
+		
+			<img alt="Ruruku Logo" src="/logo.svg" height="140" />
+		
+		<span class="text">Ruruku</span>
+		<span class="subtext"></span>
+	</div>
+  </a>
+</div>
+
+				<div class="Content-wrapper">
+					<div class="Sidebar">
+	<div class="Menu">
+		<div class="item">
+			<a href="https://ruruku.sh/">Home</a>
+		</div>
+		
+			
+				<div class="item">
+					<a href="https://ruruku.sh/introduction/"></a>
+				</div>
+			
+		
+			
+				<div class="item">
+					<a href="https://ruruku.sh/getting-started/">Getting Started</a>
+				</div>
+			
+		
+			
+				<div class="item">
+					<a href="https://ruruku.sh/testplan/">Plans, sessions and sets</a>
+				</div>
+			
+		
+			
+				<div class="item">
+					<a href="https://ruruku.sh/secure-installation/">Securing your installation</a>
+				</div>
+			
+		
+			
+				<div class="item">
+					<a href="https://ruruku.sh/account-management/">Managing user accounts</a>
+				</div>
+			
+		
+			
+				<div class="item">
+					<a href="https://ruruku.sh/cli/ruruku/">Command Line Interface</a>
+				</div>
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+	</div>
+</div>
+
+					<div class="Content">
+						
+	<div class="Page" id="">
+		<h1>Plans, sessions and sets</h1>
+		
+
+<h1 id="test-cases">Test Cases</h1>
+
+<p>In Ruruku a &ldquo;unit of test&rdquo; is called a testcase. A testcase is a single test that can fail or pass.
+It has a description and a set of steps that must be performed by a tester to execute the testcase. Both fields support Markdown.
+Additionally, test cases can have annotations which are basically key/value pairs used for conveying additional metadata or for selecing tests (see test sets below).</p>
+
+<h1 id="test-plan">Test Plan</h1>
+
+<p>A testplan is a collection of test cases. Testplans are YAML files that are meant to live next to the code they test.
+To begin testing Ruruku will upload the testplan to a Ruruku instance, thus creating a test session (see below).</p>
+
+<p>Next to the testcases, a testplan contains an ID, a description and a list of testsets.
+A testplan can be created using <code>ruruku plan</code>.</p>
+
+<h1 id="test-session">Test Session</h1>
+
+<p>A test session is the execution of a testplan - an instance of a testplan, basically. In a running session, testers can claim testcases
+and contribute test results. If a session has been marked <em>modifiable</em>, the testcases can be altered in a session.
+Test sessions are started using <code>ruruku session start</code>.</p>
+
+<h1 id="test-set">Test Set</h1>
+
+<p>A test set is a selection of testcases of a testplan. Each test set has an <em>expression</em> which selects testcases based on their annotations, ID or name.
+Ruruku uses <a href="https://github.com/Knetic/govaluate"><code>goevaluate</code></a> for evaluating the expressions - see their <a href="https://github.com/Knetic/govaluate/blob/master/MANUAL.md">manual</a> for details.</p>
+
+<p>The annotations of a test case are directly available in an expression, as are their name as <code>_name</code>, ID as <code>_id</code> and Group as <code>_group</code>.
+See below for a few examples.</p>
+
+<ul>
+<li>Select testcases in the group <code>foobar</code>: <code>_group == &quot;foobar&quot;</code></li>
+<li>Select testcases based on a <code>testlevel</code> annotation: <code>level == &quot;basic&quot;</code></li>
+<li>Select testcases that require more than five users (user requirement expression as <code>requiredUsers</code> annotation): <code>level == &quot;basic&quot; &amp;&amp; requiredUsers &gt; 5</code></li>
+</ul>
+</div>
+
+						<div class="Footer">
+	<p></p>
+</div>
+<script src="https://ruruku.sh/js/index.js"></script>
+
+					</div>
+				</div>
+		</div>
+	</body>
+</html>

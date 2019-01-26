@@ -51,6 +51,12 @@
 		
 			
 				<div class="item">
+					<a href="https://ruruku.sh/testplan/">Plans, sessions and sets</a>
+				</div>
+			
+		
+			
+				<div class="item">
 					<a href="https://ruruku.sh/secure-installation/">Securing your installation</a>
 				</div>
 			
@@ -178,6 +184,9 @@ which has all permissions; use that one to get started quickly.</p>
 <p>More commonly, you&rsquo;ll have a central ruruku instance hosted somewhere (e.g. using the <a href="https://hub.docker.com/r/csweichel/ruruku/">Docker image</a>).
 In that case run <code>RURUKU_HOST=your-ruruku-server.com:1234 ruruku session start --plan testplan.yaml</code> to start the session.
 If you don&rsquo;t provide a name for the session (using <code>--name</code>), ruruku will come up with one.</p>
+
+<p>You don&rsquo;t have to have all testcases of a testplan in your session. To select a subset (e.g. because you are only
+testing for a minor release), you can use a <code>testset</code> using the <code>--set</code> flag. See the <code>examples/testplan.yaml</code> for how</p>
 
 <h2 id="participate-in-a-session">Participate in a session</h2>
 
