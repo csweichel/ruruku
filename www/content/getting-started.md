@@ -47,6 +47,9 @@ More commonly, you'll have a central ruruku instance hosted somewhere (e.g. usin
 In that case run `RURUKU_HOST=your-ruruku-server.com:1234 ruruku session start --plan testplan.yaml` to start the session.
 If you don't provide a name for the session (using `--name`), ruruku will come up with one.
 
+You don't have to have all testcases of a testplan in your session. To select a subset (e.g. because you are only
+testing for a minor release), you can use a `testset` using the `--set` flag. See the `examples/testplan.yaml` for how
+
 ## Participate in a session
 You can join a test session using the web-based UI ruruku provides. Go to the server where the session was started,
 choose the session you want to join, enter your name and you're good to go.

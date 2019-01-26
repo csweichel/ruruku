@@ -1,6 +1,10 @@
 id: demo
 name: Demo Plan
 description: ""
+testset:
+- id: sensible
+  name: "Sensible tests only"
+  expression: makes_sense == "yes" || generated == false
 case:
 - id: basics_start_server
   name: Start server
@@ -30,6 +34,8 @@ case:
     use `Ctrl+C` on a running ruruku process
   mustpass: false
   mintestercount: 2
+  annotations:
+    generated: false
 - id: tc1
   name: testcase 1
   group: foo

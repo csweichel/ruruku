@@ -1,6 +1,6 @@
 ---
 title: Securing your installation
-weight: 3
+weight: 4
 menu: true
 hideFromIndex: true
 ---
