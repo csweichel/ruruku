@@ -19,6 +19,8 @@ type Testcase struct {
 	MustPass bool
 	// MinTesterCount is the number of participants who need to run this test
 	MinTesterCount uint32
+	// Annotations are testcase metadata
+	Annotations map[string]string `json:",omitempty"`
 }
 
 type TestRunState string
@@ -74,6 +76,15 @@ type TestRunStatus struct {
 	Annotations map[string]string
 }
 
+type TestSet struct {
+	// ID is the unique ID of this testset
+	ID string
+	// Name is the short description of the testset
+	Name string
+	// Expression is the CEXL expression for matching testcases
+	Expression string
+}
+
 type TestPlan struct {
 	// ID is the globally unique ID of this testplan
 	ID string
@@ -81,6 +92,8 @@ type TestPlan struct {
 	Name string
 	// Description is a long description
 	Description string
+	// Set lists the testsets that subselect testcases
+	Set []TestSet
 	// Case lists the testcases of this plan
 	Case []Testcase
 }

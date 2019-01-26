@@ -23,6 +23,7 @@ func (s *Testcase) Convert() types.Testcase {
 		Steps:          s.Steps,
 		MustPass:       s.MustPass,
 		MinTesterCount: s.MinTesterCount,
+		Annotations:    s.Annotations,
 	}
 }
 
@@ -35,6 +36,7 @@ func ConvertTestcase(s *types.Testcase) *Testcase {
 		Steps:          s.Steps,
 		MustPass:       s.MustPass,
 		MinTesterCount: s.MinTesterCount,
+		Annotations:    s.Annotations,
 	}
 }
 

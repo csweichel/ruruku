@@ -160,6 +160,8 @@ message Testcase {
     bool mustPass = 6;
     // MinTesterCount is the number of participants who need to run this test
     uint32 minTesterCount = 7;
+    // Annotations are key-value pairs containing metadata of the test case
+    map<string, string> annotations = 8;
 }
 
 enum TestRunState {
