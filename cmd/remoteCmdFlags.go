@@ -18,7 +18,6 @@ import (
 
 type remoteCmdFlags struct {
 	format          string
-	outputChanged   bool
 	template        string
 	templateChanged bool
 
@@ -57,7 +56,6 @@ func remoteCmdValuesPreRun(cmd *cobra.Command, args []string) error {
 	viper.BindEnv("cli.timeout", "RURUKU_TIMEOUT")
 	viper.BindEnv("cli.tlscert", "RURUKU_TLSCERT")
 
-	remoteCmdValues.outputChanged = flags.Lookup("output").Changed
 	remoteCmdValues.templateChanged = flags.Lookup("output-template").Changed
 	return nil
 }
@@ -73,8 +71,8 @@ func registerRemoteCmdValueFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&remoteCmdValues.template, "output-template", "", "Output format Go template or jsonpath. Use with -o template or -o jsonpath")
 }
 
-func (s *remoteCmdFlags) GetOutputFormat(obj interface{}, template string, jsonpath string) *prettyprint.Content {
-	format := prettyprint.TemplateFormat
+func (s *remoteCmdFlags) GetOutputFormatWithDefault(obj interface{}, defaultFormat prettyprint.Format, template string, jsonpath string) *prettyprint.Content {
+	format := defaultFormat
 	if remoteCmdValues.outputFlagset.Lookup("output").Changed {
 		if s.format == "json" {
 			format = prettyprint.JSONFormat
@@ -99,6 +97,10 @@ func (s *remoteCmdFlags) GetOutputFormat(obj interface{}, template string, jsonp
 		Format:   format,
 		Writer:   os.Stdout,
 	}
+}
+
+func (s *remoteCmdFlags) GetOutputFormat(obj interface{}, template string, jsonpath string) *prettyprint.Content {
+	return s.GetOutputFormatWithDefault(obj, prettyprint.TemplateFormat, template, jsonpath)
 }
 
 func (cfg *Config) Connect() (*grpc.ClientConn, error) {

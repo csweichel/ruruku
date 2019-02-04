@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
+
+	"github.com/32leaves/ruruku/pkg/prettyprint"
 
 	api "github.com/32leaves/ruruku/pkg/api/v1"
 	"github.com/32leaves/ruruku/pkg/cli"
@@ -18,6 +21,7 @@ type sessionStartFlags struct {
 	modifiable  bool
 	testset     string
 	expression  string
+	dryrun      bool
 }
 
 var sessionStartFlagValues sessionStartFlags
@@ -50,7 +54,11 @@ func (s *sessionStartFlags) Run() error {
 		if s.testset != "" {
 			set := plan.GetTestSet(s.testset)
 			if set == nil {
-				log.Fatalf("Testset \"%s\" does not exist", s.testset)
+				allsets := make([]string, len(plan.Testset))
+				for i, ts := range plan.Testset {
+					allsets[i] = fmt.Sprintf("\"%s\"", ts.ID)
+				}
+				log.Fatalf("Testset \"%s\" does not exist. Only %s", s.testset, strings.Join(allsets, ", "))
 			}
 			expr = set.Expression
 			req.Annotations["testset"] = s.testset
@@ -77,6 +85,15 @@ func (s *sessionStartFlags) Run() error {
 		req.Name = s.name
 	}
 
+	if s.dryrun {
+
+		ctnt := remoteCmdValues.GetOutputFormatWithDefault(req, prettyprint.JSONFormat, "", `{.name}`)
+		if err := ctnt.Print(); err != nil {
+			log.WithError(err).Fatal()
+		}
+		return nil
+	}
+
 	conn, err := cfg.Connect()
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
@@ -99,8 +116,6 @@ func (s *sessionStartFlags) Run() error {
 			log.WithError(err).Fatal()
 		}
 	}
-
-	log.WithField("id", resp.Id).Info("Session started")
 
 	return nil
 }
@@ -129,6 +144,7 @@ func init() {
 	sessionStartCmd.Flags().StringVarP(&sessionStartFlagValues.planfn, "plan", "p", "", "Path to the test plan of this session")
 	sessionStartCmd.Flags().StringToStringVarP(&sessionStartFlagValues.annotations, "annotations", "a", map[string]string{}, "Metadata for this session")
 	sessionStartCmd.Flags().BoolVar(&sessionStartFlagValues.modifiable, "modifiable", false, "Make this session modifiable")
+	sessionStartCmd.Flags().BoolVar(&sessionStartFlagValues.dryrun, "dry-run", false, "Print the message we would send to the server, but don't actually start the session")
 	sessionStartCmd.Flags().StringVar(&sessionStartFlagValues.testset, "set", "", "Start the session with a testset (subset of test cases)")
 	sessionStartCmd.Flags().StringVar(&sessionStartFlagValues.expression, "set-select", "", "Only add test-cases which match this expression")
 }
